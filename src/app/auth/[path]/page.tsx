@@ -5,7 +5,7 @@ import { use } from 'react';
 
 export default function AuthPage({ params }: { params: Promise<{ path: string }> }) {
   const { path } = use(params);
-  const hasNeonAuth = !!process.env.NEXT_PUBLIC_NEON_AUTH_URL;
+  const hasNeonAuth = !!(process.env.NEXT_PUBLIC_NEON_AUTH_URL || process.env.NEON_AUTH_BASE_URL);
 
   if (!hasNeonAuth) {
     return (

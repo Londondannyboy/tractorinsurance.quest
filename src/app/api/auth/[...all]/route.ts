@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 
-// Conditionally import and create handler only if NEXT_PUBLIC_NEON_AUTH_URL is set
-const authUrl = process.env.NEXT_PUBLIC_NEON_AUTH_URL;
+// Conditionally import and create handler only if Neon Auth URL is set
+const authUrl = process.env.NEXT_PUBLIC_NEON_AUTH_URL || process.env.NEON_AUTH_BASE_URL;
 
 if (!authUrl) {
-  console.warn('NEXT_PUBLIC_NEON_AUTH_URL is not set - auth endpoints will not work');
+  console.warn('Neon Auth URL is not set - auth endpoints will not work');
 }
 
 let handler: { GET: any; POST: any } | null = null;

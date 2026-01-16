@@ -405,6 +405,12 @@ async def root():
 
 def extract_session_id(request: Request, body: dict) -> Optional[str]:
     """Extract custom_session_id from Hume request."""
+    # Check query parameters FIRST (Hume passes it here!)
+    session_id = request.query_params.get("custom_session_id") or request.query_params.get("customSessionId")
+    if session_id:
+        print(f"[BUDDY] Session ID from query params: {session_id}", file=sys.stderr)
+        return session_id
+
     # Check body fields (Hume forwards session settings here)
     session_id = body.get("custom_session_id") or body.get("customSessionId")
     if session_id:

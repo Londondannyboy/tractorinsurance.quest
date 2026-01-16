@@ -33,12 +33,27 @@ export default function RootLayout({
       >
         <NeonAuthUIProvider
           authClient={authClient!}
-          redirectTo="/account/settings"
+          redirectTo="/dashboard"
           emailOTP
           social={{ providers: ['google'] }}
         >
-          <header className="fixed top-0 left-0 right-0 h-14 bg-stone-950/90 backdrop-blur-sm border-b border-stone-800 z-[9999] flex items-center justify-end px-4">
-            <UserButton size="icon" />
+          <header className="fixed top-0 left-0 right-0 h-14 bg-transparent backdrop-blur-sm z-[9999] flex items-center justify-between px-6">
+            {/* Logo / Brand */}
+            <a href="/" className="flex items-center gap-2 text-white font-semibold text-lg">
+              <span className="text-2xl">🌍</span>
+              <span>Relocation Quest</span>
+            </a>
+
+            {/* Navigation Links */}
+            <nav className="flex items-center gap-6">
+              <a href="/destinations" className="text-white/90 hover:text-white text-sm font-medium transition-colors">
+                Destinations
+              </a>
+              <a href="/dashboard" className="text-white/90 hover:text-white text-sm font-medium transition-colors">
+                Dashboard
+              </a>
+              <UserButton size="icon" />
+            </nav>
           </header>
           <div className="pt-14">
             <Providers>

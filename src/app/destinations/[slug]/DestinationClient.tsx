@@ -287,32 +287,38 @@ function VisaCard({ visa }: { visa: Visa }) {
 }
 
 export default function DestinationClient({ slug, destination }: DestinationClientProps) {
-  const [heroImage, setHeroImage] = useState(destination.hero_image_url);
+  // Get fallback images for this destination
+  const fallbackData = FALLBACK_IMAGES[slug] || FALLBACK_IMAGES.default;
+
+  // Always start with fallback, then try to upgrade to better image
+  const [heroImage, setHeroImage] = useState(fallbackData.hero);
   const [galleryImages, setGalleryImages] = useState<UnsplashImage[]>([]);
   const [cityImages, setCityImages] = useState<Record<string, UnsplashImage>>({});
   const [activeSection, setActiveSection] = useState<'overview' | 'cities' | 'visas' | 'jobs' | 'lifestyle'>('overview');
 
-  // Get fallback images for this destination
-  const fallbackData = FALLBACK_IMAGES[slug] || FALLBACK_IMAGES.default;
+  // Debug hero image
+  useEffect(() => {
+    console.log('[Hero Debug] slug:', slug);
+    console.log('[Hero Debug] destination.hero_image_url:', destination.hero_image_url);
+    console.log('[Hero Debug] fallbackData.hero:', fallbackData.hero);
+    console.log('[Hero Debug] current heroImage:', heroImage);
+  }, [slug, destination.hero_image_url, fallbackData.hero, heroImage]);
 
   // Fetch Unsplash images or use fallbacks
   useEffect(() => {
-    // Hero image - use fallback if no database image
-    if (!destination.hero_image_url) {
-      // Try Unsplash first
+    // Hero image - if database has a URL, try it first
+    if (destination.hero_image_url) {
+      setHeroImage(destination.hero_image_url);
+    } else {
+      // Try Unsplash
       fetch(`/api/unsplash?query=${encodeURIComponent(destination.country_name + ' landscape scenic')}&count=1`)
         .then(res => res.json())
         .then(data => {
           if (data.images?.[0]?.url && !data.images[0].fallback) {
             setHeroImage(data.images[0].url);
-          } else {
-            // Use static fallback
-            setHeroImage(fallbackData.hero);
           }
         })
-        .catch(() => {
-          setHeroImage(fallbackData.hero);
-        });
+        .catch(() => {});
     }
 
     // Gallery images - try Unsplash, fall back to static
@@ -625,18 +631,16 @@ Language: ${destination.language}
 
         {/* Hero Section */}
         <div className="relative h-[70vh] min-h-[500px] pt-16 overflow-hidden">
-          {/* Background Image */}
-          {heroImage && (
-            <img
-              src={heroImage}
-              alt={`${destination.country_name} landscape`}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          )}
-          {/* Fallback gradient if no image */}
-          {!heroImage && (
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900" />
-          )}
+          {/* Background Image - always render with onError fallback */}
+          <img
+            src={heroImage}
+            alt={`${destination.country_name} landscape`}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={(e) => {
+              console.log('[Hero] Image failed to load, using fallback');
+              (e.target as HTMLImageElement).src = fallbackData.hero;
+            }}
+          />
           {/* Light overlay for text readability - reduced opacity */}
           <div className="absolute inset-0 bg-black/20" />
 

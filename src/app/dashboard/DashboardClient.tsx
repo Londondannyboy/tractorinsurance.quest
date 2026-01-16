@@ -75,6 +75,13 @@ const PERSONAS = [
     icon: '🏖️',
     color: 'from-cyan-500 to-blue-600',
   },
+  {
+    id: 'medical',
+    label: 'Medical Relocation',
+    description: 'Seeking better healthcare or medical treatment abroad',
+    icon: '🏥',
+    color: 'from-red-500 to-pink-600',
+  },
 ];
 
 // Onboarding steps

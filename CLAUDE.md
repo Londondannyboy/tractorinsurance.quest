@@ -241,6 +241,7 @@ Country content in `scripts/data/<country>.js`. Cyprus is the template.
 | `lifestyle` | Quality of life seeker |
 | `family` | Family with children |
 | `retiree` | Retirement relocation |
+| `medical` | Medical/healthcare relocation |
 
 ### New Routes
 
@@ -261,17 +262,29 @@ Country content in `scripts/data/<country>.js`. Cyprus is the template.
 
 ## Known Issues / TODO
 
-### High Priority
-- [x] **No Unsplash API key** - Added `UNSPLASH_ACCESS_KEY` to .env.local ✅
-- [x] **CopilotKit sidebar needs interactive updates** - Added useRenderToolCall hooks for visualizations ✅
-- [x] **Agent doesn't know user name** - Added Zep memory + user context in instructions ✅
-- [x] **No Zep integration** - Created /api/zep/user route and useZepMemory hook ✅
+### Completed ✅
+- [x] **No Unsplash API key** - Added `UNSPLASH_ACCESS_KEY` to .env.local
+- [x] **CopilotKit sidebar needs interactive updates** - Added useRenderToolCall hooks for visualizations
+- [x] **Agent doesn't know user name** - Added Zep memory + user context in instructions
+- [x] **No Zep integration** - Created /api/zep/user route and useZepMemory hook
+- [x] **Improve visualizations** - Added 4 visualization tools (fractional.quest pattern)
+- [x] **Auth not working (Guest, auth=false)** - Fixed auth package imports to use `@neondatabase/auth` consistently
+- [x] **HumeWidget hardcoded auth=false** - Now uses `authClient.useSession()` for real auth
+- [x] **No Zep context in voice** - VoiceChatSync now fetches `/api/zep-context` before Hume connect
+- [x] **Navigation missing Dashboard link** - Added global nav bar with logo, Destinations, Dashboard links
+- [x] **Hero image not loading** - Fixed to start with fallback, added onError handler
+
+### High Priority (Next Phase)
 - [ ] **Pydantic AI agent not deployed** - Railway agent needs setup for this project
+- [ ] **CopilotKit instructions pattern** - Pass full user context (name, persona, destinations) via instructions prop like fractional.quest
+- [ ] **AI should ask persona on first visit** - Onboarding prompt in chat to classify user
 
 ### Medium Priority
-- [x] Improve visualizations (refer to fractional.quest pattern) - Added 4 visualization tools ✅
 - [ ] Port full legacy Cyprus content
 - [ ] Add more destination fallback images
+- [ ] Add more destinations to database (currently 17)
+- [ ] Implement destination comparison tool
+- [ ] Add saved destinations feature to dashboard
 
 ---
 
@@ -341,3 +354,91 @@ CopilotSidebar now includes:
   - show_pros_cons → ProsCons
 - **Personalized AI**: CopilotSidebar now passes user context to instructions
 - **Pattern Reference**: Following fractional.quest + lost.london-v2 patterns
+
+### Jan 16, 2026 (Session 4) - Auth & Voice Integration
+- **Root Cause Found**: HumeWidget had `isAuthenticated = false` hardcoded (mock never replaced)
+- **Auth Package Mismatch Fixed**: All imports now use `@neondatabase/auth` consistently:
+  - `src/lib/auth/client.ts` - UI from `@neondatabase/auth/react/ui`
+  - `src/lib/auth/server.ts` - `createAuthServer` from `@neondatabase/auth/next/server`
+  - `src/app/api/auth/[...path]/route.ts` - `authApiHandler` from `@neondatabase/auth/next/server`
+- **HumeWidget Fixed**: Now uses `authClient.useSession()` for real auth
+- **Zep Context API**: Created `/api/zep-context` route (matches fractional.quest pattern)
+- **VoiceChatSync Updated**: Fetches Zep context before Hume connect, includes in system prompt
+- **Global Navigation**: Added nav bar with logo, Destinations link, Dashboard link (white font)
+- **Hero Image Fix**: Starts with fallback immediately, onError handler for failed loads
+- **Medical Persona Added**: 7th persona option in dashboard onboarding
+- **Auth Redirect**: Changed from `/account/settings` to `/dashboard`
+
+#### Key Pattern from fractional.quest (for reference)
+```typescript
+// Frontend builds instructions with ALL user context
+const agentInstructions = user
+  ? `CRITICAL USER CONTEXT:
+- User Name: ${firstName || user.name}
+- User ID: ${user.id}
+- User Email: ${user.email}
+- Location: ${profileItems.location || 'Not set'}
+- Target Role: ${profileItems.role || 'Not set'}
+...`
+  : undefined;
+
+// CopilotSidebar receives instructions
+<CopilotSidebar instructions={agentInstructions}>
+```
+
+---
+
+## Phase 9: Next Steps (TODO)
+
+**Goal**: Complete the CopilotKit + Zep + Neon integration for fully personalized AI advisor.
+
+### High Priority Tasks
+
+1. **CopilotKit Instructions Pattern**
+   - Pass full user context via `instructions` prop (like fractional.quest)
+   - Include: name, persona, current country, target destinations, priorities
+   - Fetch profile items and include in instructions string
+
+2. **AI Onboarding in Chat**
+   - On first visit, AI should ask: "Are you a digital nomad, relocating company, HNW, lifestyle seeker, family, retiree, or medical relocation?"
+   - Save persona to user_profiles via API
+   - Remember and use persona in subsequent conversations
+
+3. **Deploy Pydantic AI Agent**
+   - Set up Railway deployment for `/agent` folder
+   - Configure CLM endpoint for Hume voice
+   - Connect to Neon database for destination queries
+
+### API Routes Summary
+
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/api/auth/[...path]` | GET/POST | Neon Auth handler |
+| `/api/copilotkit` | POST | CopilotKit runtime |
+| `/api/destinations` | GET | List all destinations |
+| `/api/hume-token` | GET | Hume access token |
+| `/api/page-context` | GET/POST | Page context for voice |
+| `/api/unsplash` | GET | Unsplash images |
+| `/api/user-profile` | GET/POST | User profile CRUD |
+| `/api/zep-context` | GET | Zep memory for voice (formatted) |
+| `/api/zep/user` | GET/POST/DELETE | Zep user/thread CRUD |
+
+### Dashboard Features (Already Built)
+
+- 6-step onboarding wizard
+- 7 personas with visual cards
+- Current country selection
+- Timeline preference
+- Monthly budget slider
+- Priority sliders (tax, cost of living, climate)
+- Target destinations multi-select
+- CopilotKit sidebar integration
+- Profile editing
+
+### Voice Integration (Already Built)
+
+- HumeWidget with real auth
+- VoiceChatSync with Zep context
+- SyncedVoiceButton component
+- System prompt with user context
+- Auto-greeting with user name

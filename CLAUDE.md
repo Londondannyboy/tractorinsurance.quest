@@ -275,9 +275,9 @@ Country content in `scripts/data/<country>.js`. Cyprus is the template.
 - [x] **Hero image not loading** - Fixed to start with fallback, added onError handler
 
 ### High Priority (Next Phase)
-- [ ] **Pydantic AI agent not deployed** - Railway agent needs setup for this project
-- [ ] **CopilotKit instructions pattern** - Pass full user context (name, persona, destinations) via instructions prop like fractional.quest
-- [ ] **AI should ask persona on first visit** - Onboarding prompt in chat to classify user
+- [x] **Pydantic AI agent deployed** - Railway agent at `https://relocation-quest-v3-agent-production.up.railway.app`
+- [x] **CopilotKit instructions pattern** - Full user context passed via instructions prop
+- [x] **AI asks persona on first visit** - Conversational onboarding with HITL confirmations
 
 ### Medium Priority
 - [ ] Port full legacy Cyprus content
@@ -285,6 +285,8 @@ Country content in `scripts/data/<country>.js`. Cyprus is the template.
 - [ ] Add more destinations to database (currently 17)
 - [ ] Implement destination comparison tool
 - [ ] Add saved destinations feature to dashboard
+- [ ] Toggle between voice and written onboarding mode
+- [ ] Full Zep context integration in voice flow
 
 ---
 
@@ -450,3 +452,88 @@ const agentInstructions = user
 - SyncedVoiceButton component
 - System prompt with user context
 - Auto-greeting with user name
+
+---
+
+## Phase 10: Conversational Onboarding with HITL
+
+**Goal**: Replace dropdown-based onboarding with voice-first conversational flow using Pydantic AI HITL confirmations.
+
+### HITL Tools
+
+| Tool | Purpose | Parameters |
+|------|---------|------------|
+| `confirm_persona` | Confirm user relocation type | persona, description, user_id |
+| `confirm_current_location` | Confirm where user is based | country, city, user_id |
+| `confirm_destination` | Confirm target destination | destination, is_primary, user_id |
+| `confirm_timeline` | Confirm relocation timeline | timeline, display, user_id |
+| `confirm_budget` | Confirm monthly budget | monthly_budget, currency, user_id |
+
+### Persona Values
+
+| ID | Label | Icon |
+|----|-------|------|
+| company | Corporate Relocation | 🏢 |
+| hnw | High Net Worth | 💎 |
+| digital_nomad | Digital Nomad | 💻 |
+| lifestyle | Lifestyle Change | 🌴 |
+| family | Family Relocation | 👨‍👩‍👧‍👦 |
+| retiree | Retirement | 🏖️ |
+| medical | Medical Relocation | 🏥 |
+
+### Company Persona Special Data
+
+When persona is "company", the agent shares compelling business data:
+
+**Notable Relocations:**
+- Wargaming (Gaming) - Belarus → Cyprus (2022)
+- Hedge funds - UK/EU → Cyprus (2021-2023)
+
+**Cyprus Corporate Benefits:**
+- Corporate tax: 12.5% (lowest in EU)
+- IP Box regime: 2.5% effective rate
+- Notional Interest Deduction (NID)
+- No withholding tax on dividends to non-residents
+- 60+ double tax treaties
+- EU member state (passporting)
+
+### Frontend Implementation
+
+```typescript
+// DashboardClient.tsx
+import { useHumanInTheLoop } from '@copilotkit/react-core';
+
+useHumanInTheLoop({
+  name: 'confirm_persona',
+  parameters: [
+    { name: 'persona', type: 'string', required: true },
+    { name: 'description', type: 'string', required: true },
+    { name: 'user_id', type: 'string', required: true },
+  ],
+  render: ({ args, respond, status }) => {
+    // Render confirmation UI
+    // On confirm: save to DB, update local state, respond({ confirmed: true })
+    // On reject: respond({ confirmed: false, edit_requested: true })
+  },
+});
+```
+
+### Onboarding Flow
+
+1. User arrives at dashboard
+2. ATLAS greets and asks about their situation
+3. User speaks: "I'm relocating my company"
+4. Agent extracts: persona="company"
+5. HITL confirmation UI appears
+6. User confirms → Dashboard updates live
+7. Continue for: location, destination, timeline, budget
+
+### Session Log (Jan 16, 2026)
+
+- Fixed comparison picker modal (added X close button)
+- Removed debug console.log statements
+- Added HITL tools to agent system prompt
+- Added company relocation data to system prompt
+- Implemented 5 useHumanInTheLoop hooks in DashboardClient
+- Added onboarding-aware CopilotSidebar instructions
+- Dashboard now updates live as confirmations happen

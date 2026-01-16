@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CopilotSidebar } from '@copilotkit/react-ui';
-import { useCopilotReadable, useCopilotAction } from '@copilotkit/react-core';
+import { useCopilotReadable, useCopilotAction, useHumanInTheLoop } from '@copilotkit/react-core';
 import { authClient } from '@/lib/auth/client';
 import { HumeWidget } from '@/components/HumeWidget';
 
@@ -426,7 +426,9 @@ function OnboardingWizard({
 }
 
 // Main Dashboard Component
-function Dashboard({ user, profile, onEditProfile }: { user: User; profile: UserProfile; onEditProfile: () => void }) {
+function Dashboard({ user, profile: initialProfile, onEditProfile }: { user: User; profile: UserProfile; onEditProfile: () => void }) {
+  // Local profile state for live updates from HITL confirmations
+  const [profile, setProfile] = useState<UserProfile>(initialProfile);
   const persona = PERSONAS.find((p) => p.id === profile.persona);
 
   // Make user profile readable to CopilotKit
@@ -434,11 +436,13 @@ function Dashboard({ user, profile, onEditProfile }: { user: User; profile: User
     description: 'User relocation profile and preferences',
     value: {
       name: user.name,
+      userId: user.id,
       persona: profile.persona,
       currentCountry: profile.current_country,
       timeline: profile.timeline,
       budgetMonthly: profile.budget_monthly,
       targetDestinations: profile.target_destinations,
+      onboardingCompleted: profile.onboarding_completed,
     },
   });
 
@@ -456,6 +460,292 @@ function Dashboard({ user, profile, onEditProfile }: { user: User; profile: User
         body: JSON.stringify({ recommended_destinations: destinations }),
       });
       return 'Recommendations updated!';
+    },
+  });
+
+  // ========================================================================
+  // HUMAN-IN-THE-LOOP CONFIRMATIONS FOR CONVERSATIONAL ONBOARDING
+  // ========================================================================
+
+  // HITL: Confirm Persona
+  useHumanInTheLoop({
+    name: 'confirm_persona',
+    description: 'Confirm user relocation type/persona',
+    parameters: [
+      { name: 'persona', type: 'string', description: 'Persona ID', required: true },
+      { name: 'description', type: 'string', description: 'Description of persona', required: true },
+      { name: 'user_id', type: 'string', description: 'User ID', required: true },
+    ],
+    render: ({ args, respond, status }) => {
+      if (status === 'executing' && respond) {
+        const selectedPersona = PERSONAS.find(p => p.id === args.persona);
+        return (
+          <div className="p-5 bg-white rounded-xl shadow-xl border border-amber-100 max-w-md">
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Confirm Your Profile</h3>
+            <p className="text-slate-600 mb-4">{args.description}</p>
+            {selectedPersona && (
+              <div className={`bg-gradient-to-r ${selectedPersona.color} rounded-lg p-4 text-white mb-4`}>
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">{selectedPersona.icon}</span>
+                  <div>
+                    <div className="font-semibold">{selectedPersona.label}</div>
+                    <div className="text-sm text-white/80">{selectedPersona.description}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="flex gap-3">
+              <button
+                onClick={async () => {
+                  await fetch('/api/user-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ persona: args.persona }),
+                  });
+                  setProfile(prev => ({ ...prev, persona: args.persona }));
+                  respond({ confirmed: true, persona: args.persona });
+                }}
+                className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+              >
+                Yes, that's me
+              </button>
+              <button
+                onClick={() => respond({ confirmed: false, edit_requested: true })}
+                className="flex-1 border border-slate-300 hover:border-slate-400 text-slate-700 py-2 px-4 rounded-lg font-medium transition-colors"
+              >
+                Let me clarify
+              </button>
+            </div>
+          </div>
+        );
+      }
+      if (status === 'complete') {
+        return (
+          <div className="p-3 bg-emerald-50 rounded-lg text-emerald-700 text-sm">
+            Profile confirmed
+          </div>
+        );
+      }
+      return <></>;
+    },
+  });
+
+  // HITL: Confirm Current Location
+  useHumanInTheLoop({
+    name: 'confirm_current_location',
+    description: 'Confirm where user is currently based',
+    parameters: [
+      { name: 'country', type: 'string', description: 'Country name', required: true },
+      { name: 'city', type: 'string', description: 'City name', required: false },
+      { name: 'user_id', type: 'string', description: 'User ID', required: true },
+    ],
+    render: ({ args, respond, status }) => {
+      if (status === 'executing' && respond) {
+        return (
+          <div className="p-5 bg-white rounded-xl shadow-xl border border-blue-100 max-w-md">
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Confirm Your Location</h3>
+            <p className="text-slate-600 mb-4">
+              You're currently based in <span className="font-semibold">{args.city ? `${args.city}, ` : ''}{args.country}</span>. Is that correct?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={async () => {
+                  await fetch('/api/user-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ current_country: args.country }),
+                  });
+                  setProfile(prev => ({ ...prev, current_country: args.country }));
+                  respond({ confirmed: true, country: args.country });
+                }}
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+              >
+                Yes, correct
+              </button>
+              <button
+                onClick={() => respond({ confirmed: false, edit_requested: true })}
+                className="flex-1 border border-slate-300 hover:border-slate-400 text-slate-700 py-2 px-4 rounded-lg font-medium transition-colors"
+              >
+                That's not right
+              </button>
+            </div>
+          </div>
+        );
+      }
+      if (status === 'complete') {
+        return (
+          <div className="p-3 bg-emerald-50 rounded-lg text-emerald-700 text-sm">
+            Location confirmed
+          </div>
+        );
+      }
+      return <></>;
+    },
+  });
+
+  // HITL: Confirm Destination
+  useHumanInTheLoop({
+    name: 'confirm_destination',
+    description: 'Confirm target relocation destination',
+    parameters: [
+      { name: 'destination', type: 'string', description: 'Destination country', required: true },
+      { name: 'is_primary', type: 'boolean', description: 'Is this the primary destination', required: false },
+      { name: 'user_id', type: 'string', description: 'User ID', required: true },
+    ],
+    render: ({ args, respond, status }) => {
+      if (status === 'executing' && respond) {
+        const isPrimary = args.is_primary !== false;
+        return (
+          <div className="p-5 bg-white rounded-xl shadow-xl border border-emerald-100 max-w-md">
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">
+              {isPrimary ? 'Confirm Primary Destination' : 'Add Secondary Destination'}
+            </h3>
+            <p className="text-slate-600 mb-4">
+              You're interested in moving to <span className="font-semibold">{args.destination}</span>. Add this to your list?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={async () => {
+                  const currentDests = profile.target_destinations || [];
+                  const newDests = [...currentDests, args.destination.toLowerCase()];
+                  await fetch('/api/user-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ target_destinations: newDests }),
+                  });
+                  setProfile(prev => ({ ...prev, target_destinations: newDests }));
+                  respond({ confirmed: true, destination: args.destination });
+                }}
+                className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+              >
+                Yes, add it
+              </button>
+              <button
+                onClick={() => respond({ confirmed: false, edit_requested: true })}
+                className="flex-1 border border-slate-300 hover:border-slate-400 text-slate-700 py-2 px-4 rounded-lg font-medium transition-colors"
+              >
+                Not interested
+              </button>
+            </div>
+          </div>
+        );
+      }
+      if (status === 'complete') {
+        return (
+          <div className="p-3 bg-emerald-50 rounded-lg text-emerald-700 text-sm">
+            Destination added
+          </div>
+        );
+      }
+      return <></>;
+    },
+  });
+
+  // HITL: Confirm Timeline
+  useHumanInTheLoop({
+    name: 'confirm_timeline',
+    description: 'Confirm relocation timeline',
+    parameters: [
+      { name: 'timeline', type: 'string', description: 'Timeline value', required: true },
+      { name: 'display', type: 'string', description: 'Display text', required: true },
+      { name: 'user_id', type: 'string', description: 'User ID', required: true },
+    ],
+    render: ({ args, respond, status }) => {
+      if (status === 'executing' && respond) {
+        return (
+          <div className="p-5 bg-white rounded-xl shadow-xl border border-purple-100 max-w-md">
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Confirm Your Timeline</h3>
+            <p className="text-slate-600 mb-4">
+              Your relocation timeline: <span className="font-semibold">{args.display}</span>
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={async () => {
+                  await fetch('/api/user-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ timeline: args.timeline }),
+                  });
+                  setProfile(prev => ({ ...prev, timeline: args.timeline }));
+                  respond({ confirmed: true, timeline: args.timeline });
+                }}
+                className="flex-1 bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+              >
+                Sounds right
+              </button>
+              <button
+                onClick={() => respond({ confirmed: false, edit_requested: true })}
+                className="flex-1 border border-slate-300 hover:border-slate-400 text-slate-700 py-2 px-4 rounded-lg font-medium transition-colors"
+              >
+                Different timeline
+              </button>
+            </div>
+          </div>
+        );
+      }
+      if (status === 'complete') {
+        return (
+          <div className="p-3 bg-emerald-50 rounded-lg text-emerald-700 text-sm">
+            Timeline confirmed
+          </div>
+        );
+      }
+      return <></>;
+    },
+  });
+
+  // HITL: Confirm Budget
+  useHumanInTheLoop({
+    name: 'confirm_budget',
+    description: 'Confirm monthly budget',
+    parameters: [
+      { name: 'monthly_budget', type: 'number', description: 'Monthly budget amount', required: true },
+      { name: 'currency', type: 'string', description: 'Currency code', required: false },
+      { name: 'user_id', type: 'string', description: 'User ID', required: true },
+    ],
+    render: ({ args, respond, status }) => {
+      if (status === 'executing' && respond) {
+        const currency = args.currency || 'EUR';
+        const symbol = currency === 'USD' ? '$' : currency === 'GBP' ? '£' : '€';
+        return (
+          <div className="p-5 bg-white rounded-xl shadow-xl border border-indigo-100 max-w-md">
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Confirm Your Budget</h3>
+            <p className="text-slate-600 mb-4">
+              Your monthly budget: <span className="font-semibold text-2xl">{symbol}{args.monthly_budget?.toLocaleString()}</span>
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={async () => {
+                  await fetch('/api/user-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ budget_monthly: args.monthly_budget }),
+                  });
+                  setProfile(prev => ({ ...prev, budget_monthly: args.monthly_budget }));
+                  respond({ confirmed: true, budget: args.monthly_budget });
+                }}
+                className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+              >
+                Confirm budget
+              </button>
+              <button
+                onClick={() => respond({ confirmed: false, edit_requested: true })}
+                className="flex-1 border border-slate-300 hover:border-slate-400 text-slate-700 py-2 px-4 rounded-lg font-medium transition-colors"
+              >
+                Adjust amount
+              </button>
+            </div>
+          </div>
+        );
+      }
+      if (status === 'complete') {
+        return (
+          <div className="p-3 bg-emerald-50 rounded-lg text-emerald-700 text-sm">
+            Budget confirmed
+          </div>
+        );
+      }
+      return <></>;
     },
   });
 
@@ -709,8 +999,43 @@ function Dashboard({ user, profile, onEditProfile }: { user: User; profile: User
                   defaultOpen={true}
                   labels={{
                     title: 'ATLAS - Your Advisor',
-                    initial: `Hi ${user.name || 'there'}! I've reviewed your profile and I'm ready to help you plan your relocation.\n\nBased on your preferences, I can help you with:\n• Comparing destinations\n• Understanding visa options\n• Estimating costs\n• Planning your timeline\n\nWhat would you like to explore?`,
+                    initial: profile.onboarding_completed
+                      ? `Hi ${user.name || 'there'}! I've reviewed your profile and I'm ready to help you plan your relocation.\n\nBased on your preferences, I can help you with:\n• Comparing destinations\n• Understanding visa options\n• Estimating costs\n• Planning your timeline\n\nWhat would you like to explore?`
+                      : `Hi ${user.name || 'there'}! Welcome to Relocation Quest. I'm ATLAS, your AI relocation advisor.\n\nLet's get to know each other so I can give you personalized advice. Tell me a bit about yourself:\n\n• What brings you here - relocating a company, seeking a new lifestyle, or something else?\n• Where are you currently based?\n• What destinations interest you?\n\nJust tell me naturally, and I'll confirm each detail with you.`,
                   }}
+                  instructions={`You are ATLAS, an expert relocation advisor.
+
+CRITICAL USER CONTEXT:
+- User ID: ${user.id}
+- User Name: ${user.name || 'Unknown'}
+- User Email: ${user.email}
+- Current Persona: ${profile.persona || 'Not set'}
+- Current Country: ${profile.current_country || 'Not set'}
+- Target Destinations: ${profile.target_destinations?.join(', ') || 'None'}
+- Timeline: ${profile.timeline || 'Not set'}
+- Budget: ${profile.budget_monthly ? '€' + profile.budget_monthly.toLocaleString() : 'Not set'}
+- Onboarding Complete: ${profile.onboarding_completed ? 'Yes' : 'No'}
+
+${!profile.onboarding_completed ? `
+ONBOARDING MODE - Use HITL tools to confirm user information:
+- When user mentions their situation → confirm_persona(persona, description, user_id)
+- When user mentions location → confirm_current_location(country, city, user_id)
+- When user mentions destination → confirm_destination(destination, is_primary, user_id)
+- When user mentions timeline → confirm_timeline(timeline, display, user_id)
+- When user mentions budget → confirm_budget(monthly_budget, currency, user_id)
+
+Guide them conversationally through onboarding. Each confirmation will update their dashboard live.
+` : `
+Profile complete! Help the user with:
+- Destination comparisons
+- Visa options and requirements
+- Cost of living analysis
+- Tax optimization strategies
+- Quality of life factors
+`}
+
+Always use the user_id from the context above when calling HITL tools.
+Never ask for user ID - you already have it.`}
                   className="h-full"
                 />
               </div>
@@ -762,15 +1087,6 @@ export default function DashboardClient() {
     name: authUser.name || authUser.email?.split('@')[0] || null,
   } : DEMO_USER;
 
-  // Debug auth state
-  useEffect(() => {
-    console.log('[Dashboard Auth] ================================');
-    console.log('[Dashboard Auth] authPending:', authPending);
-    console.log('[Dashboard Auth] session:', session);
-    console.log('[Dashboard Auth] authUser:', authUser);
-    console.log('[Dashboard Auth] user (final):', user);
-    console.log('[Dashboard Auth] ================================');
-  }, [authPending, session, authUser, user]);
 
   useEffect(() => {
     async function fetchProfile() {

@@ -65,9 +65,20 @@ export function ComparisonPicker({ countries, onCompare, isLoading }: Comparison
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             className="absolute top-full left-0 mt-2 z-50 w-80 bg-stone-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
           >
-            <div className="p-4 border-b border-white/10">
-              <h3 className="font-semibold text-white">Compare Two Countries</h3>
-              <p className="text-xs text-white/50 mt-1">Select countries to see side-by-side comparison</p>
+            <div className="p-4 border-b border-white/10 flex items-start justify-between">
+              <div>
+                <h3 className="font-semibold text-white">Compare Two Countries</h3>
+                <p className="text-xs text-white/50 mt-1">Select countries to see side-by-side comparison</p>
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-white/50 hover:text-white transition-colors p-1 -mr-1 -mt-1"
+                aria-label="Close comparison picker"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
 
             <div className="p-4 space-y-3">

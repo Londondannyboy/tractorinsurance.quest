@@ -296,13 +296,6 @@ export default function DestinationClient({ slug, destination }: DestinationClie
   const [cityImages, setCityImages] = useState<Record<string, UnsplashImage>>({});
   const [activeSection, setActiveSection] = useState<'overview' | 'cities' | 'visas' | 'jobs' | 'lifestyle'>('overview');
 
-  // Debug hero image
-  useEffect(() => {
-    console.log('[Hero Debug] slug:', slug);
-    console.log('[Hero Debug] destination.hero_image_url:', destination.hero_image_url);
-    console.log('[Hero Debug] fallbackData.hero:', fallbackData.hero);
-    console.log('[Hero Debug] current heroImage:', heroImage);
-  }, [slug, destination.hero_image_url, fallbackData.hero, heroImage]);
 
   // Fetch Unsplash images or use fallbacks
   useEffect(() => {
@@ -361,21 +354,11 @@ export default function DestinationClient({ slug, destination }: DestinationClie
   }, [destination.country_name, destination.hero_image_url, destination.cost_of_living, slug, fallbackData]);
 
   // Get logged-in user from Neon Auth (using authClient.useSession like fractional.quest)
-  const { data: session, isPending: authPending } = authClient.useSession();
+  const { data: session } = authClient.useSession();
   const user = session?.user;
   const authUserId = user?.id || null;
   const authUserName = user?.name || user?.email?.split('@')[0] || null;
 
-  // Debug auth state
-  useEffect(() => {
-    console.log('[Auth Debug] ================================');
-    console.log('[Auth Debug] authPending:', authPending);
-    console.log('[Auth Debug] session:', session);
-    console.log('[Auth Debug] user:', user);
-    console.log('[Auth Debug] authUserId:', authUserId);
-    console.log('[Auth Debug] authUserName:', authUserName);
-    console.log('[Auth Debug] ================================');
-  }, [authPending, session, user, authUserId, authUserName]);
 
   // Zep memory for user context (now using real auth)
   const { user: zepUser, facts: userFacts, buildContext, isReturningUser } = useZepMemory(authUserId);
@@ -544,13 +527,6 @@ export default function DestinationClient({ slug, destination }: DestinationClie
   // Use auth name first, then Zep name, then fallback
   const userName = authUserName || zepUser?.firstName || (isReturningUser ? 'valued user' : null);
 
-  // Debug user context
-  useEffect(() => {
-    console.log('[User Debug] authUserName:', authUserName);
-    console.log('[User Debug] zepUser:', zepUser);
-    console.log('[User Debug] userName (final):', userName);
-    console.log('[User Debug] isReturningUser:', isReturningUser);
-  }, [authUserName, zepUser, userName, isReturningUser]);
   const personalizedInstructions = `You are ATLAS, an expert relocation advisor for ${destination.country_name}.
 
 ${userName ? `## USER CONTEXT
@@ -637,7 +613,6 @@ Language: ${destination.language}
             alt={`${destination.country_name} landscape`}
             className="absolute inset-0 w-full h-full object-cover"
             onError={(e) => {
-              console.log('[Hero] Image failed to load, using fallback');
               (e.target as HTMLImageElement).src = fallbackData.hero;
             }}
           />

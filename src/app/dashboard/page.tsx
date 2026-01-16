@@ -4,8 +4,8 @@ import { Metadata } from 'next';
 import DashboardClient from './DashboardClient';
 
 export const metadata: Metadata = {
-  title: 'Dashboard | Relocation Quest',
-  description: 'Your personalized relocation dashboard',
+  title: 'My Pets | Puppy Insurance',
+  description: 'Manage your pets and insurance policies',
 };
 
 function AuthNotConfigured() {

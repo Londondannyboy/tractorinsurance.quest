@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Relocation Quest - AI Relocation Advisor",
-  description: "Your voice-first AI guide to moving abroad. Explore destinations, visas, costs, and more.",
+  title: "Puppy Insurance Quest - AI Pet Insurance Advisor",
+  description: "Your voice-first AI guide to pet insurance. Get personalized quotes for your furry friend.",
 };
 
 export default function RootLayout({
@@ -40,17 +40,17 @@ export default function RootLayout({
           <header className="fixed top-0 left-0 right-0 h-14 bg-slate-900/95 backdrop-blur-sm z-[9999] flex items-center justify-between px-6 border-b border-slate-800">
             {/* Logo / Brand */}
             <a href="/" className="flex items-center gap-2 text-white font-semibold text-lg">
-              <span className="text-2xl">🌍</span>
-              <span>Relocation Quest</span>
+              <span className="text-2xl">🐾</span>
+              <span>Puppy Insurance</span>
             </a>
 
             {/* Navigation Links */}
             <nav className="flex items-center gap-6">
-              <a href="/destinations" className="text-white/90 hover:text-white text-sm font-medium transition-colors">
-                Destinations
+              <a href="/" className="text-white/90 hover:text-white text-sm font-medium transition-colors">
+                Get Quote
               </a>
               <a href="/dashboard" className="text-white/90 hover:text-white text-sm font-medium transition-colors">
-                Dashboard
+                My Pets
               </a>
               <UserButton size="icon" />
             </nav>

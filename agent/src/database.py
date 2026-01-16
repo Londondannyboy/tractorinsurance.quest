@@ -1,11 +1,12 @@
-"""Database connection and RRF hybrid search for Neon PostgreSQL with pgvector."""
+"""
+Database queries for Puppy Insurance Agent
+"""
 
 import os
-import json
 import sys
 import asyncpg
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Optional
+from typing import AsyncGenerator, Optional, List, Dict, Any
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
@@ -43,754 +44,320 @@ async def get_connection() -> AsyncGenerator[asyncpg.Connection, None]:
         yield conn
 
 
-# Known destinations for extraction
-KNOWN_DESTINATIONS = {
-    "portugal", "spain", "cyprus", "dubai", "canada", "australia", "uk",
-    "new zealand", "france", "germany", "netherlands", "mexico", "thailand",
-    "malta", "greece", "italy", "indonesia", "bali", "lisbon", "barcelona",
-    "madrid", "amsterdam", "berlin", "paris", "london", "dublin", "singapore",
-}
+# =============================================================================
+# DOG BREED QUERIES
+# =============================================================================
 
-# Stop phrases to remove from queries
-STOP_PHRASES = [
-    "tell me about", "what is", "what's", "show me", "how do i", "how can i",
-    "i want to", "i'd like to", "can you", "could you", "please", "the",
-    "cost of living in", "visa for", "moving to", "relocating to", "living in",
+async def get_all_breeds() -> List[Dict[str, Any]]:
+    """Get all dog breeds from database."""
+    try:
+        async with get_connection() as conn:
+            rows = await conn.fetch("""
+                SELECT id, name, size, risk_category, avg_lifespan_years,
+                       common_health_issues, base_premium_multiplier,
+                       temperament, exercise_needs, grooming_needs
+                FROM dog_breeds
+                ORDER BY name
+            """)
+            print(f"[BUDDY DB] Retrieved {len(rows)} breeds", file=sys.stderr)
+            return [dict(row) for row in rows]
+    except Exception as e:
+        print(f"[BUDDY DB] Error fetching breeds: {e}", file=sys.stderr)
+        return []
+
+
+async def get_breed_by_name(name: str) -> Optional[Dict[str, Any]]:
+    """Get breed by name (fuzzy match)."""
+    try:
+        async with get_connection() as conn:
+            # Try exact match first
+            row = await conn.fetchrow("""
+                SELECT id, name, size, risk_category, avg_lifespan_years,
+                       common_health_issues, base_premium_multiplier,
+                       temperament, exercise_needs, grooming_needs
+                FROM dog_breeds
+                WHERE LOWER(name) = LOWER($1)
+            """, name)
+
+            if row:
+                print(f"[BUDDY DB] Found exact breed match: {row['name']}", file=sys.stderr)
+                return dict(row)
+
+            # Try fuzzy match
+            row = await conn.fetchrow("""
+                SELECT id, name, size, risk_category, avg_lifespan_years,
+                       common_health_issues, base_premium_multiplier,
+                       temperament, exercise_needs, grooming_needs
+                FROM dog_breeds
+                WHERE LOWER(name) LIKE LOWER($1)
+                ORDER BY
+                    CASE WHEN LOWER(name) = LOWER($2) THEN 0 ELSE 1 END
+                LIMIT 1
+            """, f"%{name}%", name)
+
+            if row:
+                print(f"[BUDDY DB] Found fuzzy breed match: {row['name']}", file=sys.stderr)
+                return dict(row)
+
+            print(f"[BUDDY DB] No breed found for: {name}", file=sys.stderr)
+            return None
+    except Exception as e:
+        print(f"[BUDDY DB] Error fetching breed by name: {e}", file=sys.stderr)
+        return None
+
+
+async def search_breeds(query: str) -> List[Dict[str, Any]]:
+    """Search breeds by name."""
+    try:
+        async with get_connection() as conn:
+            rows = await conn.fetch("""
+                SELECT id, name, size, risk_category, avg_lifespan_years,
+                       common_health_issues, base_premium_multiplier
+                FROM dog_breeds
+                WHERE LOWER(name) LIKE LOWER($1)
+                ORDER BY name
+                LIMIT 5
+            """, f"%{query}%")
+            return [dict(row) for row in rows]
+    except Exception as e:
+        print(f"[BUDDY DB] Error searching breeds: {e}", file=sys.stderr)
+        return []
+
+
+# =============================================================================
+# INSURANCE PLANS
+# =============================================================================
+
+INSURANCE_PLANS = [
+    {
+        "type": "basic",
+        "name": "Puppy Basic",
+        "base_monthly_premium": 15,
+        "annual_coverage_limit": 5000,
+        "deductible": 250,
+        "features": [
+            "Accident coverage up to $5,000/year",
+            "Emergency vet visits",
+            "24/7 Pet Helpline",
+        ],
+    },
+    {
+        "type": "standard",
+        "name": "Puppy Standard",
+        "base_monthly_premium": 35,
+        "annual_coverage_limit": 10000,
+        "deductible": 200,
+        "features": [
+            "Accident & illness coverage up to $10,000/year",
+            "Prescription medications",
+            "Specialist consultations",
+            "Emergency vet visits",
+            "24/7 Pet Helpline",
+        ],
+    },
+    {
+        "type": "premium",
+        "name": "Puppy Premium",
+        "base_monthly_premium": 55,
+        "annual_coverage_limit": 20000,
+        "deductible": 100,
+        "features": [
+            "Accident & illness coverage up to $20,000/year",
+            "Routine care & wellness visits",
+            "Dental care included",
+            "Hereditary condition coverage",
+            "Prescription medications",
+            "Specialist consultations",
+            "Low $100 deductible",
+            "24/7 Pet Helpline",
+        ],
+    },
+    {
+        "type": "comprehensive",
+        "name": "Puppy Comprehensive",
+        "base_monthly_premium": 85,
+        "annual_coverage_limit": 50000,
+        "deductible": 0,
+        "features": [
+            "Unlimited accident & illness coverage (up to $50,000/year)",
+            "ZERO deductible",
+            "All routine & wellness care",
+            "Full dental coverage",
+            "Hereditary & chronic conditions",
+            "Alternative therapies (acupuncture, hydrotherapy)",
+            "Behavioral therapy",
+            "Lost pet advertising & reward",
+            "Travel coverage",
+            "Priority claims processing",
+        ],
+    },
 ]
 
 
-def extract_search_terms(query: str) -> str:
-    """
-    Extract key search terms from natural language query.
-
-    Removes common stop phrases and extracts destination names.
-    Falls back to the cleaned query if no destination found.
-    """
-    query_lower = query.lower().strip()
-
-    # Remove stop phrases
-    for phrase in STOP_PHRASES:
-        query_lower = query_lower.replace(phrase, " ")
-
-    # Clean up extra spaces
-    query_lower = " ".join(query_lower.split())
-
-    # Check for known destinations
-    for dest in KNOWN_DESTINATIONS:
-        if dest in query_lower:
-            # Return the destination plus any remaining important words
-            remaining = query_lower.replace(dest, "").strip()
-            # Keep important keywords like "visa", "cost", "job"
-            important = [w for w in remaining.split() if w in {"visa", "cost", "job", "tax", "living", "guide", "nomad", "digital"}]
-            if important:
-                return f"{dest} {' '.join(important)}"
-            return dest
-
-    # No known destination - return cleaned query
-    return query_lower if query_lower else query
+def get_insurance_plans() -> List[Dict[str, Any]]:
+    """Get all insurance plans."""
+    return INSURANCE_PLANS
 
 
-async def search_articles_keyword(
-    query_text: str,
-    limit: int = 5,
-    country: str = None
-) -> list[dict]:
-    """
-    Simple keyword search on articles using content_text column.
-
-    Searches title, excerpt, and content_text for the query.
-    Falls back to this when vector embeddings aren't available.
-
-    Args:
-        query_text: Search query
-        limit: Maximum number of results
-        country: Optional country filter
-
-    Returns:
-        List of matching articles with relevance scores
-    """
-    async with get_connection() as conn:
-        # Extract key search terms from natural language query
-        query_lower = extract_search_terms(query_text)
-
-        # Build query with optional country filter
-        if country:
-            results = await conn.fetch("""
-                SELECT
-                    id::text,
-                    title,
-                    excerpt,
-                    content_text as content,
-                    slug,
-                    hero_image_url,
-                    country,
-                    article_mode,
-                    CASE
-                        WHEN LOWER(title) LIKE '%' || $1 || '%' THEN 3.0
-                        WHEN LOWER(excerpt) LIKE '%' || $1 || '%' THEN 2.0
-                        WHEN LOWER(content_text) LIKE '%' || $1 || '%' THEN 1.0
-                        ELSE 0.0
-                    END as score
-                FROM articles
-                WHERE (
-                    LOWER(title) LIKE '%' || $1 || '%'
-                    OR LOWER(excerpt) LIKE '%' || $1 || '%'
-                    OR LOWER(content_text) LIKE '%' || $1 || '%'
-                )
-                AND LOWER(country) = $3
-                ORDER BY score DESC, published_at DESC NULLS LAST
-                LIMIT $2
-            """, query_lower, limit, country.lower())
-        else:
-            results = await conn.fetch("""
-                SELECT
-                    id::text,
-                    title,
-                    excerpt,
-                    content_text as content,
-                    slug,
-                    hero_image_url,
-                    country,
-                    article_mode,
-                    CASE
-                        WHEN LOWER(title) LIKE '%' || $1 || '%' THEN 3.0
-                        WHEN LOWER(excerpt) LIKE '%' || $1 || '%' THEN 2.0
-                        WHEN LOWER(content_text) LIKE '%' || $1 || '%' THEN 1.0
-                        ELSE 0.0
-                    END as score
-                FROM articles
-                WHERE (
-                    LOWER(title) LIKE '%' || $1 || '%'
-                    OR LOWER(excerpt) LIKE '%' || $1 || '%'
-                    OR LOWER(content_text) LIKE '%' || $1 || '%'
-                )
-                ORDER BY score DESC, published_at DESC NULLS LAST
-                LIMIT $2
-            """, query_lower, limit)
-
-        print(f"[ATLAS Search] Query: '{query_text[:30]}...' -> {len(results)} results", file=sys.stderr)
-        for r in results[:3]:
-            print(f"[ATLAS Search]   {r['title'][:40]}... (score={r['score']})", file=sys.stderr)
-
-        return [dict(r) for r in results]
+def get_plan_by_type(plan_type: str) -> Optional[Dict[str, Any]]:
+    """Get a specific insurance plan by type."""
+    for plan in INSURANCE_PLANS:
+        if plan["type"] == plan_type:
+            return plan
+    return None
 
 
-async def search_articles_hybrid(
-    query_embedding: list[float],
-    query_text: str,
-    limit: int = 5,
-    similarity_threshold: float = 0.3
-) -> list[dict]:
-    """
-    Hybrid search - falls back to keyword search if embeddings not available.
+def calculate_quote(
+    breed: Dict[str, Any],
+    age_years: int,
+    plan_type: str = "standard",
+    has_preexisting_conditions: bool = False
+) -> Dict[str, Any]:
+    """Calculate insurance quote based on breed, age, and plan."""
+    plan = get_plan_by_type(plan_type)
+    if not plan:
+        plan = INSURANCE_PLANS[1]  # Default to standard
 
-    Args:
-        query_embedding: Vector embedding (may be ignored if no vector support)
-        query_text: Original query text for keyword matching
-        limit: Maximum number of results
-        similarity_threshold: Minimum similarity score
+    premium = plan["base_monthly_premium"]
 
-    Returns:
-        List of matching articles
-    """
-    # Use simple keyword search (vector support can be added later)
-    return await search_articles_keyword(query_text, limit)
+    # Apply breed risk multiplier
+    breed_multiplier = float(breed.get("base_premium_multiplier", 1.0))
+    premium *= breed_multiplier
 
+    # Age adjustments
+    if age_years < 1:
+        premium *= 1.1  # Puppies have more accidents
+    elif age_years >= 10:
+        premium *= 1.5  # Very senior
+    elif age_years >= 7:
+        premium *= 1.3  # Senior dogs
 
-async def get_article_by_slug(slug: str) -> Optional[dict]:
-    """Get a full article by its slug for detailed card display."""
-    async with get_connection() as conn:
-        result = await conn.fetchrow("""
-            SELECT id::text, title, content, content_text, slug, excerpt,
-                   hero_image_url, country, article_mode, category
-            FROM articles
-            WHERE slug = $1
-        """, slug)
-        return dict(result) if result else None
+    # Preexisting conditions surcharge
+    if has_preexisting_conditions and plan_type in ["premium", "comprehensive"]:
+        premium *= 1.25
 
+    monthly_premium = round(premium, 2)
+    annual_premium = round(monthly_premium * 12, 2)
 
-async def get_articles_by_country(country: str, limit: int = 5) -> list[dict]:
-    """Get articles for a specific country/destination."""
-    async with get_connection() as conn:
-        results = await conn.fetch("""
-            SELECT id::text, title, excerpt, slug, hero_image_url, country, article_mode
-            FROM articles
-            WHERE LOWER(country) = $1
-            ORDER BY is_featured DESC NULLS LAST, published_at DESC NULLS LAST
-            LIMIT $2
-        """, country.lower(), limit)
-        return [dict(r) for r in results]
-
-
-async def get_articles_by_mode(article_mode: str, limit: int = 10) -> list[dict]:
-    """Get articles of a specific type (guide, story, nomad, etc.)."""
-    async with get_connection() as conn:
-        results = await conn.fetch("""
-            SELECT id::text, title, excerpt, slug, hero_image_url, country, article_mode
-            FROM articles
-            WHERE article_mode = $1
-            ORDER BY is_featured DESC NULLS LAST, published_at DESC NULLS LAST
-            LIMIT $2
-        """, article_mode, limit)
-        return [dict(r) for r in results]
-
-
-async def get_user_preferred_name(user_id: str) -> Optional[str]:
-    """
-    Get user's preferred name from Neon database.
-    Checks both user_data table and users table.
-    """
-    try:
-        async with get_connection() as conn:
-            # First check user_data table for preferred_name
-            result = await conn.fetchrow("""
-                SELECT preferred_name FROM user_data WHERE user_id = $1
-            """, user_id)
-
-            if result and result['preferred_name']:
-                print(f"[ATLAS DB] Found preferred_name in user_data: {result['preferred_name']}", file=sys.stderr)
-                return result['preferred_name']
-
-            # Fallback: check users table for name or preferred_name
-            result = await conn.fetchrow("""
-                SELECT name, preferred_name FROM users WHERE id = $1
-            """, user_id)
-
-            if result:
-                if result['preferred_name']:
-                    print(f"[ATLAS DB] Found preferred_name in users: {result['preferred_name']}", file=sys.stderr)
-                    return result['preferred_name']
-                if result['name']:
-                    # Extract first name
-                    name = result['name'].split()[0] if result['name'] else None
-                    if name:
-                        print(f"[ATLAS DB] Found name in users table: {name}", file=sys.stderr)
-                        return name
-
-            print(f"[ATLAS DB] No name found for user {user_id}", file=sys.stderr)
-            return None
-    except Exception as e:
-        print(f"[ATLAS DB] Error looking up user name: {e}", file=sys.stderr)
-        return None
-
-
-async def get_destination_by_slug(slug: str) -> Optional[dict]:
-    """
-    Get full destination data including JSONB fields.
-
-    Returns visas, cost_of_living, job_market, faqs, etc.
-    """
-    try:
-        async with get_connection() as conn:
-            result = await conn.fetchrow("""
-                SELECT
-                    slug, country_name, flag, region, language,
-                    hero_title, hero_subtitle, hero_image_url,
-                    quick_facts, highlights, visas, cost_of_living,
-                    job_market, faqs,
-                    -- Extended fields (new)
-                    COALESCE(education_stats, '{}'::jsonb) as education_stats,
-                    COALESCE(company_incorporation, '{}'::jsonb) as company_incorporation,
-                    COALESCE(property_info, '{}'::jsonb) as property_info,
-                    COALESCE(expatriate_scheme, '{}'::jsonb) as expatriate_scheme,
-                    COALESCE(residency_requirements, '{}'::jsonb) as residency_requirements
-                FROM destinations
-                WHERE slug = $1 AND enabled = true
-            """, slug.lower())
-
-            if result:
-                # Convert to dict and parse JSONB fields
-                data = dict(result)
-                print(f"[ATLAS DB] Found destination: {data['country_name']}", file=sys.stderr)
-                return data
-
-            print(f"[ATLAS DB] Destination not found: {slug}", file=sys.stderr)
-            return None
-    except Exception as e:
-        print(f"[ATLAS DB] Error looking up destination: {e}", file=sys.stderr)
-        return None
-
-
-async def get_full_destination_for_confirmation(slug: str) -> Optional[dict]:
-    """
-    Get complete destination data for confirm_destination tool.
-
-    Returns ALL fields needed for the full section reveal including
-    extended fields: education_stats, company_incorporation, property_info,
-    expatriate_scheme, residency_requirements.
-    """
-    try:
-        async with get_connection() as conn:
-            result = await conn.fetchrow("""
-                SELECT
-                    slug, country_name, flag, region, language,
-                    hero_title, hero_subtitle, hero_image_url,
-                    quick_facts, highlights, visas, cost_of_living,
-                    job_market, faqs,
-                    COALESCE(education_stats, '{}'::jsonb) as education_stats,
-                    COALESCE(company_incorporation, '{}'::jsonb) as company_incorporation,
-                    COALESCE(property_info, '{}'::jsonb) as property_info,
-                    COALESCE(expatriate_scheme, '{}'::jsonb) as expatriate_scheme,
-                    COALESCE(residency_requirements, '{}'::jsonb) as residency_requirements
-                FROM destinations
-                WHERE slug = $1 AND enabled = true
-            """, slug.lower())
-
-            if result:
-                data = dict(result)
-                print(f"[ATLAS DB] Full destination data for confirmation: {data['country_name']}", file=sys.stderr)
-
-                # Log which extended fields have data
-                has_education = bool(data.get('education_stats') and data['education_stats'] != {})
-                has_company = bool(data.get('company_incorporation') and data['company_incorporation'] != {})
-                has_property = bool(data.get('property_info') and data['property_info'] != {})
-                has_expatriate = bool(data.get('expatriate_scheme') and data['expatriate_scheme'] != {})
-                has_residency = bool(data.get('residency_requirements') and data['residency_requirements'] != {})
-
-                print(f"[ATLAS DB] Extended fields: education={has_education}, company={has_company}, "
-                      f"property={has_property}, expatriate={has_expatriate}, residency={has_residency}",
-                      file=sys.stderr)
-
-                return data
-
-            print(f"[ATLAS DB] Destination not found for confirmation: {slug}", file=sys.stderr)
-            return None
-    except Exception as e:
-        print(f"[ATLAS DB] Error getting full destination data: {e}", file=sys.stderr)
-        return None
-
-
-async def search_destinations(query: str) -> list[dict]:
-    """
-    Search destinations by country name or keywords.
-
-    Returns matching destinations with their structured data.
-    """
-    try:
-        async with get_connection() as conn:
-            query_lower = f"%{query.lower()}%"
-            results = await conn.fetch("""
-                SELECT
-                    slug, country_name, flag, region, language,
-                    hero_subtitle, hero_image_url,
-                    quick_facts, visas, cost_of_living
-                FROM destinations
-                WHERE enabled = true
-                AND (
-                    LOWER(country_name) LIKE $1
-                    OR LOWER(region) LIKE $1
-                    OR LOWER(hero_subtitle) LIKE $1
-                )
-                ORDER BY priority DESC
-                LIMIT 5
-            """, query_lower)
-
-            print(f"[ATLAS DB] Found {len(results)} destinations for '{query}'", file=sys.stderr)
-            return [dict(r) for r in results]
-    except Exception as e:
-        print(f"[ATLAS DB] Error searching destinations: {e}", file=sys.stderr)
-        return []
-
-
-async def get_all_destinations() -> list[dict]:
-    """
-    Get all enabled destinations with key info.
-    Used for "what destinations do you cover" type questions.
-    """
-    try:
-        async with get_connection() as conn:
-            results = await conn.fetch("""
-                SELECT
-                    slug, country_name, flag, region,
-                    hero_subtitle, featured, priority
-                FROM destinations
-                WHERE enabled = true
-                ORDER BY featured DESC, priority DESC, country_name ASC
-            """)
-            print(f"[ATLAS DB] Retrieved {len(results)} destinations", file=sys.stderr)
-            return [dict(r) for r in results]
-    except Exception as e:
-        print(f"[ATLAS DB] Error getting destinations: {e}", file=sys.stderr)
-        return []
-
-
-async def compare_destinations(slug1: str, slug2: str) -> Optional[dict]:
-    """
-    Compare two destinations side by side.
-    Returns structured comparison data for visas, costs, and lifestyle.
-    """
-    try:
-        dest1 = await get_destination_by_slug(slug1)
-        dest2 = await get_destination_by_slug(slug2)
-
-        if not dest1 or not dest2:
-            return None
-
-        # Build comparison structure
-        comparison = {
-            "destinations": [
-                {
-                    "slug": dest1["slug"],
-                    "name": dest1["country_name"],
-                    "flag": dest1["flag"],
-                    "region": dest1["region"],
-                },
-                {
-                    "slug": dest2["slug"],
-                    "name": dest2["country_name"],
-                    "flag": dest2["flag"],
-                    "region": dest2["region"],
-                }
-            ],
-            "visas": {
-                dest1["country_name"]: dest1.get("visas", []),
-                dest2["country_name"]: dest2.get("visas", []),
-            },
-            "cost_of_living": {
-                dest1["country_name"]: dest1.get("cost_of_living", []),
-                dest2["country_name"]: dest2.get("cost_of_living", []),
-            },
-            "job_market": {
-                dest1["country_name"]: dest1.get("job_market", {}),
-                dest2["country_name"]: dest2.get("job_market", {}),
-            },
+    return {
+        "monthly_premium": monthly_premium,
+        "annual_premium": annual_premium,
+        "plan": plan,
+        "factors": {
+            "breed_multiplier": breed_multiplier,
+            "age_adjustment": "senior" if age_years >= 7 else "puppy" if age_years < 1 else "adult",
+            "preexisting_adjustment": has_preexisting_conditions,
         }
-
-        print(f"[ATLAS DB] Compared {dest1['country_name']} vs {dest2['country_name']}", file=sys.stderr)
-        return comparison
-    except Exception as e:
-        print(f"[ATLAS DB] Error comparing destinations: {e}", file=sys.stderr)
-        return None
-
-
-async def get_visa_info(destination: str) -> Optional[dict]:
-    """
-    Get visa information for a destination.
-    Returns visas with processing times, costs, and requirements.
-    """
-    dest = await get_destination_by_slug(destination)
-    if not dest:
-        # Try searching by country name
-        results = await search_destinations(destination)
-        if results:
-            dest = await get_destination_by_slug(results[0]["slug"])
-
-    if not dest:
-        return None
-
-    return {
-        "country": dest["country_name"],
-        "flag": dest["flag"],
-        "visas": dest.get("visas", []),
-        "hero_image_url": dest.get("hero_image_url"),
     }
 
 
-async def get_cost_of_living(destination: str) -> Optional[dict]:
-    """
-    Get cost of living data for a destination.
-    Returns city-level breakdown of costs.
-    """
-    dest = await get_destination_by_slug(destination)
-    if not dest:
-        results = await search_destinations(destination)
-        if results:
-            dest = await get_destination_by_slug(results[0]["slug"])
+# =============================================================================
+# USER & POLICY QUERIES
+# =============================================================================
 
-    if not dest:
-        return None
-
-    return {
-        "country": dest["country_name"],
-        "flag": dest["flag"],
-        "cities": dest.get("cost_of_living", []),
-        "job_market": dest.get("job_market", {}),
-    }
-
-
-async def get_topic_image(query: str) -> Optional[str]:
-    """
-    Look up a topic image using the topic_images table.
-
-    Uses phonetic-aware keyword search for robust matching.
-    The topic_images table includes phonetic variants like:
-    - "thorney" -> ["thorny", "fawny", "fawney", "fourney", ...]
-    - "aquarium" -> ["aquarim", "aquariam", ...]
-
-    Args:
-        query: The topic or search query
-
-    Returns:
-        Image URL if found, None otherwise
-    """
+async def get_user_profile(user_id: str) -> Optional[Dict[str, Any]]:
+    """Get user profile from database."""
     try:
         async with get_connection() as conn:
-            # Search for any word in the query matching topic_keywords
-            query_words = query.lower().split()
-
-            # Try each word until we find a match
-            for word in query_words:
-                if len(word) < 3:
-                    continue
-
-                result = await conn.fetchrow("""
-                    SELECT image_url
-                    FROM topic_images
-                    WHERE $1 = ANY(topic_keywords)
-                    LIMIT 1
-                """, word)
-
-                if result:
-                    print(f"[ATLAS DB] Found topic image for '{word}': {result['image_url'][:50]}...", file=sys.stderr)
-                    return result['image_url']
-
-            print(f"[ATLAS DB] No topic image found for query: {query}", file=sys.stderr)
-            return None
+            row = await conn.fetchrow("""
+                SELECT * FROM user_profiles WHERE user_id = $1
+            """, user_id)
+            return dict(row) if row else None
     except Exception as e:
-        print(f"[ATLAS DB] Error looking up topic image: {e}", file=sys.stderr)
+        print(f"[BUDDY DB] Error fetching user profile: {e}", file=sys.stderr)
         return None
 
 
-async def get_property_market(destination: str) -> Optional[dict]:
-    """
-    Get property market data for a destination.
-
-    Args:
-        destination: Country name or slug
-
-    Returns:
-        Property market data including prices by city, rental yields, etc.
-    """
-    try:
-        slug = destination.lower().replace(" ", "-").replace("uae", "uae")
-        async with get_connection() as conn:
-            result = await conn.fetchrow("""
-                SELECT country_name, flag, region,
-                       COALESCE(property_market, '{}'::jsonb) as property_market
-                FROM destinations
-                WHERE slug = $1 AND enabled = true
-            """, slug)
-
-            if result:
-                return {
-                    "country_name": result["country_name"],
-                    "flag": result["flag"],
-                    "region": result["region"],
-                    "property_market": json.loads(result["property_market"]) if result["property_market"] else {}
-                }
-            return None
-    except Exception as e:
-        print(f"[ATLAS DB] Error getting property market: {e}", file=sys.stderr)
-        return None
-
-
-async def get_education_data(destination: str) -> Optional[dict]:
-    """
-    Get education data for a destination.
-
-    Args:
-        destination: Country name or slug
-
-    Returns:
-        Education data including schools, universities, system info
-    """
-    try:
-        slug = destination.lower().replace(" ", "-").replace("uae", "uae")
-        async with get_connection() as conn:
-            result = await conn.fetchrow("""
-                SELECT country_name, flag, region,
-                       COALESCE(education_data, '{}'::jsonb) as education_data
-                FROM destinations
-                WHERE slug = $1 AND enabled = true
-            """, slug)
-
-            if result:
-                return {
-                    "country_name": result["country_name"],
-                    "flag": result["flag"],
-                    "region": result["region"],
-                    "education_data": json.loads(result["education_data"]) if result["education_data"] else {}
-                }
-            return None
-    except Exception as e:
-        print(f"[ATLAS DB] Error getting education data: {e}", file=sys.stderr)
-        return None
-
-
-async def get_climate_data(destination: str) -> Optional[dict]:
-    """
-    Get climate data for a destination.
-
-    Args:
-        destination: Country name or slug
-
-    Returns:
-        Climate data including seasons, temperatures, best months
-    """
-    try:
-        slug = destination.lower().replace(" ", "-").replace("uae", "uae")
-        async with get_connection() as conn:
-            result = await conn.fetchrow("""
-                SELECT country_name, flag, region,
-                       COALESCE(climate_data, '{}'::jsonb) as climate_data
-                FROM destinations
-                WHERE slug = $1 AND enabled = true
-            """, slug)
-
-            if result:
-                return {
-                    "country_name": result["country_name"],
-                    "flag": result["flag"],
-                    "region": result["region"],
-                    "climate_data": json.loads(result["climate_data"]) if result["climate_data"] else {}
-                }
-            return None
-    except Exception as e:
-        print(f"[ATLAS DB] Error getting climate data: {e}", file=sys.stderr)
-        return None
-
-
-async def get_quality_of_life(destination: str) -> Optional[dict]:
-    """
-    Get quality of life data for a destination.
-
-    Args:
-        destination: Country name or slug
-
-    Returns:
-        Quality of life metrics including safety, cost index, expat friendliness
-    """
-    try:
-        slug = destination.lower().replace(" ", "-").replace("uae", "uae")
-        async with get_connection() as conn:
-            result = await conn.fetchrow("""
-                SELECT country_name, flag, region,
-                       COALESCE(quality_of_life, '{}'::jsonb) as quality_of_life
-                FROM destinations
-                WHERE slug = $1 AND enabled = true
-            """, slug)
-
-            if result:
-                return {
-                    "country_name": result["country_name"],
-                    "flag": result["flag"],
-                    "region": result["region"],
-                    "quality_of_life": json.loads(result["quality_of_life"]) if result["quality_of_life"] else {}
-                }
-            return None
-    except Exception as e:
-        print(f"[ATLAS DB] Error getting quality of life: {e}", file=sys.stderr)
-        return None
-
-
-async def search_destinations_by_criteria(
-    has_digital_nomad_visa: bool = None,
-    max_cost_index: float = None,
-    min_safety_index: float = None,
-    region: str = None,
-    min_quality_score: float = None,
-) -> list[dict]:
-    """
-    Search destinations by specific criteria.
-
-    Args:
-        has_digital_nomad_visa: Filter for countries with DN visa
-        max_cost_index: Maximum cost of living index
-        min_safety_index: Minimum safety index
-        region: Filter by region (Europe, Asia, etc.)
-        min_quality_score: Minimum quality of life score
-
-    Returns:
-        List of matching destinations
-    """
+async def get_user_dogs(user_id: str) -> List[Dict[str, Any]]:
+    """Get all dogs registered by a user."""
     try:
         async with get_connection() as conn:
-            # Build dynamic WHERE clause
-            conditions = ["enabled = true"]
-            params = []
-            param_idx = 1
-
-            if has_digital_nomad_visa is not None:
-                conditions.append(f"(digital_nomad_info->>'visa_available')::boolean = ${param_idx}")
-                params.append(has_digital_nomad_visa)
-                param_idx += 1
-
-            if max_cost_index is not None:
-                conditions.append(f"(quality_of_life->>'cost_of_living_index')::float <= ${param_idx}")
-                params.append(max_cost_index)
-                param_idx += 1
-
-            if min_safety_index is not None:
-                conditions.append(f"(quality_of_life->>'safety_index')::float >= ${param_idx}")
-                params.append(min_safety_index)
-                param_idx += 1
-
-            if region is not None:
-                conditions.append(f"region ILIKE ${param_idx}")
-                params.append(f"%{region}%")
-                param_idx += 1
-
-            if min_quality_score is not None:
-                conditions.append(f"(quality_of_life->>'overall_score')::float >= ${param_idx}")
-                params.append(min_quality_score)
-                param_idx += 1
-
-            query = f"""
-                SELECT slug, country_name, flag, region,
-                       COALESCE(quality_of_life, '{{}}'::jsonb) as quality_of_life,
-                       COALESCE(digital_nomad_info, '{{}}'::jsonb) as digital_nomad_info
-                FROM destinations
-                WHERE {' AND '.join(conditions)}
-                ORDER BY (quality_of_life->>'overall_score')::float DESC NULLS LAST
-                LIMIT 10
-            """
-
-            results = await conn.fetch(query, *params)
-
-            return [
-                {
-                    "slug": r["slug"],
-                    "country_name": r["country_name"],
-                    "flag": r["flag"],
-                    "region": r["region"],
-                    "quality_of_life": json.loads(r["quality_of_life"]) if r["quality_of_life"] else {},
-                    "digital_nomad_info": json.loads(r["digital_nomad_info"]) if r["digital_nomad_info"] else {},
-                }
-                for r in results
-            ]
+            rows = await conn.fetch("""
+                SELECT d.*, b.name as breed_name_full, b.size, b.risk_category
+                FROM user_dogs d
+                LEFT JOIN dog_breeds b ON d.breed_id = b.id
+                WHERE d.user_id = $1
+                ORDER BY d.created_at DESC
+            """, user_id)
+            return [dict(row) for row in rows]
     except Exception as e:
-        print(f"[ATLAS DB] Error searching by criteria: {e}", file=sys.stderr)
+        print(f"[BUDDY DB] Error fetching user dogs: {e}", file=sys.stderr)
         return []
 
 
-async def get_dining_nightlife(destination: str) -> Optional[dict]:
-    """
-    Get dining and nightlife data for a destination.
-
-    Args:
-        destination: Country name or slug
-
-    Returns:
-        Dining data including restaurants, signature dishes, costs
-    """
+async def save_user_dog(
+    user_id: str,
+    dog_name: str,
+    breed_name: str,
+    age_years: int,
+    has_preexisting_conditions: bool = False,
+    preexisting_conditions: List[str] = None
+) -> Optional[int]:
+    """Save a dog to the database."""
     try:
-        slug = destination.lower().replace(" ", "-").replace("uae", "uae")
+        # Look up breed
+        breed = await get_breed_by_name(breed_name)
+        breed_id = breed.get("id") if breed else None
+
         async with get_connection() as conn:
             result = await conn.fetchrow("""
-                SELECT country_name, flag, region,
-                       COALESCE(dining_nightlife, '{}'::jsonb) as dining_nightlife
-                FROM destinations
-                WHERE slug = $1 AND enabled = true
-            """, slug)
+                INSERT INTO user_dogs (user_id, name, breed_id, breed_name, age_years,
+                                       has_preexisting_conditions, preexisting_conditions)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                RETURNING id
+            """, user_id, dog_name, breed_id, breed_name, age_years,
+                has_preexisting_conditions, preexisting_conditions or [])
 
-            if result:
-                return {
-                    "country_name": result["country_name"],
-                    "flag": result["flag"],
-                    "region": result["region"],
-                    "dining_nightlife": json.loads(result["dining_nightlife"]) if result["dining_nightlife"] else {}
-                }
-            return None
+            print(f"[BUDDY DB] Saved dog {dog_name} for user {user_id}", file=sys.stderr)
+            return result["id"] if result else None
     except Exception as e:
-        print(f"[ATLAS DB] Error getting dining data: {e}", file=sys.stderr)
+        print(f"[BUDDY DB] Error saving user dog: {e}", file=sys.stderr)
+        return None
+
+
+async def get_user_policies(user_id: str) -> List[Dict[str, Any]]:
+    """Get all policies for a user."""
+    try:
+        async with get_connection() as conn:
+            rows = await conn.fetch("""
+                SELECT p.*, d.name as dog_name, d.breed_name
+                FROM insurance_policies p
+                LEFT JOIN user_dogs d ON p.dog_id = d.id
+                WHERE p.user_id = $1
+                ORDER BY p.created_at DESC
+            """, user_id)
+            return [dict(row) for row in rows]
+    except Exception as e:
+        print(f"[BUDDY DB] Error fetching user policies: {e}", file=sys.stderr)
+        return []
+
+
+async def save_quote(
+    user_id: Optional[str],
+    session_id: str,
+    dog_details: Dict[str, Any],
+    plan_type: str,
+    quoted_premium: float,
+    coverage_details: Dict[str, Any]
+) -> Optional[int]:
+    """Save a quote to the database."""
+    try:
+        import json
+        from datetime import datetime, timedelta
+
+        valid_until = datetime.now() + timedelta(days=30)
+
+        async with get_connection() as conn:
+            result = await conn.fetchrow("""
+                INSERT INTO policy_quotes (user_id, session_id, dog_details, plan_type,
+                                          quoted_premium, coverage_details, valid_until)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                RETURNING id
+            """, user_id, session_id, json.dumps(dog_details), plan_type,
+                quoted_premium, json.dumps(coverage_details), valid_until)
+
+            print(f"[BUDDY DB] Saved quote for session {session_id}", file=sys.stderr)
+            return result["id"] if result else None
+    except Exception as e:
+        print(f"[BUDDY DB] Error saving quote: {e}", file=sys.stderr)
         return None

@@ -37,7 +37,7 @@ export default function RootLayout({
           emailOTP
           social={{ providers: ['google'] }}
         >
-          <header className="fixed top-0 left-0 right-0 h-14 bg-transparent backdrop-blur-sm z-[9999] flex items-center justify-between px-6">
+          <header className="fixed top-0 left-0 right-0 h-14 bg-slate-900/95 backdrop-blur-sm z-[9999] flex items-center justify-between px-6 border-b border-slate-800">
             {/* Logo / Brand */}
             <a href="/" className="flex items-center gap-2 text-white font-semibold text-lg">
               <span className="text-2xl">🌍</span>

@@ -394,20 +394,28 @@ const agentInstructions = user
 
 ### High Priority Tasks
 
-1. **CopilotKit Instructions Pattern**
+1. **Deploy Pydantic AI Agent** (CRITICAL)
+   - Set up Railway deployment for `/agent` folder
+   - Configure CLM endpoint for Hume voice
+   - Connect to Neon database for destination queries
+   - ALL voice and chat should go through Pydantic AI agent
+
+2. **Pydantic HITL (Human-in-the-Loop) for Dashboard**
+   - Voice should update dashboard variables via HITL confirmation
+   - Example: User says "I want to move to Portugal" → HITL confirms → saves to profile
+   - Persona selection via voice with confirmation
+   - Destination preferences via voice with confirmation
+   - Pattern: `confirm_persona`, `confirm_destination`, `confirm_budget` tools
+
+3. **CopilotKit Instructions Pattern**
    - Pass full user context via `instructions` prop (like fractional.quest)
    - Include: name, persona, current country, target destinations, priorities
    - Fetch profile items and include in instructions string
 
-2. **AI Onboarding in Chat**
+4. **AI Onboarding in Chat**
    - On first visit, AI should ask: "Are you a digital nomad, relocating company, HNW, lifestyle seeker, family, retiree, or medical relocation?"
-   - Save persona to user_profiles via API
+   - Save persona to user_profiles via API using HITL
    - Remember and use persona in subsequent conversations
-
-3. **Deploy Pydantic AI Agent**
-   - Set up Railway deployment for `/agent` folder
-   - Configure CLM endpoint for Hume voice
-   - Connect to Neon database for destination queries
 
 ### API Routes Summary
 

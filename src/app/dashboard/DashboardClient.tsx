@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CopilotSidebar } from '@copilotkit/react-ui';
 import { useCopilotReadable, useCopilotAction } from '@copilotkit/react-core';
 import { authClient } from '@/lib/auth/client';
+import { HumeWidget } from '@/components/HumeWidget';
 
 interface User {
   id: string;
@@ -716,6 +717,11 @@ function Dashboard({ user, profile, onEditProfile }: { user: User; profile: User
             </div>
           </div>
         </aside>
+      </div>
+
+      {/* Voice Widget - Fixed Bottom Left */}
+      <div className="fixed bottom-6 left-6 z-50">
+        <HumeWidget />
       </div>
     </div>
   );

@@ -8,3 +8,4 @@ export { RelocationTimeline } from './RelocationTimeline';
 export { ClimateChart } from './ClimateChart';
 export { RestaurantGuide } from './RestaurantGuide';
 export { QualityOfLifeRadar } from './QualityOfLifeRadar';
+export { PropertyPrices } from './PropertyPrices';

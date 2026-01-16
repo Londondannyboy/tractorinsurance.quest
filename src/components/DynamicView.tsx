@@ -11,6 +11,7 @@ import {
   ClimateChart,
   RestaurantGuide,
   QualityOfLifeRadar,
+  PropertyPrices,
 } from './mdx';
 
 // Types for AI-generated views
@@ -27,7 +28,8 @@ export interface ViewBlock {
     | 'climate'
     | 'restaurant'
     | 'quality_of_life'
-    | 'section_header';
+    | 'section_header'
+    | 'property';
   props: Record<string, unknown>;
 }
 
@@ -87,7 +89,7 @@ function getBlockColSpan(type: ViewBlock['type']): string {
   ];
 
   // Half-width blocks
-  const halfWidthBlocks = ['climate', 'restaurant', 'quality_of_life'];
+  const halfWidthBlocks = ['climate', 'restaurant', 'quality_of_life', 'property'];
 
   if (fullWidthBlocks.includes(type)) return 'lg:col-span-3';
   if (halfWidthBlocks.includes(type)) return 'lg:col-span-2 md:col-span-2';
@@ -260,6 +262,31 @@ function renderBlock(block: ViewBlock) {
             <p className="text-sm text-white/60 mt-1">{String(block.props.subtitle)}</p>
           ) : null}
         </div>
+      );
+
+    case 'property':
+      return (
+        <PropertyPrices
+          country={block.props.country as string}
+          flag={block.props.flag as string}
+          currency={block.props.currency as string}
+          cities={
+            block.props.cities as Array<{
+              city: string;
+              properties: Array<{
+                type: string;
+                avgPriceEur: number;
+                pricePerSqm: number;
+                rentalYield?: number;
+              }>;
+            }>
+          }
+          avgPricePerSqmNational={block.props.avgPricePerSqmNational as number}
+          priceGrowthYoY={block.props.priceGrowthYoY as number}
+          foreignOwnershipAllowed={block.props.foreignOwnershipAllowed as boolean}
+          mortgageAvailable={block.props.mortgageAvailable as boolean}
+          typicalDepositPercent={block.props.typicalDepositPercent as number}
+        />
       );
 
     case 'heading':

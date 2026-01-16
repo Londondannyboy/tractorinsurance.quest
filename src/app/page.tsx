@@ -102,6 +102,22 @@ interface Destination {
     capital?: string;
     gradient?: string;
   };
+  property_market?: {
+    avgPricePerSqmNational?: number;
+    priceGrowthYoY?: number;
+    foreignOwnershipAllowed?: boolean;
+    mortgageAvailable?: boolean;
+    typicalDepositPercent?: number;
+    cities?: Array<{
+      city: string;
+      properties: Array<{
+        type: string;
+        avgPriceEur: number;
+        pricePerSqm: number;
+        rentalYield?: number;
+      }>;
+    }>;
+  };
 }
 
 interface RelocationState {
@@ -445,6 +461,24 @@ function createDashboardView(destination: Destination): GeneratedView {
           'Cultural adjustment period',
           'Research healthcare options',
         ].filter(Boolean) as string[],
+      },
+    });
+  }
+
+  // === PROPERTY MARKET ===
+  if (destination.property_market && destination.property_market.cities && destination.property_market.cities.length > 0) {
+    blocks.push({
+      type: 'property',
+      props: {
+        country: destination.country_name,
+        flag: destination.flag,
+        currency: 'EUR',
+        cities: destination.property_market.cities,
+        avgPricePerSqmNational: destination.property_market.avgPricePerSqmNational,
+        priceGrowthYoY: destination.property_market.priceGrowthYoY,
+        foreignOwnershipAllowed: destination.property_market.foreignOwnershipAllowed,
+        mortgageAvailable: destination.property_market.mortgageAvailable,
+        typicalDepositPercent: destination.property_market.typicalDepositPercent,
       },
     });
   }

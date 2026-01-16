@@ -171,6 +171,23 @@ export interface Images {
   gradient?: string;
 }
 
+export interface PropertyMarket {
+  avgPricePerSqmNational?: number;
+  priceGrowthYoY?: number;
+  foreignOwnershipAllowed?: boolean;
+  mortgageAvailable?: boolean;
+  typicalDepositPercent?: number;
+  cities?: Array<{
+    city: string;
+    properties: Array<{
+      type: string;
+      avgPriceEur: number;
+      pricePerSqm: number;
+      rentalYield?: number;
+    }>;
+  }>;
+}
+
 // Main Destination interface
 export interface Destination {
   slug: string;
@@ -215,6 +232,7 @@ export interface Destination {
   digital_nomad_info?: DigitalNomadInfo;
   comparison_highlights?: ComparisonHighlights;
   images?: Images;
+  property_market?: PropertyMarket;
 }
 
 // ============================================
@@ -246,7 +264,8 @@ export async function getDestination(slug: string): Promise<Destination | null> 
         COALESCE(currency_info, '{}'::jsonb) as currency_info,
         COALESCE(digital_nomad_info, '{}'::jsonb) as digital_nomad_info,
         COALESCE(comparison_highlights, '{}'::jsonb) as comparison_highlights,
-        COALESCE(images, '{}'::jsonb) as images
+        COALESCE(images, '{}'::jsonb) as images,
+        COALESCE(property_market, '{}'::jsonb) as property_market
       FROM destinations
       WHERE slug = ${slug.toLowerCase()} AND enabled = true
     `;

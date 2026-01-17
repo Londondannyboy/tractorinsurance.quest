@@ -1,7 +1,7 @@
 [project]
-name = "relocation-quest-agent"
+name = "puppy-insurance-agent"
 version = "0.1.0"
-description = "ATLAS - Relocation Quest voice assistant powered by Pydantic AI"
+description = "Buddy - Puppy Insurance Quest voice assistant powered by Pydantic AI"
 requires-python = ">=3.11"
 dependencies = [
     "pydantic-ai[google]>=0.0.40",

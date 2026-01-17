@@ -103,6 +103,15 @@ export function Footer() {
         </div>
       </div>
 
+      {/* Disclaimer */}
+      <div className="border-t border-amber-500/20 bg-amber-950/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <p className="text-amber-200/70 text-xs text-center leading-relaxed">
+            <span className="font-semibold text-amber-300">Important:</span> Puppy Insurance Quest is a comparison website only. We do not sell, underwrite, or provide insurance policies. Always consult with an authorised insurance provider before making any financial commitment. Information provided is for guidance only and should not be considered financial advice.
+          </p>
+        </div>
+      </div>
+
       {/* Bottom Bar */}
       <div className="border-t border-stone-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

@@ -103,7 +103,7 @@ export default function RootLayout({
           social={{ providers: ["google"] }}
         >
           <Header />
-          <main className="flex-1 pt-16">
+          <main className="flex-1 pt-[5.25rem]">
             <Providers>{children}</Providers>
           </main>
           <Footer />

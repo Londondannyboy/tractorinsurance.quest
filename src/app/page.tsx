@@ -233,25 +233,39 @@ function PlanComparison({ onSelectPlan }: { onSelectPlan: (plan: string) => void
 // Welcome/Empty State
 function WelcomeState() {
   return (
-    <div className="bg-gradient-to-br from-amber-900/30 to-orange-900/30 backdrop-blur-md rounded-3xl border border-amber-500/20 p-12 text-center shadow-lg">
-      <div className="text-8xl mb-6">🐾</div>
-      <h2 className="text-4xl font-bold text-white mb-4">Protect Your Furry Friend</h2>
-      <p className="text-white/70 max-w-lg mx-auto text-lg mb-8">
-        Get personalized pet insurance quotes in seconds. Talk to Buddy, our AI assistant, to find the perfect coverage for your pup.
-      </p>
-      <div className="flex flex-wrap justify-center gap-4">
-        <div className="bg-white/10 rounded-xl px-6 py-4 text-center">
-          <p className="text-3xl font-bold text-amber-400">18+</p>
-          <p className="text-white/60 text-sm">Breeds covered</p>
+    <div className="space-y-6">
+      <div className="bg-gradient-to-br from-amber-900/30 to-orange-900/30 backdrop-blur-md rounded-3xl border border-amber-500/20 p-12 text-center shadow-lg">
+        <div className="text-8xl mb-6">🐾</div>
+        <h2 className="text-4xl font-bold text-white mb-4">Protect Your Furry Friend</h2>
+        <p className="text-white/70 max-w-lg mx-auto text-lg mb-8">
+          Get personalized pet insurance quotes in seconds. Talk to Buddy, our AI assistant, to find the perfect coverage for your pup.
+        </p>
+        <div className="flex flex-wrap justify-center gap-4">
+          <div className="bg-white/10 rounded-xl px-6 py-4 text-center">
+            <p className="text-3xl font-bold text-amber-400">18+</p>
+            <p className="text-white/60 text-sm">Breeds covered</p>
+          </div>
+          <div className="bg-white/10 rounded-xl px-6 py-4 text-center">
+            <p className="text-3xl font-bold text-amber-400">$15</p>
+            <p className="text-white/60 text-sm">Starting from/mo</p>
+          </div>
+          <div className="bg-white/10 rounded-xl px-6 py-4 text-center">
+            <p className="text-3xl font-bold text-amber-400">24/7</p>
+            <p className="text-white/60 text-sm">Pet helpline</p>
+          </div>
         </div>
-        <div className="bg-white/10 rounded-xl px-6 py-4 text-center">
-          <p className="text-3xl font-bold text-amber-400">$15</p>
-          <p className="text-white/60 text-sm">Starting from/mo</p>
-        </div>
-        <div className="bg-white/10 rounded-xl px-6 py-4 text-center">
-          <p className="text-3xl font-bold text-amber-400">24/7</p>
-          <p className="text-white/60 text-sm">Pet helpline</p>
-        </div>
+      </div>
+
+      {/* Policy/Consent Banner */}
+      <div className="bg-stone-900/60 backdrop-blur-sm rounded-xl border border-stone-700/50 px-6 py-4 text-center">
+        <p className="text-white/60 text-sm">
+          By using our service, you agree to our{' '}
+          <a href="/terms-of-service" className="text-amber-400 hover:text-amber-300 underline">Terms of Service</a>
+          {' '}and{' '}
+          <a href="/privacy-policy" className="text-amber-400 hover:text-amber-300 underline">Privacy Policy</a>.
+          {' '}We use cookies to improve your experience.{' '}
+          <a href="/cookie-policy" className="text-amber-400 hover:text-amber-300 underline">Learn more</a>.
+        </p>
       </div>
     </div>
   );

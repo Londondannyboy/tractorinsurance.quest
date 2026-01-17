@@ -176,7 +176,7 @@ Configure this in Hume Dashboard -> EVI Config -> Custom Language Model.
 ## Session Log
 
 ### Jan 16, 2026
-- Initial project setup from relocation.quest template
+- Initial puppy insurance project setup
 - Created puppy insurance database schema (18 breeds)
 - Built frontend with CopilotKit sidebar
 - Created Pydantic AI agent "Buddy"

@@ -160,3 +160,296 @@
 .leaflet-control-zoom a:hover {
   background: rgba(28, 25, 23, 1) !important;
 }
+
+/* ============================================
+   PENSION QUEST TYPOGRAPHY SYSTEM
+   Global prose styles for content pages
+   ============================================ */
+
+/* Base prose container */
+.prose-pension {
+  @apply text-slate-200 leading-relaxed;
+  font-size: 1.0625rem; /* 17px - optimal for reading */
+  line-height: 1.75;
+}
+
+/* Headings */
+.prose-pension h1 {
+  @apply text-4xl md:text-5xl font-bold text-white mb-6 mt-0 leading-tight tracking-tight;
+}
+
+.prose-pension h2 {
+  @apply text-2xl md:text-3xl font-bold text-white mb-4 mt-12 first:mt-0 leading-snug;
+  scroll-margin-top: 5rem;
+}
+
+.prose-pension h3 {
+  @apply text-xl md:text-2xl font-semibold text-white mb-3 mt-8 leading-snug;
+}
+
+.prose-pension h4 {
+  @apply text-lg font-semibold text-white mb-2 mt-6;
+}
+
+/* Paragraphs */
+.prose-pension p {
+  @apply mb-6 text-slate-300;
+}
+
+.prose-pension p:last-child {
+  @apply mb-0;
+}
+
+/* Strong and emphasis */
+.prose-pension strong,
+.prose-pension b {
+  @apply font-semibold text-white;
+}
+
+.prose-pension em,
+.prose-pension i {
+  @apply italic text-slate-200;
+}
+
+/* Links */
+.prose-pension a {
+  @apply text-emerald-400 hover:text-emerald-300 underline underline-offset-2 transition-colors;
+}
+
+.prose-pension a:visited {
+  @apply text-emerald-500;
+}
+
+/* Lists */
+.prose-pension ul {
+  @apply list-disc pl-6 mb-6 space-y-2;
+}
+
+.prose-pension ol {
+  @apply list-decimal pl-6 mb-6 space-y-2;
+}
+
+.prose-pension li {
+  @apply text-slate-300;
+}
+
+.prose-pension li::marker {
+  @apply text-emerald-400;
+}
+
+.prose-pension li > ul,
+.prose-pension li > ol {
+  @apply mt-2 mb-0;
+}
+
+/* Blockquotes */
+.prose-pension blockquote {
+  @apply border-l-4 border-emerald-500/50 bg-slate-800/30 pl-6 py-4 my-6 rounded-r-xl italic text-slate-300;
+}
+
+.prose-pension blockquote p {
+  @apply mb-0;
+}
+
+/* Code */
+.prose-pension code {
+  @apply bg-slate-800 text-emerald-400 px-1.5 py-0.5 rounded text-sm font-mono;
+}
+
+.prose-pension pre {
+  @apply bg-slate-900 border border-slate-700/50 rounded-xl p-4 overflow-x-auto my-6;
+}
+
+.prose-pension pre code {
+  @apply bg-transparent p-0 text-slate-200;
+}
+
+/* Horizontal rules */
+.prose-pension hr {
+  @apply border-t border-slate-700/50 my-12;
+}
+
+/* Images */
+.prose-pension img {
+  @apply rounded-xl my-6 w-full;
+}
+
+.prose-pension figure {
+  @apply my-8;
+}
+
+.prose-pension figcaption {
+  @apply text-center text-sm text-slate-500 mt-3 italic;
+}
+
+/* Tables (native markdown tables) */
+.prose-pension table {
+  @apply w-full my-6 border-collapse rounded-xl overflow-hidden;
+}
+
+.prose-pension thead {
+  @apply bg-slate-800/80;
+}
+
+.prose-pension th {
+  @apply text-left p-4 font-semibold text-slate-300 border-b border-slate-700/50;
+}
+
+.prose-pension td {
+  @apply p-4 text-slate-300 border-b border-slate-700/30;
+}
+
+.prose-pension tbody tr:nth-child(even) {
+  @apply bg-slate-800/30;
+}
+
+.prose-pension tbody tr:nth-child(odd) {
+  @apply bg-slate-800/50;
+}
+
+.prose-pension tbody tr:hover {
+  @apply bg-slate-700/50;
+}
+
+/* Definition lists */
+.prose-pension dl {
+  @apply my-6;
+}
+
+.prose-pension dt {
+  @apply font-semibold text-white mt-4 first:mt-0;
+}
+
+.prose-pension dd {
+  @apply text-slate-300 ml-4 mb-2;
+}
+
+/* Small text / footnotes */
+.prose-pension small {
+  @apply text-sm text-slate-500;
+}
+
+/* Mark / highlight */
+.prose-pension mark {
+  @apply bg-emerald-500/20 text-emerald-300 px-1 rounded;
+}
+
+/* Abbreviations */
+.prose-pension abbr {
+  @apply border-b border-dotted border-slate-500 cursor-help;
+}
+
+/* Lead paragraph - first paragraph styling */
+.prose-pension > p:first-of-type {
+  @apply text-lg text-slate-200 leading-relaxed;
+}
+
+/* ============================================
+   CONTENT LAYOUT UTILITIES
+   ============================================ */
+
+/* Content container with max width */
+.content-container {
+  @apply max-w-4xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Wide content for charts/tables */
+.content-wide {
+  @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Article header styling */
+.article-header {
+  @apply mb-12 pb-8 border-b border-slate-700/50;
+}
+
+/* Article meta info */
+.article-meta {
+  @apply flex flex-wrap items-center gap-4 text-sm text-slate-400 mt-4;
+}
+
+.article-meta time {
+  @apply flex items-center gap-1;
+}
+
+/* Reading time badge */
+.reading-time {
+  @apply inline-flex items-center gap-1 px-2 py-1 bg-slate-800 rounded-full text-xs text-slate-400;
+}
+
+/* Table of contents styling */
+.toc-container {
+  @apply bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 my-8;
+}
+
+.toc-container h2 {
+  @apply text-lg font-semibold text-white mb-4 mt-0;
+}
+
+.toc-container ul {
+  @apply space-y-2 pl-0 list-none mb-0;
+}
+
+.toc-container li {
+  @apply text-sm;
+}
+
+.toc-container a {
+  @apply text-slate-400 hover:text-emerald-400 no-underline transition-colors;
+}
+
+/* ============================================
+   SIDEBAR LAYOUT (for CopilotKit)
+   ============================================ */
+
+.content-with-sidebar {
+  @apply flex flex-col lg:flex-row gap-8;
+}
+
+.content-main {
+  @apply flex-1 min-w-0;
+}
+
+.content-sidebar {
+  @apply lg:w-80 lg:flex-shrink-0;
+}
+
+.sidebar-sticky {
+  @apply lg:sticky lg:top-24;
+}
+
+/* ============================================
+   CALCULATOR STYLING
+   ============================================ */
+
+.calculator-container {
+  @apply bg-gradient-to-br from-slate-800/80 to-slate-800/40 border border-slate-700/50 rounded-2xl p-6 md:p-8 my-8;
+}
+
+.calculator-input-group {
+  @apply space-y-4 mb-6;
+}
+
+.calculator-label {
+  @apply block text-white font-medium mb-2;
+}
+
+.calculator-input {
+  @apply w-full bg-slate-900/50 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all;
+}
+
+.calculator-select {
+  @apply w-full bg-slate-900/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all appearance-none cursor-pointer;
+}
+
+.calculator-result {
+  @apply bg-emerald-900/30 border border-emerald-500/30 rounded-xl p-6 text-center;
+}
+
+.calculator-result-value {
+  @apply text-4xl font-bold text-emerald-400 mb-2;
+}
+
+.calculator-result-label {
+  @apply text-slate-400 text-sm;
+}

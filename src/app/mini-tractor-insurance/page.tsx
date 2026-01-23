@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MiniTractorInsuranceContent } from "./MiniTractorContent";
+import { PageContent } from "@/components/PageContent";
 
 export const metadata: Metadata = {
   title: "Mini Tractor Insurance UK | Specialist Vehicle Insurance from £25/month",
@@ -24,5 +24,11 @@ export const metadata: Metadata = {
 };
 
 export default function MiniTractorInsurancePage() {
-  return <MiniTractorInsuranceContent />;
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 pt-28 pb-16">
+      <div className="max-w-4xl mx-auto px-4">
+        <PageContent slug="mini-tractor" />
+      </div>
+    </main>
+  );
 }

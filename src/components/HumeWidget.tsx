@@ -64,7 +64,7 @@ is_authenticated: ${isAuthenticated}
 ${zepContext ? `## WHAT I REMEMBER ABOUT ${firstName || 'THIS USER'}:\n${zepContext}\n` : '## This is their first visit - no prior history.\n'}
 
 ## GREETING
-${firstName ? `Greet them warmly: "Hey ${firstName}! Great to hear from you!"` : 'Give a friendly greeting as Buddy the puppy insurance advisor.'}
+${firstName ? `Greet them warmly: "Hey ${firstName}! Great to hear from you!"` : 'Give a friendly greeting as Tracker the tractor insurance advisor.'}
 `
 
     // Variables for the CLM

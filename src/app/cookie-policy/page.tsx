@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Cookie Policy",
-  description: "Cookie Policy for Puppy Insurance Quest. Learn about how we use cookies and tracking technologies.",
+  description: "Cookie Policy for Tractor Insurance Quest. Learn about how we use cookies and tracking technologies.",
   alternates: {
     canonical: "/cookie-policy",
   },
@@ -23,7 +23,7 @@ export default function CookiePolicyPage() {
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">What Are Cookies?</h2>
             <p className="text-white/70 leading-relaxed">
-              Cookies are small text files stored on your device when you visit a website. They help websites remember your preferences and improve your browsing experience. This policy explains how Puppy Insurance Quest uses cookies and similar technologies.
+              Cookies are small text files stored on your device when you visit a website. They help websites remember your preferences and improve your browsing experience. This policy explains how Tractor Insurance Quest uses cookies and similar technologies.
             </p>
           </section>
 
@@ -34,10 +34,10 @@ export default function CookiePolicyPage() {
               <h3 className="text-lg font-semibold text-green-400 mb-2">Necessary Cookies</h3>
               <p className="text-white/70 text-sm mb-2">Required for basic website functionality. Cannot be disabled.</p>
               <ul className="text-white/60 text-sm space-y-1">
-                <li>• Session management</li>
-                <li>• Authentication</li>
-                <li>• Security features</li>
-                <li>• Cookie consent preferences</li>
+                <li>Session management</li>
+                <li>Authentication</li>
+                <li>Security features</li>
+                <li>Cookie consent preferences</li>
               </ul>
             </div>
 
@@ -45,10 +45,10 @@ export default function CookiePolicyPage() {
               <h3 className="text-lg font-semibold text-blue-400 mb-2">Analytics Cookies</h3>
               <p className="text-white/70 text-sm mb-2">Help us understand how visitors use our website.</p>
               <ul className="text-white/60 text-sm space-y-1">
-                <li>• Page views and navigation</li>
-                <li>• Time spent on pages</li>
-                <li>• Traffic sources</li>
-                <li>• Device and browser information</li>
+                <li>Page views and navigation</li>
+                <li>Time spent on pages</li>
+                <li>Traffic sources</li>
+                <li>Device and browser information</li>
               </ul>
             </div>
 
@@ -56,9 +56,9 @@ export default function CookiePolicyPage() {
               <h3 className="text-lg font-semibold text-amber-400 mb-2">Marketing Cookies</h3>
               <p className="text-white/70 text-sm mb-2">Used to deliver relevant advertisements (optional).</p>
               <ul className="text-white/60 text-sm space-y-1">
-                <li>• Personalized advertising</li>
-                <li>• Conversion tracking</li>
-                <li>• Retargeting</li>
+                <li>Personalized advertising</li>
+                <li>Conversion tracking</li>
+                <li>Retargeting</li>
               </ul>
             </div>
           </section>
@@ -107,7 +107,7 @@ export default function CookiePolicyPage() {
             <p className="text-white/70 leading-relaxed">
               For questions about our use of cookies, contact us at:
             </p>
-            <p className="text-amber-400 mt-2">hello@puppyinsurance.quest</p>
+            <p className="text-amber-400 mt-2">hello@tractorinsurance.quest</p>
           </section>
         </div>
       </div>

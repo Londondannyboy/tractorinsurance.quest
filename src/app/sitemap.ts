@@ -1,24 +1,23 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://puppyinsurance.quest";
+  const baseUrl = "https://tractorinsurance.quest";
 
   // Static pages
   const staticPages = [
     "",
-    "/puppy-insurance",
-    "/best-puppy-insurance",
-    "/cheap-puppy-insurance",
-    "/puppy-insurance-cost",
-    "/compare-pet-insurance",
-    "/new-puppy-guide",
-    "/jack-russell-insurance",
-    "/pug-insurance",
-    "/cockapoo-insurance",
-    "/cavapoo-insurance",
-    "/dachshund-insurance",
-    "/french-bulldog-insurance",
-    "/labrador-insurance",
+    "/tractor-insurance",
+    "/best-tractor-insurance",
+    "/cheap-tractor-insurance",
+    "/tractor-insurance-cost",
+    "/compare-tractor-insurance",
+    "/utility-tractor-insurance",
+    "/mini-tractor-insurance",
+    "/compact-tractor-insurance",
+    "/garden-tractor-insurance",
+    "/ride-on-mower-insurance",
+    "/vintage-tractor-insurance",
+    "/farm-tractor-insurance",
     "/dashboard",
     "/terms-of-service",
     "/privacy-policy",

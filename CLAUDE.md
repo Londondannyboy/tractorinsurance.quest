@@ -1,4 +1,4 @@
-# Puppy Insurance Quest
+# Tractor Insurance Quest
 
 > **Cole Medin Methodology**: PRD-first, modular rules, command-ify, context reset, system evolution.
 
@@ -15,9 +15,9 @@ uvicorn src.agent:app --reload --port 8000
 
 ## Current Architecture
 
-Single-page conversational AI puppy insurance advisor. CopilotKit Next.js runtime with Gemini adapter. Dog breed and policy data from Neon PostgreSQL.
+Single-page conversational AI tractor insurance advisor. CopilotKit Next.js runtime with Gemini adapter. Tractor type and policy data from Neon PostgreSQL. Page content stored as MDX in Neon DB `page_content` table.
 
-**Pattern**: CopilotKit runtime inside Next.js API route + Pydantic AI agent on Railway for voice.
+**Pattern**: CopilotKit runtime inside Next.js API route + Pydantic AI agent "Tracker" on Railway for voice.
 
 ---
 
@@ -28,9 +28,11 @@ Single-page conversational AI puppy insurance advisor. CopilotKit Next.js runtim
 | Main page | `src/app/page.tsx` |
 | CopilotKit provider | `src/components/providers.tsx` |
 | CopilotKit runtime | `src/app/api/copilotkit/route.ts` |
-| Breeds API | `src/app/api/breeds/route.ts` |
+| Tractor types API | `src/app/api/breeds/route.ts` |
 | Quote API | `src/app/api/quote/route.ts` |
-| Database queries (frontend) | `src/lib/puppy-db.ts` |
+| Content API (MDX from DB) | `src/app/api/content/route.ts` |
+| Database queries (frontend) | `src/lib/tractor-db.ts` |
+| Page content renderer | `src/components/PageContent.tsx` |
 | Hume voice widget | `src/components/HumeWidget.tsx` |
 | Hume token API | `src/app/api/hume-token/route.ts` |
 | Neon Auth client | `src/lib/auth/client.ts` |
@@ -47,8 +49,8 @@ Single-page conversational AI puppy insurance advisor. CopilotKit Next.js runtim
 
 | Action | Purpose |
 |--------|---------|
-| `show_breed_info` | Display breed information when user mentions a breed |
-| `confirm_dog_details` | Confirm and save dog's name, breed, age |
+| `show_tractor_info` | Display tractor type information |
+| `confirm_tractor_details` | Confirm and save tractor name, type, age |
 | `generate_quote` | Generate insurance quote for selected plan |
 | `show_plans` | Display all available insurance plans |
 
@@ -56,14 +58,16 @@ Single-page conversational AI puppy insurance advisor. CopilotKit Next.js runtim
 
 ## Database (Neon)
 
+Project: `delicate-shadow-96964693`
+Connection: `postgresql://neondb_owner:npg_UKZmNVDO74Rw@ep-shy-flower-abtsg4ue-pooler.eu-west-2.aws.neon.tech/neondb`
+
 | Table | Purpose |
 |-------|---------|
-| dog_breeds | 18 breeds with risk factors, health issues, premium multipliers |
-| user_dogs | User's registered dogs |
+| dog_breeds | Tractor types with risk factors, common issues, premium multipliers |
+| user_dogs | User's registered tractors |
 | insurance_policies | Active policies |
 | policy_quotes | Quote history |
-| claims | Insurance claims |
-| user_profiles | User account data |
+| page_content | MDX content for sub-pages (slug, title, content, meta_description) |
 
 ---
 
@@ -78,24 +82,24 @@ Authentication powered by Neon Auth (`@neondatabase/auth`).
 
 ---
 
-## Insurance Plans
+## Insurance Plans (GBP)
 
-| Plan | Monthly | Annual Limit | Deductible | Key Features |
-|------|---------|--------------|------------|--------------|
-| Basic | $15 | $5,000 | $250 | Accident only, emergency care |
-| Standard | $35 | $10,000 | $200 | + Illness, prescriptions |
-| Premium | $55 | $20,000 | $100 | + Routine care, dental, hereditary |
-| Comprehensive | $85 | $50,000 | $0 | Everything, alternative therapies |
+| Plan | Monthly | Annual Limit | Excess | Key Features |
+|------|---------|--------------|--------|--------------|
+| Basic | £25 | £10,000 | £500 | Accidental damage, breakdown assist |
+| Standard | £75 | £25,000 | £350 | + Mechanical, parts, liability |
+| Premium | £150 | £50,000 | £200 | + Maintenance, tyres, modifications |
+| Comprehensive | £250 | £100,000 | £0 | Everything, theft, business interruption |
 
 ---
 
-## Breed Risk Categories
+## Tractor Type Risk Categories
 
-| Category | Premium Multiplier | Breeds |
-|----------|-------------------|--------|
-| Low | 0.75-0.9x | Chihuahua, Beagle, Poodle, Yorkshire Terrier, Mixed Breed |
-| Medium | 1.0-1.2x | Labrador, German Shepherd, Golden Retriever, Boxer |
-| High | 1.35-1.6x | French Bulldog, Bulldog, Cavalier King Charles, Great Dane |
+| Category | Premium Multiplier | Types |
+|----------|-------------------|-------|
+| Low | 0.75-0.9x | Garden Tractor, Ride-on Mower, Mini Tractor |
+| Medium | 1.0-1.2x | Farm Tractor, Compact Tractor, Utility Tractor |
+| High | 1.35-1.6x | Vintage Tractor |
 
 ---
 
@@ -103,19 +107,20 @@ Authentication powered by Neon Auth (`@neondatabase/auth`).
 
 | Layer | Technology |
 |-------|------------|
-| Frontend | Next.js 15, React 19, TypeScript, Tailwind |
+| Frontend | Next.js 16, React 19, TypeScript, Tailwind |
 | AI Chat | CopilotKit (Next.js runtime + Gemini adapter) |
 | Voice | Hume EVI (@humeai/voice-react) |
 | Agent | Pydantic AI (FastAPI on Railway) |
 | Database | Neon PostgreSQL (@neondatabase/serverless) |
 | Auth | Neon Auth (@neondatabase/auth) |
+| Content | MDX stored in Neon DB, rendered via PageContent component |
 
 ---
 
 ## Environment Variables
 
 ```bash
-# Database (puppyinsurance.quest)
+# Database (tractorinsurance.quest)
 DATABASE_URL=postgresql://neondb_owner:...@ep-xxx.neon.tech/neondb
 
 # CopilotKit (Gemini)
@@ -126,8 +131,8 @@ HUME_API_KEY=...
 HUME_SECRET_KEY=...
 NEXT_PUBLIC_HUME_CONFIG_ID=...
 
-# Agent URL (Railway - set after deployment)
-NEXT_PUBLIC_AGENT_URL=https://your-agent.up.railway.app
+# Agent URL (Railway)
+NEXT_PUBLIC_AGENT_URL=https://tractorinsurance-agent-production.up.railway.app
 
 # Neon Auth
 NEON_AUTH_BASE_URL=https://ep-xxx.neonauth.region.aws.neon.tech/neondb/auth
@@ -152,14 +157,14 @@ ZEP_API_KEY=...
 ## Railway Deployment (Agent)
 
 1. Create new Railway project
-2. Connect GitHub repo: `Londondannyboy/puppyinsurance.quest`
+2. Connect GitHub repo: `Londondannyboy/tractorinsurance.quest`
 3. Set root directory to `agent/`
 4. Add environment variables:
    - `DATABASE_URL` (from Neon)
    - `GOOGLE_API_KEY` (for Gemini)
    - `ZEP_API_KEY` (optional)
 5. Deploy will auto-detect `railway.toml`
-6. Note the URL (e.g., `https://puppyinsurance-agent-xxx.up.railway.app`)
+6. Note the URL (e.g., `https://tractorinsurance-agent-production.up.railway.app`)
 7. Update `NEXT_PUBLIC_AGENT_URL` in frontend `.env.local`
 
 ### CLM Endpoint for Hume
@@ -173,23 +178,40 @@ Configure this in Hume Dashboard -> EVI Config -> Custom Language Model.
 
 ---
 
-## Session Log
+## Sub-pages (DB-driven MDX)
 
-### Jan 16, 2026
-- Initial puppy insurance project setup
-- Created puppy insurance database schema (18 breeds)
-- Built frontend with CopilotKit sidebar
-- Created Pydantic AI agent "Buddy"
-- Implemented breed lookup, quote generation, plan comparison
-- Voice integration via Hume EVI
-- Ready for Railway deployment
+All sub-pages fetch content from `page_content` table via `/api/content?slug=X`:
+
+| Route | Slug |
+|-------|------|
+| `/tractor-insurance` | `tractor-insurance` |
+| `/farm-tractor` | `farm-tractor` |
+| `/vintage-tractor` | `vintage-tractor` |
+| `/compact-tractor` | `compact-tractor` |
+| `/utility-tractor` | `utility-tractor` |
+| `/garden-tractor` | `garden-tractor` |
+| `/ride-on-mower` | `ride-on-mower` |
+| `/mini-tractor` | `mini-tractor` |
+| `/best-tractor-insurance` | `best-tractor-insurance` |
+| `/cheap-tractor-insurance` | `cheap-tractor-insurance` |
+| `/tractor-insurance-cost` | `tractor-insurance-cost` |
+| `/compare-tractor-insurance` | `compare-tractor-insurance` |
 
 ---
 
-## Test Commands
+## Git
 
-Try these in the chat:
-- "I have a Labrador" -> shows breed info
-- "My dog Max is a 3 year old Golden Retriever" -> saves dog details
-- "Show me insurance plans" -> displays plan comparison
-- "Get me a quote for the premium plan" -> generates personalized quote
+Repository: `https://github.com/Londondannyboy/tractorinsurance.quest`
+Domain: `tractorinsurance.quest`
+
+---
+
+## Session Log
+
+### Jan 23, 2026
+- Complete rebranding from Puppy Insurance to Tractor Insurance Quest
+- Rewrote all frontend pages, components, APIs
+- Created Neon DB schema with tractor types
+- Populated page_content table with MDX for all sub-pages
+- Rewrote Pydantic AI agent "Tracker" (agent.py + database.py)
+- Updated CLAUDE.md and all config files

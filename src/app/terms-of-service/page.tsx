@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: "Terms of Service for Puppy Insurance Quest. Read our terms and conditions for using our pet insurance comparison service.",
+  description: "Terms of Service for Tractor Insurance Quest. Read our terms and conditions for using our vehicle insurance comparison service.",
   alternates: {
     canonical: "/terms-of-service",
   },
@@ -23,20 +23,20 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">1. Agreement to Terms</h2>
             <p className="text-white/70 leading-relaxed">
-              By accessing and using Puppy Insurance Quest (&quot;the Service&quot;), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our Service.
+              By accessing and using Tractor Insurance Quest (&quot;the Service&quot;), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our Service.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">2. Description of Service</h2>
             <p className="text-white/70 leading-relaxed mb-4">
-              Puppy Insurance Quest provides:
+              Tractor Insurance Quest provides:
             </p>
             <ul className="list-disc list-inside text-white/70 space-y-2">
-              <li>Pet insurance information and comparison tools</li>
+              <li>Vehicle insurance information and comparison tools</li>
               <li>AI-powered insurance advisory services</li>
               <li>Quote estimation calculators</li>
-              <li>Educational content about pet insurance</li>
+              <li>Educational content about tractor insurance</li>
             </ul>
             <p className="text-white/70 leading-relaxed mt-4">
               We are an information service and comparison platform. We are not an insurance provider, broker, or intermediary. Any quotes provided are estimates for informational purposes only.
@@ -66,7 +66,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">5. Intellectual Property</h2>
             <p className="text-white/70 leading-relaxed">
-              All content on Puppy Insurance Quest, including text, graphics, logos, and software, is the property of Puppy Insurance Quest or its content suppliers and is protected by intellectual property laws. You may not reproduce, distribute, or create derivative works without our express written permission.
+              All content on Tractor Insurance Quest, including text, graphics, logos, and software, is the property of Tractor Insurance Quest or its content suppliers and is protected by intellectual property laws. You may not reproduce, distribute, or create derivative works without our express written permission.
             </p>
           </section>
 
@@ -80,7 +80,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">7. Limitation of Liability</h2>
             <p className="text-white/70 leading-relaxed">
-              To the maximum extent permitted by law, Puppy Insurance Quest shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of the Service. Our total liability shall not exceed the amount paid by you, if any, for using the Service.
+              To the maximum extent permitted by law, Tractor Insurance Quest shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of the Service. Our total liability shall not exceed the amount paid by you, if any, for using the Service.
             </p>
           </section>
 
@@ -117,7 +117,7 @@ export default function TermsOfServicePage() {
             <p className="text-white/70 leading-relaxed">
               If you have any questions about these Terms, please contact us at:
             </p>
-            <p className="text-amber-400 mt-2">hello@puppyinsurance.quest</p>
+            <p className="text-amber-400 mt-2">hello@tractorinsurance.quest</p>
           </section>
         </div>
       </div>

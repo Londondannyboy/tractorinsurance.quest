@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Sitemap",
-  description: "Browse all pages on Puppy Insurance Quest. Find puppy insurance guides, breed-specific coverage, and comparison tools.",
+  description: "Browse all pages on Tractor Insurance Quest. Find tractor insurance guides, type-specific coverage, and comparison tools.",
   alternates: {
     canonical: "/site-map",
   },
@@ -14,30 +14,29 @@ const siteStructure = [
     category: "Insurance Guides",
     links: [
       { href: "/", label: "Home - Get a Quote" },
-      { href: "/puppy-insurance", label: "Puppy Insurance" },
-      { href: "/best-puppy-insurance", label: "Best Puppy Insurance" },
-      { href: "/cheap-puppy-insurance", label: "Cheap Puppy Insurance" },
-      { href: "/puppy-insurance-cost", label: "Puppy Insurance Cost" },
-      { href: "/compare-pet-insurance", label: "Compare Pet Insurance" },
-      { href: "/new-puppy-guide", label: "New Puppy Guide" },
+      { href: "/tractor-insurance", label: "Tractor Insurance" },
+      { href: "/best-tractor-insurance", label: "Best Tractor Insurance" },
+      { href: "/cheap-tractor-insurance", label: "Cheap Tractor Insurance" },
+      { href: "/tractor-insurance-cost", label: "Tractor Insurance Cost" },
+      { href: "/compare-tractor-insurance", label: "Compare Tractor Insurance" },
     ],
   },
   {
-    category: "Breed Insurance",
+    category: "Tractor Type Insurance",
     links: [
-      { href: "/jack-russell-insurance", label: "Jack Russell Insurance" },
-      { href: "/pug-insurance", label: "Pug Insurance" },
-      { href: "/cockapoo-insurance", label: "Cockapoo Insurance" },
-      { href: "/cavapoo-insurance", label: "Cavapoo Insurance" },
-      { href: "/dachshund-insurance", label: "Dachshund Insurance" },
-      { href: "/french-bulldog-insurance", label: "French Bulldog Insurance" },
-      { href: "/labrador-insurance", label: "Labrador Insurance" },
+      { href: "/utility-tractor-insurance", label: "Utility Tractor Insurance" },
+      { href: "/mini-tractor-insurance", label: "Mini Tractor Insurance" },
+      { href: "/compact-tractor-insurance", label: "Compact Tractor Insurance" },
+      { href: "/garden-tractor-insurance", label: "Garden Tractor Insurance" },
+      { href: "/ride-on-mower-insurance", label: "Ride-on Mower Insurance" },
+      { href: "/vintage-tractor-insurance", label: "Vintage Tractor Insurance" },
+      { href: "/farm-tractor-insurance", label: "Farm Tractor Insurance" },
     ],
   },
   {
     category: "Account",
     links: [
-      { href: "/dashboard", label: "My Pets Dashboard" },
+      { href: "/dashboard", label: "My Vehicles Dashboard" },
       { href: "/auth/sign-in", label: "Sign In" },
       { href: "/auth/sign-up", label: "Sign Up" },
     ],
@@ -59,7 +58,7 @@ export default function SitemapPage() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">Sitemap</h1>
           <p className="text-white/70 text-lg">
-            Browse all pages on Puppy Insurance Quest
+            Browse all pages on Tractor Insurance Quest
           </p>
         </div>
 
@@ -97,7 +96,7 @@ export default function SitemapPage() {
                   "@type": "SiteNavigationElement",
                   position: sectionIndex * 10 + linkIndex + 1,
                   name: link.label,
-                  url: `https://puppyinsurance.quest${link.href}`,
+                  url: `https://tractorinsurance.quest${link.href}`,
                 }))
               ),
             }),

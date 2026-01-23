@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getBreedByName, calculateQuote, saveQuote, INSURANCE_PLANS } from '@/lib/puppy-db';
+import { getBreedByName, calculateQuote, saveQuote, INSURANCE_PLANS } from '@/lib/tractor-db';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,15 +13,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find the breed
-    const breed = await getBreedByName(breedName);
-    if (!breed) {
-      return NextResponse.json({ error: 'Breed not found' }, { status: 404 });
+    // Find the tractor type
+    const tractorType = await getBreedByName(breedName);
+    if (!tractorType) {
+      return NextResponse.json({ error: 'Tractor type not found' }, { status: 404 });
     }
 
     // Calculate quote
     const { monthlyPremium, annualPremium, plan } = calculateQuote(
-      breed,
+      tractorType,
       ageYears,
       planType,
       hasPreexistingConditions || false
@@ -47,11 +47,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       quoteId,
-      breed: {
-        name: breed.name,
-        size: breed.size,
-        riskCategory: breed.risk_category,
-        commonHealthIssues: breed.common_health_issues,
+      tractor: {
+        name: tractorType.name,
+        category: tractorType.size,
+        riskCategory: tractorType.risk_category,
+        commonRisks: tractorType.common_health_issues,
       },
       quote: {
         monthlyPremium,

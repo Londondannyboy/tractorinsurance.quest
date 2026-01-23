@@ -17,13 +17,13 @@ export function getSql() {
 }
 
 // ============================================
-// PUPPY INSURANCE TYPE DEFINITIONS
+// TRACTOR INSURANCE TYPE DEFINITIONS
 // ============================================
 
-export interface DogBreed {
+export interface TractorType {
   id: number;
   name: string;
-  size: 'small' | 'medium' | 'large' | 'giant';
+  size: 'compact' | 'utility' | 'standard' | 'large';
   risk_category: 'low' | 'medium' | 'high';
   avg_lifespan_years: number;
   common_health_issues: string[];
@@ -35,7 +35,7 @@ export interface DogBreed {
   grooming_needs: 'low' | 'moderate' | 'high';
 }
 
-export interface UserDog {
+export interface UserTractor {
   id: number;
   user_id: string;
   name: string;
@@ -112,10 +112,10 @@ export interface InsurancePlan {
 export const INSURANCE_PLANS: InsurancePlan[] = [
   {
     type: 'basic',
-    name: 'Puppy Basic',
-    base_monthly_premium: 15,
-    annual_coverage_limit: 5000,
-    deductible: 250,
+    name: 'Tractor Basic',
+    base_monthly_premium: 25,
+    annual_coverage_limit: 25000,
+    deductible: 500,
     coverage: {
       accident_coverage: true,
       illness_coverage: false,
@@ -128,17 +128,17 @@ export const INSURANCE_PLANS: InsurancePlan[] = [
       alternative_therapies: false,
     },
     features: [
-      'Accident coverage up to $5,000/year',
-      'Emergency vet visits',
-      '24/7 Pet Helpline',
+      'Third-party liability cover',
+      'Fire damage protection',
+      '24/7 emergency helpline',
     ],
   },
   {
     type: 'standard',
-    name: 'Puppy Standard',
-    base_monthly_premium: 35,
-    annual_coverage_limit: 10000,
-    deductible: 200,
+    name: 'Tractor Standard',
+    base_monthly_premium: 75,
+    annual_coverage_limit: 75000,
+    deductible: 350,
     coverage: {
       accident_coverage: true,
       illness_coverage: true,
@@ -151,19 +151,19 @@ export const INSURANCE_PLANS: InsurancePlan[] = [
       alternative_therapies: false,
     },
     features: [
-      'Accident & illness coverage up to $10,000/year',
-      'Prescription medications',
-      'Specialist consultations',
-      'Emergency vet visits',
-      '24/7 Pet Helpline',
+      'Theft & accidental damage cover up to \u00a375,000/year',
+      'Road use cover included',
+      'Breakdown assistance',
+      '24/7 emergency helpline',
+      'Windscreen & glass cover',
     ],
   },
   {
     type: 'premium',
-    name: 'Puppy Premium',
-    base_monthly_premium: 55,
-    annual_coverage_limit: 20000,
-    deductible: 100,
+    name: 'Tractor Premium',
+    base_monthly_premium: 150,
+    annual_coverage_limit: 150000,
+    deductible: 200,
     coverage: {
       accident_coverage: true,
       illness_coverage: true,
@@ -176,21 +176,21 @@ export const INSURANCE_PLANS: InsurancePlan[] = [
       alternative_therapies: false,
     },
     features: [
-      'Accident & illness coverage up to $20,000/year',
-      'Routine care & wellness visits',
-      'Dental care included',
-      'Hereditary condition coverage',
-      'Prescription medications',
-      'Specialist consultations',
-      'Low $100 deductible',
-      '24/7 Pet Helpline',
+      'Full comprehensive cover up to \u00a3150,000/year',
+      'Hire replacement tractor during repairs',
+      'Attached implements covered',
+      'Road use & field use',
+      'Breakdown & recovery assistance',
+      'Legal expenses cover',
+      'Low \u00a3200 excess',
+      '24/7 emergency helpline',
     ],
   },
   {
     type: 'comprehensive',
-    name: 'Puppy Comprehensive',
-    base_monthly_premium: 85,
-    annual_coverage_limit: 50000,
+    name: 'Tractor Comprehensive',
+    base_monthly_premium: 250,
+    annual_coverage_limit: 500000,
     deductible: 0,
     coverage: {
       accident_coverage: true,
@@ -204,15 +204,15 @@ export const INSURANCE_PLANS: InsurancePlan[] = [
       alternative_therapies: true,
     },
     features: [
-      'Unlimited accident & illness coverage (up to $50,000/year)',
-      'ZERO deductible',
-      'All routine & wellness care',
-      'Full dental coverage',
-      'Hereditary & chronic conditions',
-      'Alternative therapies (acupuncture, hydrotherapy)',
-      'Behavioral therapy',
-      'Lost pet advertising & reward',
-      'Travel coverage',
+      'Full comprehensive cover up to \u00a3500,000/year',
+      'ZERO excess option',
+      'All implements & attachments covered',
+      'Hire replacement machinery',
+      'Business interruption cover',
+      'Multi-vehicle fleet discount',
+      'Agreed value guarantee',
+      'Worldwide cover for shows & events',
+      'GPS tracker contribution',
       'Priority claims processing',
     ],
   },
@@ -222,21 +222,21 @@ export const INSURANCE_PLANS: InsurancePlan[] = [
 // DATABASE QUERIES
 // ============================================
 
-// Get all dog breeds
-export async function getAllBreeds(): Promise<DogBreed[]> {
+// Get all tractor types
+export async function getAllBreeds(): Promise<TractorType[]> {
   try {
     const result = await getSql()`
       SELECT * FROM dog_breeds ORDER BY name
     `;
-    return result as DogBreed[];
+    return result as TractorType[];
   } catch (error) {
-    console.error('Error fetching breeds:', error);
+    console.error('Error fetching tractor types:', error);
     return [];
   }
 }
 
-// Get breed by name (fuzzy match)
-export async function getBreedByName(name: string): Promise<DogBreed | null> {
+// Get tractor type by name (fuzzy match)
+export async function getBreedByName(name: string): Promise<TractorType | null> {
   try {
     const result = await getSql()`
       SELECT * FROM dog_breeds
@@ -246,15 +246,15 @@ export async function getBreedByName(name: string): Promise<DogBreed | null> {
         CASE WHEN LOWER(name) = LOWER(${name}) THEN 0 ELSE 1 END
       LIMIT 1
     `;
-    return result[0] as DogBreed || null;
+    return result[0] as TractorType || null;
   } catch (error) {
-    console.error('Error fetching breed:', error);
+    console.error('Error fetching tractor type:', error);
     return null;
   }
 }
 
-// Search breeds
-export async function searchBreeds(query: string): Promise<DogBreed[]> {
+// Search tractor types
+export async function searchBreeds(query: string): Promise<TractorType[]> {
   try {
     const result = await getSql()`
       SELECT * FROM dog_breeds
@@ -262,52 +262,52 @@ export async function searchBreeds(query: string): Promise<DogBreed[]> {
       ORDER BY name
       LIMIT 5
     `;
-    return result as DogBreed[];
+    return result as TractorType[];
   } catch (error) {
-    console.error('Error searching breeds:', error);
+    console.error('Error searching tractor types:', error);
     return [];
   }
 }
 
-// Get breed by ID
-export async function getBreedById(id: number): Promise<DogBreed | null> {
+// Get tractor type by ID
+export async function getBreedById(id: number): Promise<TractorType | null> {
   try {
     const result = await getSql()`
       SELECT * FROM dog_breeds WHERE id = ${id}
     `;
-    return result[0] as DogBreed || null;
+    return result[0] as TractorType || null;
   } catch (error) {
-    console.error('Error fetching breed by ID:', error);
+    console.error('Error fetching tractor type by ID:', error);
     return null;
   }
 }
 
 // Calculate insurance quote
 export function calculateQuote(
-  breed: DogBreed,
+  tractorType: TractorType,
   ageYears: number,
   planType: InsurancePlan['type'],
-  hasPreexistingConditions: boolean = false
+  hasModifications: boolean = false
 ): { monthlyPremium: number; annualPremium: number; plan: InsurancePlan } {
   const plan = INSURANCE_PLANS.find(p => p.type === planType) || INSURANCE_PLANS[1];
 
   let premium = plan.base_monthly_premium;
 
-  // Apply breed risk multiplier
-  premium *= breed.base_premium_multiplier;
+  // Apply tractor type risk multiplier
+  premium *= tractorType.base_premium_multiplier;
 
-  // Age adjustments
-  if (ageYears < 1) {
-    premium *= 1.1; // Puppies have more accidents
-  } else if (ageYears >= 7) {
-    premium *= 1.3; // Senior dogs have more health issues
+  // Age adjustments (tractors depreciate but older ones need more repairs)
+  if (ageYears < 2) {
+    premium *= 1.15; // New tractors - higher replacement value
+  } else if (ageYears >= 15) {
+    premium *= 1.4; // Older tractors - more breakdown risk
   } else if (ageYears >= 10) {
-    premium *= 1.5;
+    premium *= 1.25;
   }
 
-  // Preexisting conditions surcharge (only for certain plans)
-  if (hasPreexistingConditions && (planType === 'premium' || planType === 'comprehensive')) {
-    premium *= 1.25;
+  // Modifications surcharge
+  if (hasModifications && (planType === 'premium' || planType === 'comprehensive')) {
+    premium *= 1.2;
   }
 
   const monthlyPremium = Math.round(premium * 100) / 100;
@@ -333,30 +333,30 @@ export async function saveQuote(
   }
 }
 
-// Get user's dogs
-export async function getUserDogs(userId: string): Promise<UserDog[]> {
+// Get user's tractors
+export async function getUserDogs(userId: string): Promise<UserTractor[]> {
   try {
     const result = await getSql()`
       SELECT * FROM user_dogs WHERE user_id = ${userId} ORDER BY created_at DESC
     `;
-    return result as UserDog[];
+    return result as UserTractor[];
   } catch (error) {
-    console.error('Error fetching user dogs:', error);
+    console.error('Error fetching user tractors:', error);
     return [];
   }
 }
 
-// Add a dog for user
-export async function addUserDog(dog: Omit<UserDog, 'id'>): Promise<number | null> {
+// Add a tractor for user
+export async function addUserDog(tractor: Omit<UserTractor, 'id'>): Promise<number | null> {
   try {
     const result = await getSql()`
       INSERT INTO user_dogs (user_id, name, breed_id, breed_name, date_of_birth, age_years, weight_kg, gender, is_neutered, microchip_number, has_preexisting_conditions, preexisting_conditions, photo_url)
-      VALUES (${dog.user_id}, ${dog.name}, ${dog.breed_id || null}, ${dog.breed_name}, ${dog.date_of_birth?.toISOString() || null}, ${dog.age_years}, ${dog.weight_kg || null}, ${dog.gender || null}, ${dog.is_neutered}, ${dog.microchip_number || null}, ${dog.has_preexisting_conditions}, ${dog.preexisting_conditions || []}, ${dog.photo_url || null})
+      VALUES (${tractor.user_id}, ${tractor.name}, ${tractor.breed_id || null}, ${tractor.breed_name}, ${tractor.date_of_birth?.toISOString() || null}, ${tractor.age_years}, ${tractor.weight_kg || null}, ${tractor.gender || null}, ${tractor.is_neutered}, ${tractor.microchip_number || null}, ${tractor.has_preexisting_conditions}, ${tractor.preexisting_conditions || []}, ${tractor.photo_url || null})
       RETURNING id
     `;
     return result[0]?.id || null;
   } catch (error) {
-    console.error('Error adding user dog:', error);
+    console.error('Error adding user tractor:', error);
     return null;
   }
 }
@@ -381,7 +381,7 @@ export async function getUserPolicies(userId: string): Promise<InsurancePolicy[]
 // Create a policy from a quote
 export async function createPolicy(
   userId: string,
-  dogId: number,
+  tractorId: number,
   quoteId: number,
   planType: InsurancePlan['type']
 ): Promise<string | null> {
@@ -389,14 +389,14 @@ export async function createPolicy(
     const plan = INSURANCE_PLANS.find(p => p.type === planType);
     if (!plan) return null;
 
-    const policyNumber = `PUP-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+    const policyNumber = `TRC-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
     const startDate = new Date();
     const endDate = new Date();
     endDate.setFullYear(endDate.getFullYear() + 1);
 
     await getSql()`
       INSERT INTO insurance_policies (policy_number, user_id, dog_id, plan_type, monthly_premium, annual_coverage_limit, deductible, coverage_details, start_date, end_date, status)
-      VALUES (${policyNumber}, ${userId}, ${dogId}, ${planType}, ${plan.base_monthly_premium}, ${plan.annual_coverage_limit}, ${plan.deductible}, ${JSON.stringify(plan.coverage)}, ${startDate.toISOString()}, ${endDate.toISOString()}, 'active')
+      VALUES (${policyNumber}, ${userId}, ${tractorId}, ${planType}, ${plan.base_monthly_premium}, ${plan.annual_coverage_limit}, ${plan.deductible}, ${JSON.stringify(plan.coverage)}, ${startDate.toISOString()}, ${endDate.toISOString()}, 'active')
     `;
 
     // Mark quote as converted

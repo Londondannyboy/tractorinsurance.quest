@@ -21,48 +21,48 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Puppy Insurance UK | Compare Pet Insurance for Puppies & Dogs",
-    template: "%s | Puppy Insurance Quest",
+    default: "Tractor Insurance UK | Compare Tractor & Agricultural Vehicle Insurance",
+    template: "%s | Tractor Insurance Quest",
   },
   description:
-    "Compare the best puppy insurance in the UK. Get instant quotes for Jack Russell, Pug, Cockapoo & more breeds. AI-powered pet insurance advisor helps you find the perfect coverage.",
+    "Compare the best tractor insurance in the UK. Get instant quotes for farm tractors, vintage tractors, compact tractors & more. AI-powered tractor insurance advisor helps you find the perfect coverage.",
   keywords: [
-    "puppy insurance",
-    "pet insurance puppies",
-    "dog insurance UK",
-    "best pet insurance for puppies",
-    "cheap puppy insurance",
-    "jack russell insurance",
-    "pug insurance",
-    "cockapoo insurance",
-    "puppy insurance cost",
-    "compare pet insurance",
+    "tractor insurance",
+    "tractor insurance UK",
+    "farm tractor insurance",
+    "agricultural vehicle insurance",
+    "cheap tractor insurance",
+    "vintage tractor insurance",
+    "compact tractor insurance",
+    "ride on mower insurance",
+    "tractor insurance cost",
+    "compare tractor insurance",
   ],
-  authors: [{ name: "Puppy Insurance Quest" }],
-  creator: "Puppy Insurance Quest",
-  publisher: "Puppy Insurance Quest",
+  authors: [{ name: "Tractor Insurance Quest" }],
+  creator: "Tractor Insurance Quest",
+  publisher: "Tractor Insurance Quest",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://puppyinsurance.quest"),
+  metadataBase: new URL("https://tractorinsurance.quest"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Puppy Insurance UK | Compare Pet Insurance for Puppies & Dogs",
+    title: "Tractor Insurance UK | Compare Tractor & Agricultural Vehicle Insurance",
     description:
-      "Compare the best puppy insurance in the UK. Get instant quotes with our AI-powered pet insurance advisor.",
-    url: "https://puppyinsurance.quest",
-    siteName: "Puppy Insurance Quest",
+      "Compare the best tractor insurance in the UK. Get instant quotes with our AI-powered tractor insurance advisor.",
+    url: "https://tractorinsurance.quest",
+    siteName: "Tractor Insurance Quest",
     locale: "en_GB",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Puppy Insurance UK | Compare Pet Insurance",
-    description: "Compare the best puppy insurance in the UK. AI-powered quotes for all breeds.",
+    title: "Tractor Insurance UK | Compare Tractor Insurance",
+    description: "Compare the best tractor insurance in the UK. AI-powered quotes for all tractor types.",
   },
   robots: {
     index: true,
@@ -90,7 +90,7 @@ export default function RootLayout({
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="shortcut icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <meta name="apple-mobile-web-app-title" content="Puppy Insurance Quest" />
+        <meta name="apple-mobile-web-app-title" content="Tractor Insurance Quest" />
         <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body

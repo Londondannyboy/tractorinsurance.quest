@@ -10,29 +10,29 @@ const navigationItems = [
   {
     label: "Insurance",
     items: [
-      { href: "/puppy-insurance", label: "Puppy Insurance", description: "Complete coverage for your new puppy" },
-      { href: "/best-puppy-insurance", label: "Best Puppy Insurance", description: "Top-rated plans compared" },
-      { href: "/cheap-puppy-insurance", label: "Cheap Puppy Insurance", description: "Budget-friendly options" },
-      { href: "/puppy-insurance-cost", label: "Insurance Costs", description: "Pricing guide & calculator" },
-      { href: "/compare-pet-insurance", label: "Compare Plans", description: "Side-by-side comparison tool" },
+      { href: "/tractor-insurance", label: "Tractor Insurance", description: "Complete coverage for your tractor" },
+      { href: "/best-tractor-insurance", label: "Best Tractor Insurance", description: "Top-rated plans compared" },
+      { href: "/cheap-tractor-insurance", label: "Cheap Tractor Insurance", description: "Budget-friendly options" },
+      { href: "/tractor-insurance-cost", label: "Insurance Costs", description: "Pricing guide & calculator" },
+      { href: "/compare-tractor-insurance", label: "Compare Plans", description: "Side-by-side comparison tool" },
     ],
   },
   {
-    label: "Breeds",
+    label: "Tractor Types",
     items: [
-      { href: "/jack-russell-insurance", label: "Jack Russell Insurance", description: "Terrier-specific coverage" },
-      { href: "/pug-insurance", label: "Pug Insurance", description: "Brachycephalic breed plans" },
-      { href: "/cockapoo-insurance", label: "Cockapoo Insurance", description: "Designer breed coverage" },
-      { href: "/cavapoo-insurance", label: "Cavapoo Insurance", description: "Cavalier mix protection" },
-      { href: "/dachshund-insurance", label: "Dachshund Insurance", description: "Sausage dog specialist" },
-      { href: "/french-bulldog-insurance", label: "French Bulldog Insurance", description: "Frenchie health cover" },
-      { href: "/labrador-insurance", label: "Labrador Insurance", description: "Lab breed coverage" },
+      { href: "/utility-tractor-insurance", label: "Utility Tractor Insurance", description: "All-purpose tractor cover" },
+      { href: "/mini-tractor-insurance", label: "Mini Tractor Insurance", description: "Compact machine coverage" },
+      { href: "/compact-tractor-insurance", label: "Compact Tractor Insurance", description: "Sub-compact & compact plans" },
+      { href: "/garden-tractor-insurance", label: "Garden Tractor Insurance", description: "Domestic tractor protection" },
+      { href: "/ride-on-mower-insurance", label: "Ride-on Mower Insurance", description: "Mower & groundcare cover" },
+      { href: "/vintage-tractor-insurance", label: "Vintage Tractor Insurance", description: "Classic tractor specialist" },
+      { href: "/farm-tractor-insurance", label: "Farm Tractor Insurance", description: "Agricultural tractor cover" },
     ],
   },
   {
     label: "Resources",
     items: [
-      { href: "/dashboard", label: "My Pets", description: "Manage your pet profiles" },
+      { href: "/dashboard", label: "My Tractors", description: "Manage your tractor profiles" },
       { href: "/site-map", label: "Sitemap", description: "Browse all pages" },
     ],
   },
@@ -59,9 +59,9 @@ export function Header() {
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 group">
-              <span className="text-2xl group-hover:scale-110 transition-transform">🐾</span>
+              <span className="text-2xl group-hover:scale-110 transition-transform">🚜</span>
               <span className="font-bold text-lg text-white group-hover:text-amber-400 transition-colors">
-                Puppy Insurance
+                Tractor Insurance
               </span>
             </Link>
 

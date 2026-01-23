@@ -16,27 +16,27 @@ import {
   FeatureComparisonTable,
 } from '@/components/mdx';
 
-// Types for puppy insurance
-interface DogBreed {
+// Types for tractor insurance
+interface TractorType {
   id: number;
   name: string;
-  size: string;
+  category: string;
   risk_category: string;
-  avg_lifespan_years: number;
-  common_health_issues: string[];
+  avg_horsepower: number;
+  common_risks: string[];
   base_premium_multiplier: number;
-  temperament: string[];
-  exercise_needs: string;
-  grooming_needs: string;
+  usage_types: string[];
+  typical_value: string;
+  fuel_type: string;
 }
 
 interface InsuranceQuote {
   quoteId: number;
-  breed: {
+  tractor: {
     name: string;
-    size: string;
+    category: string;
     riskCategory: string;
-    commonHealthIssues: string[];
+    commonRisks: string[];
   };
   quote: {
     monthlyPremium: number;
@@ -52,21 +52,21 @@ interface InsuranceQuote {
   };
 }
 
-interface PuppyInsuranceState {
-  breeds: DogBreed[];
-  selectedBreed?: DogBreed;
+interface TractorInsuranceState {
+  tractorTypes: TractorType[];
+  selectedType?: TractorType;
   currentQuote?: InsuranceQuote;
-  dogDetails?: {
+  tractorDetails?: {
     name?: string;
-    breed?: string;
+    type?: string;
     age?: number;
-    hasPreexistingConditions?: boolean;
+    hasModifications?: boolean;
   };
-  step: 'welcome' | 'breed_selection' | 'dog_details' | 'quote' | 'coverage';
+  step: 'welcome' | 'type_selection' | 'tractor_details' | 'quote' | 'coverage';
 }
 
-// Breed card for grid display
-function BreedCard({ name, href, risk, description, image }: {
+// Tractor type card for grid display
+function TractorCard({ name, href, risk, description, image }: {
   name: string;
   href: string;
   risk: 'low' | 'medium' | 'high';
@@ -88,7 +88,7 @@ function BreedCard({ name, href, risk, description, image }: {
         <div className="relative h-48 overflow-hidden">
           <Image
             src={image}
-            alt={`${name} puppy insurance`}
+            alt={`${name} tractor insurance`}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
@@ -117,21 +117,21 @@ function QuoteDisplay({ quote }: { quote: InsuranceQuote }) {
       className="bg-gradient-to-br from-emerald-900/40 to-teal-900/40 backdrop-blur-lg rounded-3xl border border-emerald-500/20 p-8"
     >
       <div className="text-center mb-8">
-        <span className="text-6xl mb-4 block">🐶</span>
+        <span className="text-6xl mb-4 block">🚜</span>
         <h2 className="text-3xl font-bold text-white mb-2">Your Quote is Ready!</h2>
-        <p className="text-white/60">Coverage for your {quote.breed.name}</p>
+        <p className="text-white/60">Coverage for your {quote.tractor.name}</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8 mb-8">
         <div className="bg-white/10 rounded-2xl p-6 text-center">
           <p className="text-white/50 text-sm mb-2">Monthly Premium</p>
-          <p className="text-5xl font-bold text-emerald-400">${quote.quote.monthlyPremium.toFixed(2)}</p>
+          <p className="text-5xl font-bold text-emerald-400">&pound;{quote.quote.monthlyPremium.toFixed(2)}</p>
           <p className="text-white/40 text-sm mt-2">per month</p>
         </div>
 
         <div className="bg-white/10 rounded-2xl p-6 text-center">
           <p className="text-white/50 text-sm mb-2">Annual Coverage</p>
-          <p className="text-4xl font-bold text-white">${quote.quote.plan.annualCoverageLimit.toLocaleString()}</p>
+          <p className="text-4xl font-bold text-white">&pound;{quote.quote.plan.annualCoverageLimit.toLocaleString()}</p>
           <p className="text-white/40 text-sm mt-2">max per year</p>
         </div>
       </div>
@@ -141,17 +141,17 @@ function QuoteDisplay({ quote }: { quote: InsuranceQuote }) {
         <ul className="space-y-3">
           {quote.quote.plan.features.map((feature, index) => (
             <li key={index} className="flex items-start gap-3 text-white/80">
-              <span className="text-emerald-400 mt-1">✓</span>
+              <span className="text-emerald-400 mt-1">&#10003;</span>
               {feature}
             </li>
           ))}
         </ul>
       </div>
 
-      {quote.breed.commonHealthIssues && quote.breed.commonHealthIssues.length > 0 && (
+      {quote.tractor.commonRisks && quote.tractor.commonRisks.length > 0 && (
         <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
-          <p className="text-amber-300 text-sm font-medium mb-2">Common health concerns for {quote.breed.name}:</p>
-          <p className="text-amber-200/70 text-sm">{quote.breed.commonHealthIssues.join(', ')}</p>
+          <p className="text-amber-300 text-sm font-medium mb-2">Common risks for {quote.tractor.name}:</p>
+          <p className="text-amber-200/70 text-sm">{quote.tractor.commonRisks.join(', ')}</p>
         </div>
       )}
 
@@ -176,97 +176,97 @@ function Section({ children, className = '', id }: { children: React.ReactNode; 
 }
 
 export default function Home() {
-  const [state, setState] = useState<PuppyInsuranceState>({
-    breeds: [],
+  const [state, setState] = useState<TractorInsuranceState>({
+    tractorTypes: [],
     step: 'welcome',
   });
   const [loading, setLoading] = useState(true);
   const { appendMessage } = useCopilotChat();
 
-  // Fetch breeds on mount
+  // Fetch tractor types on mount
   useEffect(() => {
-    async function fetchBreeds() {
+    async function fetchTractorTypes() {
       try {
         const res = await fetch('/api/breeds');
         if (res.ok) {
-          const breeds = await res.json();
-          setState(prev => ({ ...prev, breeds }));
+          const types = await res.json();
+          setState(prev => ({ ...prev, tractorTypes: types }));
         }
       } catch (error) {
-        console.error('Failed to fetch breeds:', error);
+        console.error('Failed to fetch tractor types:', error);
       } finally {
         setLoading(false);
       }
     }
-    fetchBreeds();
+    fetchTractorTypes();
   }, []);
 
   // Make state readable to the AI
   useCopilotReadable({
-    description: 'Current puppy insurance application state',
+    description: 'Current tractor insurance application state',
     value: state,
   });
 
-  // Action: Show breed info
+  // Action: Show tractor type info
   useCopilotAction({
     name: "show_breed_info",
-    description: "Show detailed information about a specific dog breed when the user mentions a breed.",
+    description: "Show detailed information about a specific tractor type when the user mentions a tractor type.",
     parameters: [
-      { name: "breed_name", type: "string" as const, description: "Name of the dog breed (e.g., 'Labrador', 'French Bulldog')" },
+      { name: "breed_name", type: "string" as const, description: "Type of tractor (e.g., 'Farm Tractor', 'Vintage Tractor', 'Compact Tractor')" },
     ],
     handler: async ({ breed_name }) => {
       try {
         const res = await fetch(`/api/breeds?name=${encodeURIComponent(breed_name)}`);
         if (res.ok) {
-          const breed = await res.json();
+          const tractorType = await res.json();
           setState(prev => ({
             ...prev,
-            selectedBreed: breed,
-            dogDetails: { ...prev.dogDetails, breed: breed.name },
-            step: 'breed_selection',
+            selectedType: tractorType,
+            tractorDetails: { ...prev.tractorDetails, type: tractorType.name },
+            step: 'type_selection',
           }));
-          return `Found ${breed.name}! This is a ${breed.size} breed with ${breed.risk_category} health risk. Common health issues include: ${breed.common_health_issues.join(', ')}. They typically live ${breed.avg_lifespan_years} years.`;
+          return `Found ${tractorType.name}! This is a ${tractorType.category} tractor with ${tractorType.risk_category} risk level. Common risks include: ${tractorType.common_risks?.join(', ') || tractorType.common_health_issues?.join(', ')}. Average horsepower: ${tractorType.avg_horsepower || tractorType.avg_lifespan_years}.`;
         }
-        return `I couldn't find a breed called "${breed_name}". Could you try a different breed name?`;
+        return `I couldn't find a tractor type called "${breed_name}". Could you try a different type?`;
       } catch (error) {
-        console.error('Error fetching breed:', error);
-        return 'Error looking up breed information. Please try again.';
+        console.error('Error fetching tractor type:', error);
+        return 'Error looking up tractor type information. Please try again.';
       }
     },
   });
 
-  // Action: Confirm dog details
+  // Action: Confirm tractor details
   useCopilotAction({
     name: "confirm_dog_details",
-    description: "Confirm and save the dog's details when the user provides their dog's name, breed, and age.",
+    description: "Confirm and save the tractor's details when the user provides their tractor's name, type, and age.",
     parameters: [
-      { name: "dog_name", type: "string" as const, description: "The dog's name" },
-      { name: "breed_name", type: "string" as const, description: "The dog's breed" },
-      { name: "age_years", type: "number" as const, description: "The dog's age in years" },
-      { name: "has_preexisting_conditions", type: "boolean" as const, description: "Whether the dog has preexisting health conditions" },
+      { name: "dog_name", type: "string" as const, description: "The tractor's name or identifier" },
+      { name: "breed_name", type: "string" as const, description: "The tractor type" },
+      { name: "age_years", type: "number" as const, description: "The tractor's age in years" },
+      { name: "has_preexisting_conditions", type: "boolean" as const, description: "Whether the tractor has modifications or prior damage" },
     ],
     handler: async ({ dog_name, breed_name, age_years, has_preexisting_conditions }) => {
-      let breed = state.selectedBreed;
-      if (!breed || breed.name.toLowerCase() !== breed_name.toLowerCase()) {
+      let tractorType = state.selectedType;
+      if (!tractorType || tractorType.name.toLowerCase() !== breed_name.toLowerCase()) {
         const res = await fetch(`/api/breeds?name=${encodeURIComponent(breed_name)}`);
         if (res.ok) {
-          breed = await res.json();
+          tractorType = await res.json();
         }
       }
 
       setState(prev => ({
         ...prev,
-        selectedBreed: breed,
-        dogDetails: {
+        selectedType: tractorType,
+        tractorDetails: {
           name: dog_name,
-          breed: breed_name,
+          type: breed_name,
           age: age_years,
-          hasPreexistingConditions: has_preexisting_conditions || false,
+          hasModifications: has_preexisting_conditions || false,
         },
-        step: 'dog_details',
+        step: 'tractor_details',
       }));
 
-      return `Great! I've noted that ${dog_name} is a ${age_years} year old ${breed_name}${has_preexisting_conditions ? ' with some preexisting conditions' : ''}. Would you like to see our insurance plans?`;
+      return `Great! I've noted that ${dog_name} is a ${age_years} year old ${breed_name}${has_preexisting_conditions ? ' with modifications' : ''}. Would you like to see our insurance plans?`;
     },
   });
 
@@ -278,9 +278,9 @@ export default function Home() {
       { name: "plan_type", type: "string" as const, description: "Plan type: 'basic', 'standard', 'premium', or 'comprehensive'" },
     ],
     handler: async ({ plan_type }) => {
-      const dogDetails = state.dogDetails;
-      if (!dogDetails?.breed || dogDetails?.age === undefined) {
-        return "I need to know your dog's breed and age first. What kind of dog do you have?";
+      const tractorDetails = state.tractorDetails;
+      if (!tractorDetails?.type || tractorDetails?.age === undefined) {
+        return "I need to know your tractor type and age first. What kind of tractor do you have?";
       }
 
       try {
@@ -288,10 +288,10 @@ export default function Home() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            breedName: dogDetails.breed,
-            ageYears: dogDetails.age,
+            breedName: tractorDetails.type,
+            ageYears: tractorDetails.age,
             planType: plan_type || 'standard',
-            hasPreexistingConditions: dogDetails.hasPreexistingConditions || false,
+            hasPreexistingConditions: tractorDetails.hasModifications || false,
           }),
         });
 
@@ -303,7 +303,7 @@ export default function Home() {
             step: 'quote',
           }));
 
-          return `Here's your quote for ${dogDetails.name || 'your ' + dogDetails.breed}! With our ${quote.quote.plan.name} plan, you'll pay $${quote.quote.monthlyPremium.toFixed(2)}/month for up to $${quote.quote.plan.annualCoverageLimit.toLocaleString()} in annual coverage.`;
+          return `Here's your quote for ${tractorDetails.name || 'your ' + tractorDetails.type}! With our ${quote.quote.plan.name} plan, you'll pay \u00a3${quote.quote.monthlyPremium.toFixed(2)}/month for up to \u00a3${quote.quote.plan.annualCoverageLimit.toLocaleString()} in annual coverage.`;
         }
         return 'There was an error generating your quote. Please try again.';
       } catch (error) {
@@ -329,55 +329,50 @@ export default function Home() {
     appendMessage(new TextMessage({ content: prompt, role: Role.User }));
   }, [appendMessage]);
 
-  const availableBreeds = state.breeds.map(b => b.name).join(', ') || 'Loading...';
+  const availableTypes = state.tractorTypes.map(t => t.name).join(', ') || 'Loading...';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-stone-950 via-stone-900 to-stone-950 text-white">
       <CopilotSidebar
         defaultOpen={false}
-        instructions={`You are Buddy, a friendly and knowledgeable puppy insurance advisor. You help pet owners find the right insurance coverage for their dogs.
+        instructions={`You are Tracker, a knowledgeable tractor insurance advisor. You help tractor owners find the right insurance coverage for their machinery.
 
-AVAILABLE BREEDS IN DATABASE: ${availableBreeds}
+AVAILABLE TRACTOR TYPES IN DATABASE: ${availableTypes}
 
 YOUR PERSONALITY:
-- Warm, friendly, and enthusiastic about dogs
-- Use dog-related language naturally
-- Be empathetic when discussing health concerns
-- Always prioritize the dog's wellbeing
+- Professional, helpful, and knowledgeable about agricultural machinery
+- Use tractor and farming-related language naturally
+- Be practical when discussing risk and coverage
+- Always prioritise protecting the owner's investment
 
 CRITICAL RULES:
-1. When user mentions a breed, ALWAYS call show_breed_info
-2. When user provides dog details, call confirm_dog_details
+1. When user mentions a tractor type, ALWAYS call show_breed_info
+2. When user provides tractor details, call confirm_dog_details
 3. When user wants prices/coverage, call generate_quote
 4. When user wants to compare options, call show_plans
 
-${state.dogDetails?.name ? `CURRENT DOG: ${state.dogDetails.name}, a ${state.dogDetails.age || '?'} year old ${state.dogDetails.breed}` : ''}
-${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremium}/mo for ${state.currentQuote.quote.plan.name} plan` : ''}`}
+${state.tractorDetails?.name ? `CURRENT TRACTOR: ${state.tractorDetails.name}, a ${state.tractorDetails.age || '?'} year old ${state.tractorDetails.type}` : ''}
+${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyPremium}/mo for ${state.currentQuote.quote.plan.name} plan` : ''}`}
         labels={{
-          title: 'Chat with Buddy',
-          initial: "Woof! I'm Buddy, your friendly puppy insurance advisor! Tell me about your dog - what breed are they?",
+          title: 'Chat with Tracker',
+          initial: "Hello! I'm Tracker, your tractor insurance advisor. Tell me about your tractor - what type is it?",
         }}
       >
         {/* Trusted Sources Banner */}
         <div className="bg-stone-900/80 border-b border-stone-700/50 py-4">
           <div className="max-w-6xl mx-auto px-4">
-            <p className="text-white/50 text-xs text-center mb-3">Trusted resources for pet insurance information:</p>
+            <p className="text-white/50 text-xs text-center mb-3">Trusted resources for tractor insurance information:</p>
             <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs">
-              <a href="https://www.bbc.co.uk/news/business-67116578" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">BBC News</a>
-              <a href="https://en.wikipedia.org/wiki/Pet_insurance" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">Wikipedia</a>
-              <a href="https://www.theguardian.com/money/pet-insurance" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">The Guardian</a>
-              <a href="https://www.which.co.uk/money/insurance/pet-insurance" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">Which?</a>
-              <a href="https://www.moneysavingexpert.com/insurance/cheap-pet-insurance/" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">MoneySavingExpert</a>
-              <a href="https://www.gov.uk/pet-travel-quarantine" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">GOV.UK</a>
-              <a href="https://www.rspca.org.uk/adviceandwelfare/pets/dogs" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">RSPCA</a>
-              <a href="https://www.bluecross.org.uk/pet-advice/dog-advice" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">Blue Cross</a>
-              <a href="https://www.thekennelclub.org.uk/health-and-dog-care/" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">The Kennel Club</a>
-              <a href="https://www.pdsa.org.uk/pet-help-and-advice" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">PDSA</a>
-              <a href="https://www.fca.org.uk/consumers/pet-insurance" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">FCA</a>
-              <a href="https://www.citizensadvice.org.uk/consumer/insurance/insurance/types-of-insurance/pet-insurance/" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">Citizens Advice</a>
-              <a href="https://www.abi.org.uk/products-and-issues/choosing-the-right-insurance/pet-insurance/" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">ABI</a>
-              <a href="https://www.bva.co.uk/resources-support/practice-management/pet-insurance/" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">British Veterinary Association</a>
-              <a href="https://www.telegraph.co.uk/money/insurance/pet-insurance/" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">The Telegraph</a>
+              <a href="https://www.nfuonline.com/" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">NFU</a>
+              <a href="https://www.fwi.co.uk/" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">Farmers Weekly</a>
+              <a href="https://www.gov.uk/farming-equipment" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">GOV.UK</a>
+              <a href="https://www.hse.gov.uk/agriculture/" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">HSE Agriculture</a>
+              <a href="https://www.abi.org.uk/" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">ABI</a>
+              <a href="https://www.fca.org.uk/" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">FCA</a>
+              <a href="https://www.which.co.uk/money/insurance/" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">Which?</a>
+              <a href="https://www.moneysavingexpert.com/" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">MoneySavingExpert</a>
+              <a href="https://www.citizensadvice.org.uk/" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">Citizens Advice</a>
+              <a href="https://www.bbc.co.uk/news/topics/cvenzmgyg4rt" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-amber-400 transition-colors">BBC Farming</a>
             </div>
           </div>
         </div>
@@ -391,18 +386,18 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
               className="mb-8"
             >
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight">
-                <span className="text-amber-400">Puppy Insurance UK</span>
+                <span className="text-amber-400">Tractor Insurance UK</span>
                 <br />
-                <span className="text-white">Compare Pet Insurance for Puppies</span>
+                <span className="text-white">Compare Agricultural Vehicle Insurance</span>
               </h1>
               <p className="text-lg md:text-xl text-white/70 max-w-3xl mx-auto leading-relaxed">
-                Find the <strong>best puppy insurance</strong> for your furry friend. Compare puppy insurance plans from top UK providers,
-                get instant quotes, and protect your pet from unexpected vet bills. Whether you have a playful
-                <Link href="/labrador-insurance" className="text-amber-400 hover:underline"> Labrador</Link>,
-                a lovable <Link href="/french-bulldog-insurance" className="text-amber-400 hover:underline"> French Bulldog</Link>,
-                or a spirited <Link href="/jack-russell-insurance" className="text-amber-400 hover:underline"> Jack Russell</Link> -
-                we help you find <Link href="/cheap-puppy-insurance" className="text-amber-400 hover:underline">cheap puppy insurance</Link> that fits your budget.
-                Understanding <Link href="/puppy-insurance-cost" className="text-amber-400 hover:underline">puppy insurance cost</Link> is essential before you buy.
+                Find the <strong>best tractor insurance</strong> for your machinery. Compare tractor insurance plans from top UK providers,
+                get instant quotes, and protect your investment from unexpected repair bills. Whether you have a powerful
+                <Link href="/farm-tractor-insurance" className="text-amber-400 hover:underline"> Farm Tractor</Link>,
+                a classic <Link href="/vintage-tractor-insurance" className="text-amber-400 hover:underline"> Vintage Tractor</Link>,
+                or a versatile <Link href="/utility-tractor-insurance" className="text-amber-400 hover:underline"> Utility Tractor</Link> -
+                we help you find <Link href="/cheap-tractor-insurance" className="text-amber-400 hover:underline">cheap tractor insurance</Link> that fits your budget.
+                Understanding <Link href="/tractor-insurance-cost" className="text-amber-400 hover:underline">tractor insurance cost</Link> is essential before you buy.
               </p>
             </motion.div>
 
@@ -424,19 +419,19 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
               className="flex flex-wrap justify-center gap-4 md:gap-8 mb-8"
             >
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-6 py-4 text-center">
-                <p className="text-3xl md:text-4xl font-bold text-amber-400">18+</p>
-                <p className="text-white/60 text-sm">Breeds Covered</p>
+                <p className="text-3xl md:text-4xl font-bold text-amber-400">7+</p>
+                <p className="text-white/60 text-sm">Tractor Types Covered</p>
               </div>
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-6 py-4 text-center">
-                <p className="text-3xl md:text-4xl font-bold text-amber-400">From £12</p>
+                <p className="text-3xl md:text-4xl font-bold text-amber-400">From &pound;25</p>
                 <p className="text-white/60 text-sm">Per Month</p>
               </div>
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-6 py-4 text-center">
                 <p className="text-3xl md:text-4xl font-bold text-amber-400">24/7</p>
-                <p className="text-white/60 text-sm">Vet Helpline</p>
+                <p className="text-white/60 text-sm">Breakdown Cover</p>
               </div>
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-6 py-4 text-center">
-                <p className="text-3xl md:text-4xl font-bold text-amber-400">90%</p>
+                <p className="text-3xl md:text-4xl font-bold text-amber-400">95%</p>
                 <p className="text-white/60 text-sm">Claims Paid</p>
               </div>
             </motion.div>
@@ -449,13 +444,13 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
               className="flex flex-col sm:flex-row gap-4 justify-center"
             >
               <button
-                onClick={() => handleQuickPrompt("I want to get a quote for my puppy")}
+                onClick={() => handleQuickPrompt("I want to get a quote for my tractor")}
                 className="px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-bold text-lg rounded-xl hover:from-amber-400 hover:to-orange-400 transition-all shadow-lg shadow-amber-500/25"
               >
                 Get Your Free Quote
               </button>
               <Link
-                href="/compare-pet-insurance"
+                href="/compare-tractor-insurance"
                 className="px-8 py-4 bg-white/10 border border-white/20 text-white font-semibold text-lg rounded-xl hover:bg-white/20 transition-all"
               >
                 Compare All Plans
@@ -481,55 +476,56 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
           </Section>
         )}
 
-        {/* What is Puppy Insurance Section */}
-        <Section id="what-is-puppy-insurance" className="bg-stone-900/30">
+        {/* What is Tractor Insurance Section */}
+        <Section id="what-is-tractor-insurance" className="bg-stone-900/30">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                What is Puppy Insurance and Why Do You Need It?
+                What is Tractor Insurance and Why Do You Need It?
               </h2>
               <div className="prose prose-invert max-w-none">
                 <p className="text-white/70 text-lg leading-relaxed mb-6">
-                  <strong className="text-white">Puppy insurance</strong> is a type of pet insurance specifically designed to cover
-                  veterinary costs for young dogs. With the average vet bill in the UK now exceeding £800 for emergency treatment,
-                  having comprehensive puppy insurance gives you peace of mind that your furry friend will always get the care they need.
+                  <strong className="text-white">Tractor insurance</strong> is a specialist type of agricultural vehicle insurance
+                  designed to cover tractors and other farm machinery. With the average tractor repair now exceeding &pound;3,000
+                  and replacement costs running into tens of thousands, having comprehensive tractor insurance gives you peace of
+                  mind that your essential machinery is always protected.
                 </p>
                 <p className="text-white/70 leading-relaxed mb-6">
-                  Puppies are naturally curious and can get into all sorts of trouble - from swallowing foreign objects to injuries
-                  from adventurous play. Additionally, many hereditary conditions don&apos;t show symptoms until later in life. By getting
-                  <strong className="text-white"> pet insurance for puppies</strong> early, you ensure these conditions are covered
-                  before they become &quot;pre-existing.&quot;
+                  Tractors face unique risks - from mechanical breakdowns and hydraulic failures to theft, fire, and accidental
+                  damage during fieldwork. Additionally, tractors used on public roads require specific insurance to meet legal
+                  requirements. By getting <strong className="text-white">tractor insurance</strong> early, you protect your
+                  investment from day one.
                 </p>
                 <ul className="space-y-3 text-white/70">
                   <li className="flex items-start gap-3">
-                    <span className="text-amber-400 mt-1">✓</span>
-                    <span>Cover unexpected accidents and illnesses from day one</span>
+                    <span className="text-amber-400 mt-1">&#10003;</span>
+                    <span>Cover against theft, fire, and accidental damage</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="text-amber-400 mt-1">✓</span>
-                    <span>Protect against breed-specific hereditary conditions</span>
+                    <span className="text-amber-400 mt-1">&#10003;</span>
+                    <span>Protection for road use and third-party liability</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="text-amber-400 mt-1">✓</span>
-                    <span>Access to 24/7 vet helplines for advice</span>
+                    <span className="text-amber-400 mt-1">&#10003;</span>
+                    <span>24/7 breakdown and recovery assistance</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="text-amber-400 mt-1">✓</span>
-                    <span>Third-party liability cover if your dog causes damage</span>
+                    <span className="text-amber-400 mt-1">&#10003;</span>
+                    <span>Replacement machinery hire during repairs</span>
                   </li>
                 </ul>
               </div>
             </div>
             <div className="relative">
               <Image
-                src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80"
-                alt="Happy puppy with owner - puppy insurance protects your pet"
+                src="https://images.unsplash.com/photo-1530267981375-f0de937f5f13?w=800&q=80"
+                alt="Farm tractor in field - tractor insurance protects your investment"
                 width={600}
                 height={400}
                 className="rounded-2xl shadow-2xl"
               />
               <div className="absolute -bottom-6 -left-6 bg-amber-500 text-stone-950 px-6 py-3 rounded-xl font-bold shadow-lg">
-                Insure from 8 weeks old
+                Cover from day one
               </div>
             </div>
           </div>
@@ -539,11 +535,11 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
         <Section id="video-guides">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Puppy Insurance Explained: Video Guides
+              Tractor Insurance Explained: Video Guides
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
-              Learn more about pet insurance for puppies with these helpful video guides from trusted sources.
-              Understanding how puppy insurance works helps you make an informed decision.
+              Learn more about tractor and agricultural vehicle insurance with these helpful video guides.
+              Understanding how tractor insurance works helps you make an informed decision.
             </p>
           </div>
 
@@ -554,7 +550,7 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
                   width="100%"
                   height="100%"
                   src="https://www.youtube.com/embed/VLkrpN6UJHI"
-                  title="Pet Insurance Explained - Is It Worth It?"
+                  title="Agricultural Vehicle Insurance Explained"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -562,8 +558,8 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
                 />
               </div>
               <div className="p-4">
-                <h4 className="font-bold text-white mb-1">Pet Insurance: Is It Worth It?</h4>
-                <p className="text-white/60 text-sm">Expert breakdown of pet insurance pros and cons</p>
+                <h4 className="font-bold text-white mb-1">Agricultural Insurance: Is It Worth It?</h4>
+                <p className="text-white/60 text-sm">Expert breakdown of tractor insurance pros and cons</p>
               </div>
             </div>
 
@@ -573,7 +569,7 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
                   width="100%"
                   height="100%"
                   src="https://www.youtube.com/embed/5Z5gPhVHh7k"
-                  title="How to Choose Pet Insurance"
+                  title="How to Choose Farm Insurance"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -581,7 +577,7 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
                 />
               </div>
               <div className="p-4">
-                <h4 className="font-bold text-white mb-1">How to Choose Pet Insurance</h4>
+                <h4 className="font-bold text-white mb-1">How to Choose Tractor Insurance</h4>
                 <p className="text-white/60 text-sm">Step-by-step guide to selecting the right policy</p>
               </div>
             </div>
@@ -592,7 +588,7 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
                   width="100%"
                   height="100%"
                   src="https://www.youtube.com/embed/Qv1glHQvEyI"
-                  title="New Puppy Checklist - Essential Guide"
+                  title="New Tractor Owner's Guide"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -600,28 +596,28 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
                 />
               </div>
               <div className="p-4">
-                <h4 className="font-bold text-white mb-1">New Puppy Checklist</h4>
-                <p className="text-white/60 text-sm">Everything you need when bringing home a new puppy</p>
+                <h4 className="font-bold text-white mb-1">New Tractor Owner&apos;s Guide</h4>
+                <p className="text-white/60 text-sm">Everything you need when buying your first tractor</p>
               </div>
             </div>
           </div>
 
           <p className="text-center mt-8 text-white/50 text-sm">
             Videos sourced from YouTube. We recommend also visiting{' '}
-            <a href="https://www.rspca.org.uk/adviceandwelfare/pets/dogs/puppies" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">RSPCA</a>,{' '}
-            <a href="https://www.bluecross.org.uk/pet-advice/getting-a-puppy" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">Blue Cross</a>, and{' '}
-            <a href="https://www.thekennelclub.org.uk/getting-a-dog/are-you-ready/puppy-or-adult-dog/" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">The Kennel Club</a> for authoritative puppy advice.
+            <a href="https://www.nfuonline.com/" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">NFU</a>,{' '}
+            <a href="https://www.fwi.co.uk/" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">Farmers Weekly</a>, and{' '}
+            <a href="https://www.hse.gov.uk/agriculture/" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">HSE Agriculture</a> for authoritative farming advice.
           </p>
         </Section>
 
-        {/* Puppy Insurance Cost Section */}
-        <Section id="puppy-insurance-cost">
+        {/* Tractor Insurance Cost Section */}
+        <Section id="tractor-insurance-cost">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              How Much Does Puppy Insurance Cost?
+              How Much Does Tractor Insurance Cost?
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
-              <strong className="text-white">Puppy insurance costs</strong> vary based on breed, age, location, and coverage level.
+              <strong className="text-white">Tractor insurance costs</strong> vary based on type, age, value, usage, and coverage level.
               Use our interactive calculator to get an instant estimate, or explore our detailed pricing guide.
             </p>
           </div>
@@ -643,44 +639,44 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
 
           <div className="bg-gradient-to-br from-amber-900/30 to-orange-900/30 rounded-2xl border border-amber-500/20 p-6 md:p-8">
             <h3 className="text-2xl font-bold text-white mb-6 text-center">
-              Get Your Personalised Puppy Insurance Quote
+              Get Your Personalised Tractor Insurance Quote
             </h3>
             <QuoteCalculator />
           </div>
 
           <div className="mt-12 grid md:grid-cols-3 gap-6">
             <div className="bg-stone-900/40 rounded-xl p-6 text-center">
-              <p className="text-4xl font-bold text-amber-400 mb-2">£12-£25</p>
+              <p className="text-4xl font-bold text-amber-400 mb-2">&pound;25-&pound;50</p>
               <p className="text-white font-medium mb-1">Basic Cover</p>
-              <p className="text-white/60 text-sm">Accident only, lower limits</p>
+              <p className="text-white/60 text-sm">Third-party only, field use</p>
             </div>
             <div className="bg-stone-900/40 rounded-xl p-6 text-center border-2 border-amber-500/30">
-              <p className="text-4xl font-bold text-amber-400 mb-2">£25-£45</p>
+              <p className="text-4xl font-bold text-amber-400 mb-2">&pound;50-&pound;120</p>
               <p className="text-white font-medium mb-1">Standard Cover</p>
-              <p className="text-white/60 text-sm">Accidents + illness, most popular</p>
+              <p className="text-white/60 text-sm">Theft + damage, most popular</p>
             </div>
             <div className="bg-stone-900/40 rounded-xl p-6 text-center">
-              <p className="text-4xl font-bold text-amber-400 mb-2">£45-£80+</p>
+              <p className="text-4xl font-bold text-amber-400 mb-2">&pound;120-&pound;300+</p>
               <p className="text-white font-medium mb-1">Comprehensive</p>
-              <p className="text-white/60 text-sm">Full cover including routine care</p>
+              <p className="text-white/60 text-sm">Full cover including breakdown</p>
             </div>
           </div>
 
           <p className="text-center mt-8">
-            <Link href="/puppy-insurance-cost" className="text-amber-400 hover:text-amber-300 underline font-medium">
-              View our complete puppy insurance cost guide →
+            <Link href="/tractor-insurance-cost" className="text-amber-400 hover:text-amber-300 underline font-medium">
+              View our complete tractor insurance cost guide &rarr;
             </Link>
           </p>
         </Section>
 
-        {/* Compare Pet Insurance Section */}
-        <Section id="compare-pet-insurance" className="bg-stone-900/30">
+        {/* Compare Tractor Insurance Section */}
+        <Section id="compare-tractor-insurance" className="bg-stone-900/30">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Compare Pet Insurance Plans
+              Compare Tractor Insurance Plans
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
-              Not sure which plan is right for your puppy? <strong className="text-white">Compare pet insurance</strong> options
+              Not sure which plan is right for your tractor? <strong className="text-white">Compare tractor insurance</strong> options
               side-by-side to find the perfect balance of coverage and cost for your needs.
             </p>
           </div>
@@ -692,61 +688,61 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 border border-slate-700">
               <h4 className="text-lg font-bold text-white mb-2">Basic</h4>
-              <p className="text-3xl font-bold text-white mb-1">£12<span className="text-lg">/mo</span></p>
-              <p className="text-white/60 text-sm mb-4">Up to £5,000/year</p>
+              <p className="text-3xl font-bold text-white mb-1">&pound;25<span className="text-lg">/mo</span></p>
+              <p className="text-white/60 text-sm mb-4">Up to &pound;25,000/year</p>
               <ul className="space-y-2 text-sm text-white/70">
-                <li>✓ Accident coverage</li>
-                <li>✓ Emergency care</li>
-                <li>✓ 24/7 helpline</li>
+                <li>&#10003; Third-party liability</li>
+                <li>&#10003; Fire coverage</li>
+                <li>&#10003; 24/7 helpline</li>
               </ul>
             </div>
             <div className="bg-gradient-to-br from-blue-900 to-blue-950 rounded-xl p-6 border-2 border-blue-500/50 relative">
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full">Most Popular</span>
               <h4 className="text-lg font-bold text-white mb-2">Standard</h4>
-              <p className="text-3xl font-bold text-white mb-1">£28<span className="text-lg">/mo</span></p>
-              <p className="text-white/60 text-sm mb-4">Up to £10,000/year</p>
+              <p className="text-3xl font-bold text-white mb-1">&pound;75<span className="text-lg">/mo</span></p>
+              <p className="text-white/60 text-sm mb-4">Up to &pound;75,000/year</p>
               <ul className="space-y-2 text-sm text-white/70">
-                <li>✓ Accidents & illness</li>
-                <li>✓ Prescriptions</li>
-                <li>✓ Specialist treatment</li>
+                <li>&#10003; Theft &amp; accidental damage</li>
+                <li>&#10003; Road use cover</li>
+                <li>&#10003; Breakdown assistance</li>
               </ul>
             </div>
             <div className="bg-gradient-to-br from-purple-900 to-purple-950 rounded-xl p-6 border border-purple-700">
               <h4 className="text-lg font-bold text-white mb-2">Premium</h4>
-              <p className="text-3xl font-bold text-white mb-1">£45<span className="text-lg">/mo</span></p>
-              <p className="text-white/60 text-sm mb-4">Up to £20,000/year</p>
+              <p className="text-3xl font-bold text-white mb-1">&pound;150<span className="text-lg">/mo</span></p>
+              <p className="text-white/60 text-sm mb-4">Up to &pound;150,000/year</p>
               <ul className="space-y-2 text-sm text-white/70">
-                <li>✓ All Standard features</li>
-                <li>✓ Dental cover</li>
-                <li>✓ Hereditary conditions</li>
+                <li>&#10003; All Standard features</li>
+                <li>&#10003; Hire replacement cover</li>
+                <li>&#10003; Attached implements</li>
               </ul>
             </div>
             <div className="bg-gradient-to-br from-emerald-900 to-emerald-950 rounded-xl p-6 border border-emerald-700">
               <h4 className="text-lg font-bold text-white mb-2">Comprehensive</h4>
-              <p className="text-3xl font-bold text-white mb-1">£68<span className="text-lg">/mo</span></p>
-              <p className="text-white/60 text-sm mb-4">Up to £50,000/year</p>
+              <p className="text-3xl font-bold text-white mb-1">&pound;250<span className="text-lg">/mo</span></p>
+              <p className="text-white/60 text-sm mb-4">Up to &pound;500,000/year</p>
               <ul className="space-y-2 text-sm text-white/70">
-                <li>✓ Everything covered</li>
-                <li>✓ Zero deductible option</li>
-                <li>✓ Alternative therapies</li>
+                <li>&#10003; Everything covered</li>
+                <li>&#10003; Zero excess option</li>
+                <li>&#10003; Fleet discount available</li>
               </ul>
             </div>
           </div>
 
           <p className="text-center mt-8">
-            <Link href="/compare-pet-insurance" className="text-amber-400 hover:text-amber-300 underline font-medium">
-              View detailed plan comparison →
+            <Link href="/compare-tractor-insurance" className="text-amber-400 hover:text-amber-300 underline font-medium">
+              View detailed plan comparison &rarr;
             </Link>
           </p>
         </Section>
 
-        {/* Best Puppy Insurance Section */}
-        <Section id="best-puppy-insurance">
+        {/* Best Tractor Insurance Section */}
+        <Section id="best-tractor-insurance">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
               <Image
-                src="https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800&q=80"
-                alt="Best puppy insurance - Golden Retriever puppy"
+                src="https://images.unsplash.com/photo-1592805144716-feeccccef5ac?w=800&q=80"
+                alt="Best tractor insurance - Modern farm tractor"
                 width={600}
                 height={400}
                 className="rounded-2xl shadow-2xl"
@@ -754,92 +750,92 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
             </div>
             <div className="order-1 lg:order-2">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                Finding the Best Puppy Insurance in 2025
+                Finding the Best Tractor Insurance in 2025
               </h2>
               <p className="text-white/70 text-lg leading-relaxed mb-6">
-                The <strong className="text-white">best puppy insurance</strong> isn&apos;t always the cheapest - it&apos;s the one
-                that provides the right coverage for your specific breed and circumstances. Here&apos;s what to look for:
+                The <strong className="text-white">best tractor insurance</strong> isn&apos;t always the cheapest - it&apos;s the one
+                that provides the right coverage for your specific machine and usage. Here&apos;s what to look for:
               </p>
               <div className="space-y-4">
                 <div className="bg-stone-900/60 rounded-xl p-4 border border-stone-700/50">
-                  <h4 className="font-bold text-white mb-1">Lifetime Cover</h4>
-                  <p className="text-white/60 text-sm">Covers conditions for life, not just one policy year. Essential for breeds prone to chronic conditions.</p>
+                  <h4 className="font-bold text-white mb-1">Agreed Value Cover</h4>
+                  <p className="text-white/60 text-sm">Ensures you receive the full agreed value in case of total loss, not a depreciated market value.</p>
                 </div>
                 <div className="bg-stone-900/60 rounded-xl p-4 border border-stone-700/50">
-                  <h4 className="font-bold text-white mb-1">Hereditary Condition Cover</h4>
-                  <p className="text-white/60 text-sm">Many breeds have genetic health issues. Make sure these are covered from the start.</p>
+                  <h4 className="font-bold text-white mb-1">Road &amp; Field Use</h4>
+                  <p className="text-white/60 text-sm">If your tractor travels between fields on public roads, you need road-use cover to meet legal requirements.</p>
                 </div>
                 <div className="bg-stone-900/60 rounded-xl p-4 border border-stone-700/50">
-                  <h4 className="font-bold text-white mb-1">No Upper Age Limit</h4>
-                  <p className="text-white/60 text-sm">Some insurers won&apos;t cover dogs over 8-10 years. Look for lifetime policies without age caps.</p>
+                  <h4 className="font-bold text-white mb-1">Implements &amp; Attachments</h4>
+                  <p className="text-white/60 text-sm">Make sure ploughs, loaders, mowers, and other attachments are covered under your policy.</p>
                 </div>
                 <div className="bg-stone-900/60 rounded-xl p-4 border border-stone-700/50">
-                  <h4 className="font-bold text-white mb-1">Direct Vet Payment</h4>
-                  <p className="text-white/60 text-sm">The best policies pay your vet directly, so you don&apos;t have to find hundreds of pounds upfront.</p>
+                  <h4 className="font-bold text-white mb-1">Hire Replacement</h4>
+                  <p className="text-white/60 text-sm">The best policies cover the cost of hiring a replacement tractor while yours is being repaired.</p>
                 </div>
               </div>
               <p className="mt-6">
-                <Link href="/best-puppy-insurance" className="text-amber-400 hover:text-amber-300 underline font-medium">
-                  Read our complete guide to the best puppy insurance →
+                <Link href="/best-tractor-insurance" className="text-amber-400 hover:text-amber-300 underline font-medium">
+                  Read our complete guide to the best tractor insurance &rarr;
                 </Link>
               </p>
             </div>
           </div>
         </Section>
 
-        {/* Cheap Puppy Insurance Section */}
-        <Section id="cheap-puppy-insurance" className="bg-stone-900/30">
+        {/* Cheap Tractor Insurance Section */}
+        <Section id="cheap-tractor-insurance" className="bg-stone-900/30">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Cheap Puppy Insurance That Doesn&apos;t Compromise
+              Cheap Tractor Insurance That Doesn&apos;t Compromise
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
-              Looking for <strong className="text-white">cheap puppy insurance</strong>? You don&apos;t have to sacrifice quality
+              Looking for <strong className="text-white">cheap tractor insurance</strong>? You don&apos;t have to sacrifice quality
               for affordability. Here are proven ways to reduce your premium while maintaining solid coverage.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             <div className="bg-stone-900/60 rounded-xl p-6 border border-stone-700/50">
-              <div className="text-3xl mb-4">💰</div>
+              <div className="text-3xl mb-4">&#128176;</div>
               <h4 className="font-bold text-white mb-2">Increase Your Excess</h4>
-              <p className="text-white/60 text-sm">Choosing a higher excess (£100-£250) can reduce monthly premiums by 15-30%.</p>
+              <p className="text-white/60 text-sm">Choosing a higher excess (&pound;500-&pound;1,000) can reduce monthly premiums by 15-30%.</p>
             </div>
             <div className="bg-stone-900/60 rounded-xl p-6 border border-stone-700/50">
-              <div className="text-3xl mb-4">📅</div>
+              <div className="text-3xl mb-4">&#128197;</div>
               <h4 className="font-bold text-white mb-2">Pay Annually</h4>
               <p className="text-white/60 text-sm">Annual payment often saves 10-15% compared to monthly direct debit.</p>
             </div>
             <div className="bg-stone-900/60 rounded-xl p-6 border border-stone-700/50">
-              <div className="text-3xl mb-4">🐕</div>
-              <h4 className="font-bold text-white mb-2">Multi-Pet Discount</h4>
-              <p className="text-white/60 text-sm">Insuring multiple pets with the same provider often qualifies for 5-15% discount.</p>
+              <div className="text-3xl mb-4">🚜</div>
+              <h4 className="font-bold text-white mb-2">Fleet Discount</h4>
+              <p className="text-white/60 text-sm">Insuring multiple tractors or vehicles with the same provider qualifies for 10-20% discount.</p>
             </div>
             <div className="bg-stone-900/60 rounded-xl p-6 border border-stone-700/50">
-              <div className="text-3xl mb-4">🏥</div>
-              <h4 className="font-bold text-white mb-2">Choose Lower Coverage Limit</h4>
-              <p className="text-white/60 text-sm">If you have savings for emergencies, a £5,000 limit may suffice over £15,000.</p>
+              <div className="text-3xl mb-4">&#127969;</div>
+              <h4 className="font-bold text-white mb-2">Secure Storage</h4>
+              <p className="text-white/60 text-sm">Keeping your tractor in a locked barn or compound can reduce theft premiums significantly.</p>
             </div>
             <div className="bg-stone-900/60 rounded-xl p-6 border border-stone-700/50">
-              <div className="text-3xl mb-4">⏰</div>
-              <h4 className="font-bold text-white mb-2">Insure Early</h4>
-              <p className="text-white/60 text-sm">Premiums are lowest for puppies 8-12 weeks old. Waiting costs more.</p>
+              <div className="text-3xl mb-4">&#9201;</div>
+              <h4 className="font-bold text-white mb-2">Limited Road Use</h4>
+              <p className="text-white/60 text-sm">If your tractor stays on private land, field-only policies are much cheaper than road-use cover.</p>
             </div>
             <div className="bg-stone-900/60 rounded-xl p-6 border border-stone-700/50">
-              <div className="text-3xl mb-4">🔍</div>
+              <div className="text-3xl mb-4">&#128269;</div>
               <h4 className="font-bold text-white mb-2">Compare Providers</h4>
-              <p className="text-white/60 text-sm">Prices vary significantly between insurers. Always compare at least 5 quotes.</p>
+              <p className="text-white/60 text-sm">Prices vary significantly between insurers. Always compare at least 5 specialist agricultural quotes.</p>
             </div>
           </div>
 
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6 md:p-8">
             <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="text-6xl">⚠️</div>
+              <div className="text-6xl">&#9888;&#65039;</div>
               <div>
                 <h4 className="text-xl font-bold text-amber-300 mb-2">A Warning About &quot;Too Cheap&quot; Insurance</h4>
                 <p className="text-white/70">
-                  Be cautious of policies under £10/month - they often have severe limitations like accident-only cover,
-                  12-month condition limits, or very low annual caps. A single surgery can cost £3,000-£8,000,
+                  Be cautious of policies under &pound;20/month - they often have severe limitations like third-party only cover,
+                  no theft protection, or very low payout limits. A single engine rebuild can cost &pound;5,000-&pound;15,000,
                   so make sure your &quot;cheap&quot; policy actually covers what you need.
                 </p>
               </div>
@@ -847,90 +843,90 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
           </div>
 
           <p className="text-center mt-8">
-            <Link href="/cheap-puppy-insurance" className="text-amber-400 hover:text-amber-300 underline font-medium">
-              View our cheap puppy insurance guide →
+            <Link href="/cheap-tractor-insurance" className="text-amber-400 hover:text-amber-300 underline font-medium">
+              View our cheap tractor insurance guide &rarr;
             </Link>
           </p>
         </Section>
 
-        {/* Breed-Specific Insurance Section */}
-        <Section id="breed-insurance">
+        {/* Tractor Type Insurance Section */}
+        <Section id="tractor-type-insurance">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Dog Insurance by Breed
+              Tractor Insurance by Type
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
-              Different breeds have different health risks and insurance costs. Explore our breed-specific guides
-              to understand what coverage your dog needs and how much you&apos;ll pay.
+              Different tractor types have different risks and insurance costs. Explore our type-specific guides
+              to understand what coverage your machinery needs and how much you&apos;ll pay.
             </p>
           </div>
 
           <div className="bg-stone-900/60 backdrop-blur-sm rounded-2xl border border-stone-700/50 p-6 md:p-8 mb-12">
-            <h3 className="text-xl font-bold text-white mb-6 text-center">Premium Multiplier by Breed Risk Category</h3>
+            <h3 className="text-xl font-bold text-white mb-6 text-center">Premium Multiplier by Tractor Risk Category</h3>
             <div className="h-80">
               <BreedRiskChart />
             </div>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <BreedCard
-              name="Labrador"
-              href="/labrador-insurance"
+            <TractorCard
+              name="Farm Tractor"
+              href="/farm-tractor-insurance"
               risk="medium"
-              description="Britain's favourite breed. Active dogs prone to hip dysplasia and joint issues."
-              image="https://images.unsplash.com/photo-1591769225440-811ad7d6eab3?w=500&q=80"
+              description="The workhorse of British farming. High-value machines prone to mechanical wear and theft."
+              image="https://images.unsplash.com/photo-1530267981375-f0de937f5f13?w=500&q=80"
             />
-            <BreedCard
-              name="French Bulldog"
-              href="/french-bulldog-insurance"
+            <TractorCard
+              name="Vintage Tractor"
+              href="/vintage-tractor-insurance"
               risk="high"
-              description="Popular but expensive to insure due to breathing and spinal issues."
-              image="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=500&q=80"
+              description="Classic and collectible tractors requiring specialist agreed-value cover."
+              image="https://images.unsplash.com/photo-1605338803901-58d0e5312a3e?w=500&q=80"
             />
-            <BreedCard
-              name="Cockapoo"
-              href="/cockapoo-insurance"
+            <TractorCard
+              name="Compact Tractor"
+              href="/compact-tractor-insurance"
               risk="low"
-              description="Healthy crossbreed with lower premiums than purebreds."
-              image="https://images.unsplash.com/photo-1591946614720-90a587da4a36?w=500&q=80"
+              description="Smaller machines for smallholdings and estates with lower premiums."
+              image="https://images.unsplash.com/photo-1592805144716-feeccccef5ac?w=500&q=80"
             />
-            <BreedCard
-              name="Jack Russell"
-              href="/jack-russell-insurance"
-              risk="low"
-              description="Hardy terriers with few health issues but accident-prone nature."
-              image="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=500&q=80"
-            />
-            <BreedCard
-              name="Pug"
-              href="/pug-insurance"
-              risk="high"
-              description="Brachycephalic breed requiring comprehensive cover for breathing issues."
-              image="https://images.unsplash.com/photo-1517849845537-4d257902454a?w=500&q=80"
-            />
-            <BreedCard
-              name="Cavapoo"
-              href="/cavapoo-insurance"
+            <TractorCard
+              name="Utility Tractor"
+              href="/utility-tractor-insurance"
               risk="medium"
-              description="Popular designer breed. Watch for inherited heart conditions."
-              image="https://images.unsplash.com/photo-1587564758086-8c0c91521428?w=500&q=80"
+              description="Versatile all-rounders used for multiple tasks across the farm."
+              image="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=500&q=80"
             />
-            <BreedCard
-              name="Dachshund"
-              href="/dachshund-insurance"
-              risk="high"
-              description="Prone to IVDD spinal disease. Specialist cover essential."
-              image="https://images.unsplash.com/photo-1612195583950-b8fd34c87093?w=500&q=80"
+            <TractorCard
+              name="Mini Tractor"
+              href="/mini-tractor-insurance"
+              risk="low"
+              description="Sub-compact machines for gardens and small properties with affordable cover."
+              image="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=500&q=80"
+            />
+            <TractorCard
+              name="Garden Tractor"
+              href="/garden-tractor-insurance"
+              risk="low"
+              description="Domestic garden tractors and ride-on equipment for private use."
+              image="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500&q=80"
+            />
+            <TractorCard
+              name="Ride-on Mower"
+              href="/ride-on-mower-insurance"
+              risk="low"
+              description="Ride-on mowers and groundcare equipment for larger gardens and estates."
+              image="https://images.unsplash.com/photo-1589923188900-85dae523342b?w=500&q=80"
             />
             <div className="bg-stone-900/60 backdrop-blur-sm rounded-2xl border border-amber-500/30 p-6 flex flex-col items-center justify-center text-center">
-              <div className="text-4xl mb-4">🐕</div>
-              <h3 className="text-lg font-bold text-white mb-2">Other Breeds</h3>
-              <p className="text-white/60 text-sm mb-4">We cover 18+ breeds including Golden Retrievers, Bulldogs, Beagles, and more.</p>
+              <div className="text-4xl mb-4">🚜</div>
+              <h3 className="text-lg font-bold text-white mb-2">Other Machinery</h3>
+              <p className="text-white/60 text-sm mb-4">We also cover combine harvesters, telehandlers, ATVs, and more farm machinery.</p>
               <button
-                onClick={() => handleQuickPrompt("What breeds do you cover?")}
+                onClick={() => handleQuickPrompt("What types of agricultural machinery do you cover?")}
                 className="text-amber-400 hover:text-amber-300 font-medium text-sm"
               >
-                Ask Buddy about your breed →
+                Ask Tracker about your machine &rarr;
               </button>
             </div>
           </div>
@@ -940,10 +936,10 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
         <Section className="bg-stone-900/30">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              How to Choose the Right Puppy Insurance
+              How to Choose the Right Tractor Insurance
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
-              Follow our step-by-step guide to find the perfect policy for your new puppy. Making the right choice now
+              Follow our step-by-step guide to find the perfect policy for your tractor. Making the right choice now
               saves thousands in the long run.
             </p>
           </div>
@@ -953,25 +949,25 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
               <div className="flex gap-4">
                 <div className="w-12 h-12 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center font-bold text-xl shrink-0">1</div>
                 <div>
-                  <h4 className="font-bold text-white text-lg mb-2">Research Your Breed&apos;s Health Risks</h4>
-                  <p className="text-white/60">Every breed has specific conditions they&apos;re prone to. French Bulldogs need BOAS cover,
-                  Dachshunds need spinal cover, Labs need joint cover. Know what to look for.</p>
+                  <h4 className="font-bold text-white text-lg mb-2">Assess Your Tractor&apos;s Value</h4>
+                  <p className="text-white/60">Know your tractor&apos;s current market value. New machines need comprehensive cover,
+                  while older tractors may only need third-party. Get a professional valuation for vintage models.</p>
                 </div>
               </div>
               <div className="flex gap-4">
                 <div className="w-12 h-12 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center font-bold text-xl shrink-0">2</div>
                 <div>
-                  <h4 className="font-bold text-white text-lg mb-2">Decide on Coverage Level</h4>
-                  <p className="text-white/60">Accident-only is cheapest but limited. Time-limited covers conditions for 12 months.
-                  Lifetime cover is comprehensive but costs more. Choose based on your budget and risk tolerance.</p>
+                  <h4 className="font-bold text-white text-lg mb-2">Determine Usage Requirements</h4>
+                  <p className="text-white/60">Field-only use is cheaper to insure. If you drive on public roads between fields,
+                  you legally need road-use cover. Commercial haulage needs specialist policies.</p>
                 </div>
               </div>
               <div className="flex gap-4">
                 <div className="w-12 h-12 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center font-bold text-xl shrink-0">3</div>
                 <div>
-                  <h4 className="font-bold text-white text-lg mb-2">Set Your Annual Limit</h4>
-                  <p className="text-white/60">£5,000 covers most incidents, but complex surgeries can cost £8,000+.
-                  High-risk breeds should consider £10,000-£15,000 limits minimum.</p>
+                  <h4 className="font-bold text-white text-lg mb-2">Consider Attachment Cover</h4>
+                  <p className="text-white/60">Ploughs, loaders, sprayers, and trailers can be worth thousands.
+                  Make sure your policy covers all attached and detached implements.</p>
                 </div>
               </div>
             </div>
@@ -979,37 +975,37 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
               <div className="flex gap-4">
                 <div className="w-12 h-12 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center font-bold text-xl shrink-0">4</div>
                 <div>
-                  <h4 className="font-bold text-white text-lg mb-2">Compare Multiple Quotes</h4>
-                  <p className="text-white/60">Prices vary dramatically between providers. Get at least 5 quotes and compare
-                  not just price but exclusions, waiting periods, and claim limits.</p>
+                  <h4 className="font-bold text-white text-lg mb-2">Compare Specialist Providers</h4>
+                  <p className="text-white/60">General insurers often don&apos;t understand agricultural needs. Use specialist farm
+                  insurance brokers who know the sector and can offer tailored policies.</p>
                 </div>
               </div>
               <div className="flex gap-4">
                 <div className="w-12 h-12 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center font-bold text-xl shrink-0">5</div>
                 <div>
-                  <h4 className="font-bold text-white text-lg mb-2">Read the Policy Document</h4>
-                  <p className="text-white/60">The devil is in the details. Check for breed-specific exclusions, waiting periods for
-                  illness claims (usually 14 days), and what &quot;pre-existing conditions&quot; means.</p>
+                  <h4 className="font-bold text-white text-lg mb-2">Check Security Requirements</h4>
+                  <p className="text-white/60">Many insurers require specific security measures - immobilisers, GPS trackers,
+                  locked storage. Meeting these requirements upfront avoids claim rejections later.</p>
                 </div>
               </div>
               <div className="flex gap-4">
                 <div className="w-12 h-12 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center font-bold text-xl shrink-0">6</div>
                 <div>
-                  <h4 className="font-bold text-white text-lg mb-2">Insure Early, Don&apos;t Wait</h4>
-                  <p className="text-white/60">Every week you wait is a week your puppy could develop a condition that becomes
-                  &quot;pre-existing&quot; and uninsurable. Most puppies can be insured from 8 weeks.</p>
+                  <h4 className="font-bold text-white text-lg mb-2">Review Breakdown Cover</h4>
+                  <p className="text-white/60">During harvest or planting season, a breakdown can cost you thousands in lost time.
+                  Good breakdown cover with rapid response is essential for working farms.</p>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-8 text-center">
-            <h3 className="text-2xl font-bold text-stone-950 mb-4">Ready to Protect Your Puppy?</h3>
+            <h3 className="text-2xl font-bold text-stone-950 mb-4">Ready to Protect Your Tractor?</h3>
             <p className="text-stone-800 mb-6 max-w-xl mx-auto">
-              Chat with Buddy, our AI insurance advisor, to get personalised recommendations for your specific breed and circumstances.
+              Chat with Tracker, our AI insurance advisor, to get personalised recommendations for your specific machine and usage.
             </p>
             <button
-              onClick={() => handleQuickPrompt("Help me find the right insurance for my puppy")}
+              onClick={() => handleQuickPrompt("Help me find the right insurance for my tractor")}
               className="px-8 py-4 bg-stone-950 text-white font-bold rounded-xl hover:bg-stone-900 transition-all"
             >
               Start Your Free Consultation
@@ -1017,11 +1013,11 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
           </div>
         </Section>
 
-        {/* Types of Pet Insurance Section */}
+        {/* Types of Tractor Insurance Section */}
         <Section id="types-of-insurance">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Understanding Different Types of Pet Insurance
+              Understanding Different Types of Tractor Insurance
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
               Before you buy, it&apos;s crucial to understand the different policy types available in the UK market.
@@ -1032,95 +1028,95 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             <div className="bg-stone-900/60 rounded-2xl border border-stone-700/50 overflow-hidden">
               <div className="bg-emerald-600 px-6 py-4">
-                <h3 className="text-xl font-bold text-white">Lifetime Pet Insurance</h3>
-                <p className="text-emerald-100 text-sm">Best for long-term protection</p>
+                <h3 className="text-xl font-bold text-white">Comprehensive Cover</h3>
+                <p className="text-emerald-100 text-sm">Best for high-value machinery</p>
               </div>
               <div className="p-6">
                 <p className="text-white/70 mb-4">
-                  <strong className="text-white">Lifetime insurance</strong> is the gold standard of pet cover. It provides
-                  continuous protection for ongoing conditions throughout your dog&apos;s life, with the annual limit resetting
-                  each year when you renew.
+                  <strong className="text-white">Comprehensive tractor insurance</strong> is the gold standard of cover. It protects
+                  against theft, fire, accidental damage, malicious damage, and third-party claims. Most policies also include
+                  breakdown assistance and replacement hire.
                 </p>
                 <p className="text-white/70 mb-4">
-                  If your puppy develops diabetes, hip dysplasia, or any chronic condition, lifetime cover continues paying
-                  for treatment year after year - provided you renew without a break. This is particularly important for
-                  breeds prone to hereditary conditions like French Bulldogs, Cavalier King Charles Spaniels, and Dachshunds.
+                  For new or high-value tractors, comprehensive cover ensures you receive the full agreed value in case of
+                  a write-off. This is particularly important for modern machines with GPS guidance systems, precision farming
+                  technology, and other expensive integrated equipment.
                 </p>
                 <div className="flex items-center gap-4 mt-6">
-                  <span className="text-2xl font-bold text-emerald-400">£35-£80/mo</span>
+                  <span className="text-2xl font-bold text-emerald-400">&pound;120-&pound;300/mo</span>
                   <span className="text-white/50">|</span>
-                  <span className="text-white/60">Best value long-term</span>
+                  <span className="text-white/60">Best for valuable machines</span>
                 </div>
               </div>
             </div>
 
             <div className="bg-stone-900/60 rounded-2xl border border-stone-700/50 overflow-hidden">
               <div className="bg-blue-600 px-6 py-4">
-                <h3 className="text-xl font-bold text-white">Annual/Time-Limited Insurance</h3>
-                <p className="text-blue-100 text-sm">Budget-friendly option</p>
+                <h3 className="text-xl font-bold text-white">Third-Party, Fire &amp; Theft</h3>
+                <p className="text-blue-100 text-sm">Mid-range protection</p>
               </div>
               <div className="p-6">
                 <p className="text-white/70 mb-4">
-                  <strong className="text-white">Time-limited policies</strong> cover each condition for a set period
-                  (usually 12 months) or up to a maximum amount per condition. After that, the condition becomes excluded.
+                  <strong className="text-white">TPFT policies</strong> cover you against theft, fire damage, and any damage or
+                  injury caused to third parties. However, accidental damage to your own tractor is not covered.
                 </p>
                 <p className="text-white/70 mb-4">
-                  This type is cheaper than lifetime cover but has significant drawbacks. If your dog develops a condition
-                  requiring ongoing treatment - like allergies, arthritis, or heart disease - you&apos;ll need to pay out
-                  of pocket after the 12-month period ends. Consider this carefully before choosing based on price alone.
+                  This type is a good middle ground for tractors that are a few years old where the replacement cost is
+                  moderate. If your tractor is stolen or catches fire, you&apos;re covered. But if you accidentally reverse
+                  into a gatepost or roll the machine, you&apos;ll pay for repairs yourself.
                 </p>
                 <div className="flex items-center gap-4 mt-6">
-                  <span className="text-2xl font-bold text-blue-400">£20-£40/mo</span>
+                  <span className="text-2xl font-bold text-blue-400">&pound;50-&pound;120/mo</span>
                   <span className="text-white/50">|</span>
-                  <span className="text-white/60">Lower cost, limited cover</span>
+                  <span className="text-white/60">Good for mid-value tractors</span>
                 </div>
               </div>
             </div>
 
             <div className="bg-stone-900/60 rounded-2xl border border-stone-700/50 overflow-hidden">
               <div className="bg-amber-600 px-6 py-4">
-                <h3 className="text-xl font-bold text-white">Maximum Benefit Insurance</h3>
-                <p className="text-amber-100 text-sm">Fixed amount per condition</p>
+                <h3 className="text-xl font-bold text-white">Third-Party Only</h3>
+                <p className="text-amber-100 text-sm">Legal minimum for road use</p>
               </div>
               <div className="p-6">
                 <p className="text-white/70 mb-4">
-                  <strong className="text-white">Maximum benefit policies</strong> set a fixed amount you can claim per
-                  condition (e.g., £2,000 for hip problems) with no time limit. Once you reach that limit, the condition
-                  is excluded forever.
+                  <strong className="text-white">Third-party only</strong> is the minimum legal requirement for any tractor
+                  used on public roads. It covers damage or injury you cause to other people, their vehicles, or property -
+                  but nothing on your own tractor.
                 </p>
                 <p className="text-white/70 mb-4">
-                  This can work well for acute conditions that resolve quickly, but chronic conditions can easily exceed
-                  the limit within months. For example, treating IVDD (common in Dachshunds) can cost £5,000-£10,000 for
-                  surgery alone, quickly exceeding most maximum benefit limits.
+                  This is the cheapest option but leaves your own machine completely unprotected. Only consider this for
+                  very old, low-value tractors where the cost of comprehensive cover exceeds the machine&apos;s value.
+                  Remember: even basic repairs can cost &pound;1,000+.
                 </p>
                 <div className="flex items-center gap-4 mt-6">
-                  <span className="text-2xl font-bold text-amber-400">£15-£35/mo</span>
+                  <span className="text-2xl font-bold text-amber-400">&pound;25-&pound;50/mo</span>
                   <span className="text-white/50">|</span>
-                  <span className="text-white/60">Limited per condition</span>
+                  <span className="text-white/60">Legal minimum only</span>
                 </div>
               </div>
             </div>
 
             <div className="bg-stone-900/60 rounded-2xl border border-stone-700/50 overflow-hidden">
               <div className="bg-slate-600 px-6 py-4">
-                <h3 className="text-xl font-bold text-white">Accident-Only Insurance</h3>
-                <p className="text-slate-100 text-sm">Basic emergency cover</p>
+                <h3 className="text-xl font-bold text-white">Fleet/Farm Policy</h3>
+                <p className="text-slate-100 text-sm">Best for multiple machines</p>
               </div>
               <div className="p-6">
                 <p className="text-white/70 mb-4">
-                  <strong className="text-white">Accident-only policies</strong> are the cheapest option but only cover
-                  injuries from accidents - not illnesses. This means broken bones and road traffic accidents are covered,
-                  but cancer, infections, allergies, and hereditary conditions are not.
+                  <strong className="text-white">Fleet policies</strong> cover all your agricultural vehicles under one policy.
+                  This typically includes tractors, combine harvesters, telehandlers, ATVs, and other farm machinery - often
+                  at a significant discount compared to insuring each separately.
                 </p>
                 <p className="text-white/70 mb-4">
-                  While this might seem like a good way to save money, illness claims actually make up the majority of
-                  pet insurance claims. Most pet owners find accident-only cover insufficient when their dog gets sick
-                  and they face a large vet bill with no support.
+                  Fleet policies are ideal for farms with 3+ vehicles. They simplify administration with one renewal date
+                  and one point of contact. Many also include automatic cover for new additions to your fleet for 30 days,
+                  giving you time to formally add new machines.
                 </p>
                 <div className="flex items-center gap-4 mt-6">
-                  <span className="text-2xl font-bold text-slate-400">£8-£20/mo</span>
+                  <span className="text-2xl font-bold text-slate-400">&pound;200-&pound;800+/mo</span>
                   <span className="text-white/50">|</span>
-                  <span className="text-white/60">Accidents only, no illness</span>
+                  <span className="text-white/60">Best value for multiple vehicles</span>
                 </div>
               </div>
             </div>
@@ -1129,10 +1125,9 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
           <div className="bg-gradient-to-br from-emerald-900/30 to-teal-900/30 rounded-2xl border border-emerald-500/20 p-6 md:p-8">
             <h4 className="text-xl font-bold text-white mb-4 text-center">Our Recommendation</h4>
             <p className="text-white/70 text-center max-w-2xl mx-auto">
-              For most puppy owners, we recommend <strong className="text-emerald-300">lifetime cover</strong> with at
-              least £7,000-£10,000 annual limit. Yes, it costs more upfront, but the peace of mind and long-term savings
-              when your dog needs treatment far outweigh the monthly premium difference. The average dog owner makes
-              2-3 significant claims over their pet&apos;s lifetime.
+              For most tractor owners, we recommend <strong className="text-emerald-300">comprehensive cover</strong> with
+              agreed value protection. The cost of a single major repair or theft far exceeds a year&apos;s premiums. If you
+              have multiple machines, a fleet policy offers the best value and simplest management.
             </p>
           </div>
         </Section>
@@ -1142,54 +1137,54 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
           <div className="grid lg:grid-cols-2 gap-12 items-start">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                What Pet Insurance Doesn&apos;t Cover
+                What Tractor Insurance Doesn&apos;t Cover
               </h2>
               <p className="text-white/70 text-lg leading-relaxed mb-6">
                 Understanding exclusions is just as important as knowing what&apos;s covered. Here are the most common
-                things that puppy insurance policies won&apos;t pay for:
+                things that tractor insurance policies won&apos;t pay for:
               </p>
 
               <div className="space-y-4">
                 <div className="flex gap-4 items-start">
-                  <span className="text-red-400 text-xl mt-1">✗</span>
+                  <span className="text-red-400 text-xl mt-1">&#10007;</span>
                   <div>
-                    <h4 className="font-bold text-white">Pre-existing Conditions</h4>
-                    <p className="text-white/60 text-sm">Any condition your puppy had before the policy started, or during the waiting period, won&apos;t be covered. This is why insuring early is so important.</p>
+                    <h4 className="font-bold text-white">Wear &amp; Tear</h4>
+                    <p className="text-white/60 text-sm">Normal mechanical wear, gradual deterioration, and routine maintenance are never covered. Insurance is for sudden, unexpected events only.</p>
                   </div>
                 </div>
                 <div className="flex gap-4 items-start">
-                  <span className="text-red-400 text-xl mt-1">✗</span>
+                  <span className="text-red-400 text-xl mt-1">&#10007;</span>
                   <div>
-                    <h4 className="font-bold text-white">Routine & Preventative Care</h4>
-                    <p className="text-white/60 text-sm">Vaccinations, flea/worm treatments, microchipping, and annual health checks are typically excluded unless you have a comprehensive wellness add-on.</p>
+                    <h4 className="font-bold text-white">Tyres (Unless Damaged by Accident)</h4>
+                    <p className="text-white/60 text-sm">Tyre replacement due to punctures, wear, or blowouts is typically excluded unless it results from an insured accident or collision.</p>
                   </div>
                 </div>
                 <div className="flex gap-4 items-start">
-                  <span className="text-red-400 text-xl mt-1">✗</span>
+                  <span className="text-red-400 text-xl mt-1">&#10007;</span>
                   <div>
-                    <h4 className="font-bold text-white">Neutering & Spaying</h4>
-                    <p className="text-white/60 text-sm">Elective procedures like neutering aren&apos;t covered as they&apos;re considered routine. However, complications arising from these procedures may be covered.</p>
+                    <h4 className="font-bold text-white">Unlicensed Road Use</h4>
+                    <p className="text-white/60 text-sm">If your policy is for field use only and you have an incident on a public road, your claim will be rejected. Ensure your cover matches your usage.</p>
                   </div>
                 </div>
                 <div className="flex gap-4 items-start">
-                  <span className="text-red-400 text-xl mt-1">✗</span>
+                  <span className="text-red-400 text-xl mt-1">&#10007;</span>
                   <div>
-                    <h4 className="font-bold text-white">Pregnancy & Breeding</h4>
-                    <p className="text-white/60 text-sm">Costs related to pregnancy, whelping, and breeding are excluded. If you plan to breed your dog, you&apos;ll need specialist breeder insurance.</p>
+                    <h4 className="font-bold text-white">Inadequate Security</h4>
+                    <p className="text-white/60 text-sm">Theft claims may be rejected if you haven&apos;t met security requirements - locked storage, immobiliser, or GPS tracker as specified in your policy.</p>
                   </div>
                 </div>
                 <div className="flex gap-4 items-start">
-                  <span className="text-red-400 text-xl mt-1">✗</span>
+                  <span className="text-red-400 text-xl mt-1">&#10007;</span>
                   <div>
-                    <h4 className="font-bold text-white">Cosmetic Procedures</h4>
-                    <p className="text-white/60 text-sm">Ear cropping, tail docking, and other cosmetic procedures aren&apos;t covered. Procedures deemed medically unnecessary are excluded.</p>
+                    <h4 className="font-bold text-white">Unqualified Operators</h4>
+                    <p className="text-white/60 text-sm">Damage caused by operators without proper training, licensing, or authorisation to use the machine will typically not be covered.</p>
                   </div>
                 </div>
                 <div className="flex gap-4 items-start">
-                  <span className="text-red-400 text-xl mt-1">✗</span>
+                  <span className="text-red-400 text-xl mt-1">&#10007;</span>
                   <div>
-                    <h4 className="font-bold text-white">Waiting Period Claims</h4>
-                    <p className="text-white/60 text-sm">Most policies have a 14-day waiting period for illness claims (accidents are often covered immediately). Conditions that arise during this period become pre-existing.</p>
+                    <h4 className="font-bold text-white">Consequential Loss</h4>
+                    <p className="text-white/60 text-sm">Lost income from crops not harvested, or contracts not fulfilled because your tractor broke down, is not covered unless you have specific business interruption add-ons.</p>
                   </div>
                 </div>
               </div>
@@ -1197,103 +1192,100 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
 
             <div>
               <Image
-                src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800&q=80"
-                alt="Two dogs running - healthy puppies need insurance too"
+                src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&q=80"
+                alt="Tractor working in field - understanding insurance exclusions"
                 width={600}
                 height={400}
                 className="rounded-2xl shadow-2xl mb-8"
               />
 
               <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6">
-                <h4 className="font-bold text-red-300 mb-3">Breed-Specific Exclusions to Watch</h4>
+                <h4 className="font-bold text-red-300 mb-3">Type-Specific Exclusions to Watch</h4>
                 <p className="text-white/70 text-sm mb-4">
-                  Some insurers exclude certain conditions for specific breeds. Always check for these:
+                  Some insurers have specific exclusions based on tractor type. Always check for these:
                 </p>
                 <ul className="space-y-2 text-white/60 text-sm">
-                  <li>• <strong className="text-white">French Bulldogs/Pugs:</strong> BOAS (breathing problems) sometimes excluded</li>
-                  <li>• <strong className="text-white">Dachshunds:</strong> IVDD (spinal disease) may have limits</li>
-                  <li>• <strong className="text-white">Cavaliers:</strong> Heart conditions (MVD) may be excluded</li>
-                  <li>• <strong className="text-white">Large breeds:</strong> Hip dysplasia exclusions common</li>
+                  <li>&#8226; <strong className="text-white">Vintage tractors:</strong> Rally/show use may need separate event cover</li>
+                  <li>&#8226; <strong className="text-white">High-HP machines:</strong> Some insurers limit cover above 300HP</li>
+                  <li>&#8226; <strong className="text-white">Modified tractors:</strong> Aftermarket modifications may void cover</li>
+                  <li>&#8226; <strong className="text-white">Hired-in machines:</strong> Usually need separate hire-in plant cover</li>
                 </ul>
               </div>
             </div>
           </div>
         </Section>
 
-        {/* Puppy Health Tips Section */}
-        <Section id="health-tips">
+        {/* Tractor Maintenance Tips Section */}
+        <Section id="maintenance-tips">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Keeping Your Puppy Healthy: Prevention Tips
+              Keeping Your Tractor in Top Condition
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
-              While insurance protects you financially, prevention is always better than cure. Here are expert tips
-              to keep your puppy healthy and potentially lower your insurance premiums over time.
+              While insurance protects you financially, proper maintenance prevents breakdowns and can lower your premiums.
+              Here are expert tips to keep your tractor running smoothly.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             <div className="bg-stone-900/60 rounded-xl p-6 border border-stone-700/50">
               <div className="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-2xl">🥗</span>
+                <span className="text-2xl">&#9881;&#65039;</span>
               </div>
-              <h4 className="font-bold text-white mb-2">Quality Nutrition</h4>
+              <h4 className="font-bold text-white mb-2">Regular Servicing</h4>
               <p className="text-white/60 text-sm">
-                Feed your puppy high-quality, age-appropriate food. Proper nutrition supports immune function, healthy
-                joints, and coat condition. Avoid overfeeding - obesity causes numerous health problems and can
-                increase insurance premiums.
+                Follow the manufacturer&apos;s service schedule. Regular oil changes, filter replacements, and inspections
+                prevent major failures and maintain your warranty. Keep all service records as proof for insurers.
               </p>
             </div>
             <div className="bg-stone-900/60 rounded-xl p-6 border border-stone-700/50">
               <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-2xl">🏃</span>
+                <span className="text-2xl">&#128167;</span>
               </div>
-              <h4 className="font-bold text-white mb-2">Regular Exercise</h4>
+              <h4 className="font-bold text-white mb-2">Hydraulic System Care</h4>
               <p className="text-white/60 text-sm">
-                Appropriate exercise keeps your puppy fit and mentally stimulated. However, avoid over-exercising young
-                puppies - their joints are still developing. A general rule is 5 minutes of exercise per month of age,
-                twice daily.
+                Check hydraulic fluid levels and condition regularly. Look for leaks around hoses, cylinders, and
+                connections. Hydraulic failures are one of the most common and expensive repairs.
               </p>
             </div>
             <div className="bg-stone-900/60 rounded-xl p-6 border border-stone-700/50">
               <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-2xl">💉</span>
+                <span className="text-2xl">&#128274;</span>
               </div>
-              <h4 className="font-bold text-white mb-2">Vaccinations</h4>
+              <h4 className="font-bold text-white mb-2">Security Measures</h4>
               <p className="text-white/60 text-sm">
-                Keep vaccinations up to date. Core vaccines protect against parvovirus, distemper, and leptospirosis -
-                all serious and expensive to treat. Many insurers require proof of vaccination for claims to be valid.
+                Fit an immobiliser and GPS tracker. Store in a locked building overnight. Good security not only prevents
+                theft but can significantly reduce your insurance premium.
               </p>
             </div>
             <div className="bg-stone-900/60 rounded-xl p-6 border border-stone-700/50">
               <div className="w-12 h-12 bg-amber-500/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-2xl">🦷</span>
+                <span className="text-2xl">&#128308;</span>
               </div>
-              <h4 className="font-bold text-white mb-2">Dental Care</h4>
+              <h4 className="font-bold text-white mb-2">Tyre Maintenance</h4>
               <p className="text-white/60 text-sm">
-                Start dental hygiene early. Brush your puppy&apos;s teeth regularly to prevent periodontal disease,
-                which affects 80% of dogs by age 3. Dental problems can lead to heart, kidney, and liver issues.
+                Check tyre pressures regularly - incorrect pressure causes uneven wear, reduces traction, and increases
+                fuel consumption. Inspect for cuts, cracks, and embedded objects before each use.
               </p>
             </div>
             <div className="bg-stone-900/60 rounded-xl p-6 border border-stone-700/50">
               <div className="w-12 h-12 bg-pink-500/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-2xl">🔍</span>
+                <span className="text-2xl">&#128161;</span>
               </div>
-              <h4 className="font-bold text-white mb-2">Regular Vet Checks</h4>
+              <h4 className="font-bold text-white mb-2">Electrical Checks</h4>
               <p className="text-white/60 text-sm">
-                Annual vet check-ups catch problems early when they&apos;re cheaper and easier to treat. Your vet can
-                spot issues you might miss and provide breed-specific health advice. Early detection saves money
-                and improves outcomes.
+                Test all lights, indicators, and warning systems regularly - especially before road use. Check battery
+                terminals for corrosion and ensure the alternator is charging properly.
               </p>
             </div>
             <div className="bg-stone-900/60 rounded-xl p-6 border border-stone-700/50">
               <div className="w-12 h-12 bg-teal-500/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-2xl">🐛</span>
+                <span className="text-2xl">&#127777;&#65039;</span>
               </div>
-              <h4 className="font-bold text-white mb-2">Parasite Prevention</h4>
+              <h4 className="font-bold text-white mb-2">Cooling System</h4>
               <p className="text-white/60 text-sm">
-                Regular flea, tick, and worm treatments prevent parasitic diseases. Lungworm in particular can be
-                fatal if untreated. Monthly preventatives are much cheaper than treating an infestation or infection.
+                Keep radiators and grilles clear of debris. Check coolant levels and condition. Overheating causes
+                catastrophic engine damage - clean the radiator after dusty fieldwork.
               </p>
             </div>
           </div>
@@ -1301,42 +1293,42 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
           <div className="bg-stone-900/60 rounded-2xl border border-stone-700/50 p-6 md:p-8">
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div>
-                <h3 className="text-2xl font-bold text-white mb-4">The True Cost of Vet Care in 2025</h3>
+                <h3 className="text-2xl font-bold text-white mb-4">The True Cost of Tractor Repairs in 2025</h3>
                 <p className="text-white/70 mb-4">
-                  Veterinary costs have increased significantly in recent years. Understanding typical costs helps
-                  you appreciate the value of insurance:
+                  Tractor repair costs have increased significantly. Understanding typical costs helps you appreciate
+                  the value of insurance:
                 </p>
                 <ul className="space-y-3 text-white/70">
                   <li className="flex justify-between">
-                    <span>Emergency consultation</span>
-                    <span className="text-amber-400 font-medium">£150-£300</span>
+                    <span>Engine overhaul</span>
+                    <span className="text-amber-400 font-medium">&pound;5,000-&pound;15,000</span>
                   </li>
                   <li className="flex justify-between">
-                    <span>X-ray or ultrasound</span>
-                    <span className="text-amber-400 font-medium">£200-£500</span>
+                    <span>Transmission rebuild</span>
+                    <span className="text-amber-400 font-medium">&pound;3,000-&pound;8,000</span>
                   </li>
                   <li className="flex justify-between">
-                    <span>Blood tests</span>
-                    <span className="text-amber-400 font-medium">£100-£300</span>
+                    <span>Hydraulic pump replacement</span>
+                    <span className="text-amber-400 font-medium">&pound;1,500-&pound;4,000</span>
                   </li>
                   <li className="flex justify-between">
-                    <span>Cruciate ligament surgery</span>
-                    <span className="text-amber-400 font-medium">£2,000-£4,500</span>
+                    <span>PTO repair</span>
+                    <span className="text-amber-400 font-medium">&pound;800-&pound;2,500</span>
                   </li>
                   <li className="flex justify-between">
-                    <span>Cancer treatment</span>
-                    <span className="text-amber-400 font-medium">£3,000-£10,000+</span>
+                    <span>GPS/Autosteer system</span>
+                    <span className="text-amber-400 font-medium">&pound;8,000-&pound;25,000</span>
                   </li>
                   <li className="flex justify-between">
-                    <span>IVDD spinal surgery</span>
-                    <span className="text-amber-400 font-medium">£5,000-£10,000</span>
+                    <span>Complete cab replacement</span>
+                    <span className="text-amber-400 font-medium">&pound;10,000-&pound;30,000</span>
                   </li>
                 </ul>
               </div>
               <div className="relative">
                 <Image
-                  src="https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=600&q=80"
-                  alt="Veterinarian examining a puppy"
+                  src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&q=80"
+                  alt="Tractor maintenance and repairs"
                   width={500}
                   height={350}
                   className="rounded-xl shadow-lg"
@@ -1350,11 +1342,11 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
         <Section id="making-a-claim" className="bg-stone-900/30">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              How to Make a Pet Insurance Claim
+              How to Make a Tractor Insurance Claim
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
               Knowing how to claim properly ensures you get reimbursed quickly. Here&apos;s what you need to know
-              before your puppy needs treatment.
+              before your tractor needs a claim.
             </p>
           </div>
 
@@ -1363,10 +1355,10 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
               <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-stone-950">1</span>
               </div>
-              <h4 className="font-bold text-white mb-2">Visit the Vet</h4>
+              <h4 className="font-bold text-white mb-2">Report the Incident</h4>
               <p className="text-white/60 text-sm">
-                Take your puppy to any licensed vet (you don&apos;t need to use a specific network with most UK insurers).
-                Keep all receipts and invoices.
+                Contact your insurer immediately. For theft, also report to the police and get a crime reference number.
+                Take photos of any damage.
               </p>
             </div>
             <div className="text-center">
@@ -1375,28 +1367,28 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
               </div>
               <h4 className="font-bold text-white mb-2">Complete Claim Form</h4>
               <p className="text-white/60 text-sm">
-                Fill out your insurer&apos;s claim form. Most can be done online now. Your vet will need to complete
-                a section with clinical details.
+                Fill out your insurer&apos;s claim form with full details of the incident, including date, time, location,
+                and circumstances.
               </p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-stone-950">3</span>
               </div>
-              <h4 className="font-bold text-white mb-2">Submit Documents</h4>
+              <h4 className="font-bold text-white mb-2">Provide Evidence</h4>
               <p className="text-white/60 text-sm">
-                Send the completed form with invoices, receipts, and any clinical notes requested. Submit within
-                the time limit (usually 90-180 days).
+                Submit photos, repair quotes, police reports, and any witness details. The more evidence you provide,
+                the faster your claim will be processed.
               </p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-stone-950">4</span>
               </div>
-              <h4 className="font-bold text-white mb-2">Receive Payment</h4>
+              <h4 className="font-bold text-white mb-2">Receive Settlement</h4>
               <p className="text-white/60 text-sm">
-                Claims are typically processed within 5-10 working days. Payment goes to you or directly to your vet
-                if they offer direct billing.
+                Claims are typically processed within 10-20 working days. Payment covers repairs or replacement
+                value minus your excess.
               </p>
             </div>
           </div>
@@ -1405,23 +1397,23 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
             <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-6">
               <h4 className="font-bold text-emerald-300 mb-4">Tips for Faster Claims</h4>
               <ul className="space-y-2 text-white/70 text-sm">
-                <li>✓ Keep all receipts and invoices organised</li>
-                <li>✓ Take photos of documents before submitting</li>
-                <li>✓ Ask your vet to complete their section promptly</li>
-                <li>✓ Submit claims online rather than by post</li>
-                <li>✓ Respond quickly to any follow-up questions</li>
-                <li>✓ Know your policy excess and what&apos;s covered</li>
+                <li>&#10003; Keep all purchase receipts and service records</li>
+                <li>&#10003; Take photos of your tractor in good condition for reference</li>
+                <li>&#10003; Report theft to police within 24 hours</li>
+                <li>&#10003; Get at least two repair quotes from approved engineers</li>
+                <li>&#10003; Respond quickly to any follow-up questions from your insurer</li>
+                <li>&#10003; Know your policy excess and coverage limits</li>
               </ul>
             </div>
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-6">
               <h4 className="font-bold text-amber-300 mb-4">Common Reasons Claims Are Rejected</h4>
               <ul className="space-y-2 text-white/70 text-sm">
-                <li>✗ Condition existed before policy started</li>
-                <li>✗ Claim submitted after deadline</li>
-                <li>✗ Treatment during waiting period</li>
-                <li>✗ Annual limit already reached</li>
-                <li>✗ Vaccinations not up to date</li>
-                <li>✗ Treatment for excluded condition</li>
+                <li>&#10007; Security requirements not met (no immobiliser, unlocked)</li>
+                <li>&#10007; Claim submitted after deadline</li>
+                <li>&#10007; Maintenance-related failure (wear and tear)</li>
+                <li>&#10007; Unlicensed operator was driving</li>
+                <li>&#10007; Tractor used outside policy terms (e.g. road use on field-only policy)</li>
+                <li>&#10007; Modifications not declared to insurer</li>
               </ul>
             </div>
           </div>
@@ -1431,52 +1423,52 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
         <Section id="faq">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Frequently Asked Questions About Puppy Insurance
+              Frequently Asked Questions About Tractor Insurance
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
-              Get answers to the most common questions about insuring your new puppy.
+              Get answers to the most common questions about insuring your tractor.
             </p>
           </div>
 
           <div className="max-w-3xl mx-auto space-y-4">
             {[
               {
-                q: "When can I insure my puppy?",
-                a: "Most insurers allow you to insure puppies from 8 weeks old. Some require puppies to be microchipped and have had their first vaccinations. The earlier you insure, the lower your premiums and the fewer pre-existing condition exclusions."
+                q: "Do I need insurance for my tractor?",
+                a: "If your tractor is used on public roads, you legally need at least third-party insurance. For field-only use, insurance isn't legally required but is strongly recommended given the high cost of repairs and replacement. Most farmers and landowners choose to insure regardless of legal requirements."
               },
               {
-                q: "What does puppy insurance cover?",
-                a: "Standard policies cover vet fees for accidents and illnesses, including diagnostics, surgery, medication, and hospital stays. Comprehensive policies add dental care, routine treatments, behavioural therapy, and alternative therapies like hydrotherapy."
+                q: "What does tractor insurance cover?",
+                a: "Standard comprehensive policies cover theft, fire, accidental damage, malicious damage, and third-party liability. Many also include breakdown assistance, replacement hire, and attached implements. You can add optional extras like business interruption cover and legal expenses."
               },
               {
-                q: "What isn't covered by puppy insurance?",
-                a: "Pre-existing conditions (anything before the policy starts), routine vaccinations, neutering/spaying, pregnancy-related costs, and cosmetic procedures are typically excluded. Some policies exclude certain breed-specific conditions."
+                q: "How much does tractor insurance cost per month?",
+                a: "Expect to pay \u00a325-\u00a350/month for basic third-party cover, \u00a350-\u00a3120/month for TPFT, and \u00a3120-\u00a3300+/month for comprehensive cover. Costs vary significantly by tractor value, age, usage, location, and security measures."
               },
               {
-                q: "How much does puppy insurance cost per month?",
-                a: "Expect to pay £12-£25/month for basic cover, £25-£45/month for standard cover, and £45-£80+/month for comprehensive lifetime cover. Costs vary significantly by breed - French Bulldogs and Pugs cost more than Labradors or mixed breeds."
+                q: "Is tractor insurance different from regular vehicle insurance?",
+                a: "Yes. Tractor insurance is a specialist product that understands agricultural use, field operations, seasonal usage patterns, and the unique risks tractors face. Standard car insurance companies typically won't cover tractors, and general policies may not understand the sector."
               },
               {
-                q: "Is puppy insurance worth it?",
-                a: "The average vet bill for an emergency is £800, and complex surgeries can exceed £5,000-£10,000. If you couldn't afford an unexpected £3,000 bill, insurance is worth considering. It provides peace of mind and ensures your puppy always gets needed care."
+                q: "Can I insure a vintage tractor?",
+                a: "Yes, specialist vintage tractor insurance is available. These policies typically offer agreed-value cover (you agree the value upfront rather than accepting market value), rally/show cover, and restoration cover. Premiums are often lower due to limited road use and careful ownership."
               },
               {
-                q: "What's the difference between lifetime and annual policies?",
-                a: "Lifetime policies cover conditions for your dog's entire life, resetting the limit each year. Annual/time-limited policies only cover each condition for 12 months, then exclude it. For breeds with chronic conditions, lifetime is essential."
+                q: "Are my tractor attachments covered?",
+                a: "This depends on your policy. Many comprehensive policies cover permanently attached implements. Detached implements (ploughs stored separately, trailers, etc.) may need to be listed separately. Always declare all attachments and their values to your insurer."
               },
               {
-                q: "Can I insure an older dog?",
-                a: "Yes, but it's more expensive and some insurers won't cover dogs over 8-10 years for new policies. If you have a senior dog, look for providers specialising in older pet insurance. Pre-existing conditions won't be covered."
+                q: "What security do I need for tractor insurance?",
+                a: "Most insurers require an immobiliser as minimum. Many also require GPS tracking and locked overnight storage for theft cover to be valid. Higher security measures typically result in lower premiums. Check your specific policy requirements carefully."
               },
               {
-                q: "Do I need insurance if my puppy is healthy?",
-                a: "Insurance is for unexpected events - accidents, sudden illnesses, and hereditary conditions that appear later. Even healthy puppies can swallow foreign objects, break bones, or develop conditions. The best time to insure is while they're healthy."
+                q: "Can I get a fleet discount for multiple tractors?",
+                a: "Yes, most agricultural insurers offer fleet policies for 3+ vehicles at a significant discount (typically 10-20% off individual policy costs). Fleet policies also simplify administration with one renewal date and one policy document covering all machines."
               },
             ].map((faq, i) => (
               <details key={i} className="bg-stone-900/60 rounded-xl border border-stone-700/50 group">
                 <summary className="p-6 cursor-pointer text-white font-medium flex items-center justify-between">
                   {faq.q}
-                  <span className="text-amber-400 group-open:rotate-180 transition-transform">▼</span>
+                  <span className="text-amber-400 group-open:rotate-180 transition-transform">&#9660;</span>
                 </summary>
                 <div className="px-6 pb-6 text-white/70">
                   {faq.a}
@@ -1495,26 +1487,26 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
                 "mainEntity": [
                   {
                     "@type": "Question",
-                    "name": "When can I insure my puppy?",
+                    "name": "Do I need insurance for my tractor?",
                     "acceptedAnswer": {
                       "@type": "Answer",
-                      "text": "Most insurers allow you to insure puppies from 8 weeks old. Some require puppies to be microchipped and have had their first vaccinations."
+                      "text": "If your tractor is used on public roads, you legally need at least third-party insurance. For field-only use, insurance is strongly recommended given the high cost of repairs."
                     }
                   },
                   {
                     "@type": "Question",
-                    "name": "How much does puppy insurance cost per month?",
+                    "name": "How much does tractor insurance cost per month?",
                     "acceptedAnswer": {
                       "@type": "Answer",
-                      "text": "Expect to pay £12-£25/month for basic cover, £25-£45/month for standard cover, and £45-£80+/month for comprehensive lifetime cover."
+                      "text": "Expect to pay \u00a325-\u00a350/month for basic cover, \u00a350-\u00a3120/month for TPFT, and \u00a3120-\u00a3300+/month for comprehensive cover."
                     }
                   },
                   {
                     "@type": "Question",
-                    "name": "Is puppy insurance worth it?",
+                    "name": "Is tractor insurance different from regular vehicle insurance?",
                     "acceptedAnswer": {
                       "@type": "Answer",
-                      "text": "The average vet bill for an emergency is £800, and complex surgeries can exceed £5,000-£10,000. Insurance provides peace of mind and ensures your puppy always gets needed care."
+                      "text": "Yes. Tractor insurance is a specialist product that understands agricultural use, field operations, seasonal usage patterns, and the unique risks tractors face."
                     }
                   }
                 ]
@@ -1527,21 +1519,21 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
         <Section className="bg-gradient-to-b from-stone-900/50 to-amber-900/20">
           <div className="text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-              Protect Your Puppy Today
+              Protect Your Tractor Today
             </h2>
             <p className="text-white/70 text-lg max-w-2xl mx-auto mb-8">
               Don&apos;t wait until it&apos;s too late. Get a free, personalised quote in minutes and give your
-              furry friend the protection they deserve.
+              machinery the protection it deserves.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <button
-                onClick={() => handleQuickPrompt("I want to get a quote for my puppy")}
+                onClick={() => handleQuickPrompt("I want to get a quote for my tractor")}
                 className="px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-bold text-lg rounded-xl hover:from-amber-400 hover:to-orange-400 transition-all shadow-lg shadow-amber-500/25"
               >
                 Get Your Free Quote Now
               </button>
               <Link
-                href="/compare-pet-insurance"
+                href="/compare-tractor-insurance"
                 className="px-8 py-4 bg-white/10 border border-white/20 text-white font-semibold text-lg rounded-xl hover:bg-white/20 transition-all"
               >
                 Compare All Plans
@@ -1557,9 +1549,9 @@ ${state.currentQuote ? `CURRENT QUOTE: $${state.currentQuote.quote.monthlyPremiu
         {!loading && !state.currentQuote && (
           <div className="fixed bottom-6 left-6 right-6 md:left-auto md:right-6 md:w-96 z-50">
             <div className="bg-stone-900/95 backdrop-blur-md rounded-2xl border border-amber-500/20 p-4 shadow-xl">
-              <p className="text-white/60 text-sm mb-3">Quick questions for Buddy:</p>
+              <p className="text-white/60 text-sm mb-3">Quick questions for Tracker:</p>
               <div className="flex flex-wrap gap-2">
-                {['I have a Labrador', 'Compare plans', 'Get a quote', 'Cheapest option'].map((prompt) => (
+                {['I have a farm tractor', 'Compare plans', 'Get a quote', 'Cheapest option'].map((prompt) => (
                   <button
                     key={prompt}
                     onClick={() => handleQuickPrompt(prompt)}

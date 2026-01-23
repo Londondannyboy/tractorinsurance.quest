@@ -13,7 +13,7 @@ interface CTAProps {
 }
 
 export function CallToAction({
-  title = "Ready to Protect Your Puppy?",
+  title = "Ready to Protect Your Tractor?",
   description = "Get a personalized quote in minutes with our AI-powered advisor.",
   buttonText = "Get Your Quote",
   href = "/",

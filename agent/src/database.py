@@ -1,5 +1,5 @@
 """
-Database queries for Puppy Insurance Agent
+Database queries for Tractor Insurance Agent (Tracker)
 """
 
 import os
@@ -45,11 +45,11 @@ async def get_connection() -> AsyncGenerator[asyncpg.Connection, None]:
 
 
 # =============================================================================
-# DOG BREED QUERIES
+# TRACTOR TYPE QUERIES
 # =============================================================================
 
 async def get_all_breeds() -> List[Dict[str, Any]]:
-    """Get all dog breeds from database."""
+    """Get all tractor types from database."""
     try:
         async with get_connection() as conn:
             rows = await conn.fetch("""
@@ -59,15 +59,15 @@ async def get_all_breeds() -> List[Dict[str, Any]]:
                 FROM dog_breeds
                 ORDER BY name
             """)
-            print(f"[BUDDY DB] Retrieved {len(rows)} breeds", file=sys.stderr)
+            print(f"[TRACKER DB] Retrieved {len(rows)} tractor types", file=sys.stderr)
             return [dict(row) for row in rows]
     except Exception as e:
-        print(f"[BUDDY DB] Error fetching breeds: {e}", file=sys.stderr)
+        print(f"[TRACKER DB] Error fetching tractor types: {e}", file=sys.stderr)
         return []
 
 
 async def get_breed_by_name(name: str) -> Optional[Dict[str, Any]]:
-    """Get breed by name (fuzzy match)."""
+    """Get tractor type by name (fuzzy match)."""
     try:
         async with get_connection() as conn:
             # Try exact match first
@@ -80,7 +80,7 @@ async def get_breed_by_name(name: str) -> Optional[Dict[str, Any]]:
             """, name)
 
             if row:
-                print(f"[BUDDY DB] Found exact breed match: {row['name']}", file=sys.stderr)
+                print(f"[TRACKER DB] Found exact tractor type match: {row['name']}", file=sys.stderr)
                 return dict(row)
 
             # Try fuzzy match
@@ -96,18 +96,18 @@ async def get_breed_by_name(name: str) -> Optional[Dict[str, Any]]:
             """, f"%{name}%", name)
 
             if row:
-                print(f"[BUDDY DB] Found fuzzy breed match: {row['name']}", file=sys.stderr)
+                print(f"[TRACKER DB] Found fuzzy tractor type match: {row['name']}", file=sys.stderr)
                 return dict(row)
 
-            print(f"[BUDDY DB] No breed found for: {name}", file=sys.stderr)
+            print(f"[TRACKER DB] No tractor type found for: {name}", file=sys.stderr)
             return None
     except Exception as e:
-        print(f"[BUDDY DB] Error fetching breed by name: {e}", file=sys.stderr)
+        print(f"[TRACKER DB] Error fetching tractor type by name: {e}", file=sys.stderr)
         return None
 
 
 async def search_breeds(query: str) -> List[Dict[str, Any]]:
-    """Search breeds by name."""
+    """Search tractor types by name."""
     try:
         async with get_connection() as conn:
             rows = await conn.fetch("""
@@ -120,7 +120,7 @@ async def search_breeds(query: str) -> List[Dict[str, Any]]:
             """, f"%{query}%")
             return [dict(row) for row in rows]
     except Exception as e:
-        print(f"[BUDDY DB] Error searching breeds: {e}", file=sys.stderr)
+        print(f"[TRACKER DB] Error searching tractor types: {e}", file=sys.stderr)
         return []
 
 
@@ -131,63 +131,63 @@ async def search_breeds(query: str) -> List[Dict[str, Any]]:
 INSURANCE_PLANS = [
     {
         "type": "basic",
-        "name": "Puppy Basic",
-        "base_monthly_premium": 15,
-        "annual_coverage_limit": 5000,
-        "deductible": 250,
+        "name": "Tractor Basic",
+        "base_monthly_premium": 25,
+        "annual_coverage_limit": 10000,
+        "deductible": 500,
         "features": [
-            "Accident coverage up to $5,000/year",
-            "Emergency vet visits",
-            "24/7 Pet Helpline",
+            "Accidental damage coverage up to £10,000/year",
+            "Emergency breakdown assistance",
+            "24/7 Agricultural Helpline",
         ],
     },
     {
         "type": "standard",
-        "name": "Puppy Standard",
-        "base_monthly_premium": 35,
-        "annual_coverage_limit": 10000,
-        "deductible": 200,
+        "name": "Tractor Standard",
+        "base_monthly_premium": 75,
+        "annual_coverage_limit": 25000,
+        "deductible": 350,
         "features": [
-            "Accident & illness coverage up to $10,000/year",
-            "Prescription medications",
-            "Specialist consultations",
-            "Emergency vet visits",
-            "24/7 Pet Helpline",
+            "Accidental damage & mechanical breakdown up to £25,000/year",
+            "Replacement parts coverage",
+            "Third-party liability",
+            "Emergency breakdown assistance",
+            "24/7 Agricultural Helpline",
         ],
     },
     {
         "type": "premium",
-        "name": "Puppy Premium",
-        "base_monthly_premium": 55,
-        "annual_coverage_limit": 20000,
-        "deductible": 100,
+        "name": "Tractor Premium",
+        "base_monthly_premium": 150,
+        "annual_coverage_limit": 50000,
+        "deductible": 200,
         "features": [
-            "Accident & illness coverage up to $20,000/year",
-            "Routine care & wellness visits",
-            "Dental care included",
-            "Hereditary condition coverage",
-            "Prescription medications",
-            "Specialist consultations",
-            "Low $100 deductible",
-            "24/7 Pet Helpline",
+            "Comprehensive coverage up to £50,000/year",
+            "Routine maintenance & servicing",
+            "Tyre and track replacement",
+            "Modification coverage",
+            "Replacement parts coverage",
+            "Third-party liability",
+            "Low £200 excess",
+            "24/7 Agricultural Helpline",
         ],
     },
     {
         "type": "comprehensive",
-        "name": "Puppy Comprehensive",
-        "base_monthly_premium": 85,
-        "annual_coverage_limit": 50000,
+        "name": "Tractor Comprehensive",
+        "base_monthly_premium": 250,
+        "annual_coverage_limit": 100000,
         "deductible": 0,
         "features": [
-            "Unlimited accident & illness coverage (up to $50,000/year)",
-            "ZERO deductible",
-            "All routine & wellness care",
-            "Full dental coverage",
-            "Hereditary & chronic conditions",
-            "Alternative therapies (acupuncture, hydrotherapy)",
-            "Behavioral therapy",
-            "Lost pet advertising & reward",
-            "Travel coverage",
+            "Unlimited comprehensive coverage (up to £100,000/year)",
+            "ZERO excess",
+            "All routine maintenance & servicing",
+            "Full tyre, track & hydraulics coverage",
+            "Modification & attachment coverage",
+            "Theft & vandalism protection",
+            "Business interruption cover",
+            "Hire vehicle while yours is repaired",
+            "Seasonal storage coverage",
             "Priority claims processing",
         ],
     },
@@ -213,28 +213,30 @@ def calculate_quote(
     plan_type: str = "standard",
     has_preexisting_conditions: bool = False
 ) -> Dict[str, Any]:
-    """Calculate insurance quote based on breed, age, and plan."""
+    """Calculate insurance quote based on tractor type, age, and plan."""
     plan = get_plan_by_type(plan_type)
     if not plan:
         plan = INSURANCE_PLANS[1]  # Default to standard
 
     premium = plan["base_monthly_premium"]
 
-    # Apply breed risk multiplier
-    breed_multiplier = float(breed.get("base_premium_multiplier", 1.0))
-    premium *= breed_multiplier
+    # Apply tractor type risk multiplier
+    type_multiplier = float(breed.get("base_premium_multiplier", 1.0))
+    premium *= type_multiplier
 
-    # Age adjustments
-    if age_years < 1:
-        premium *= 1.1  # Puppies have more accidents
+    # Age adjustments for tractors
+    if age_years <= 2:
+        premium *= 0.9  # New tractors - lower risk
+    elif age_years >= 15:
+        premium *= 1.6  # Very old tractors - high risk
     elif age_years >= 10:
-        premium *= 1.5  # Very senior
-    elif age_years >= 7:
-        premium *= 1.3  # Senior dogs
+        premium *= 1.4  # Older tractors - increased risk
+    elif age_years >= 5:
+        premium *= 1.15  # Mid-life - moderate increase
 
-    # Preexisting conditions surcharge
+    # Pre-existing conditions (known mechanical issues) surcharge
     if has_preexisting_conditions and plan_type in ["premium", "comprehensive"]:
-        premium *= 1.25
+        premium *= 1.3
 
     monthly_premium = round(premium, 2)
     annual_premium = round(monthly_premium * 12, 2)
@@ -244,8 +246,8 @@ def calculate_quote(
         "annual_premium": annual_premium,
         "plan": plan,
         "factors": {
-            "breed_multiplier": breed_multiplier,
-            "age_adjustment": "senior" if age_years >= 7 else "puppy" if age_years < 1 else "adult",
+            "type_multiplier": type_multiplier,
+            "age_adjustment": "veteran" if age_years >= 10 else "new" if age_years <= 2 else "standard",
             "preexisting_adjustment": has_preexisting_conditions,
         }
     }
@@ -264,12 +266,12 @@ async def get_user_profile(user_id: str) -> Optional[Dict[str, Any]]:
             """, user_id)
             return dict(row) if row else None
     except Exception as e:
-        print(f"[BUDDY DB] Error fetching user profile: {e}", file=sys.stderr)
+        print(f"[TRACKER DB] Error fetching user profile: {e}", file=sys.stderr)
         return None
 
 
 async def get_user_dogs(user_id: str) -> List[Dict[str, Any]]:
-    """Get all dogs registered by a user."""
+    """Get all tractors registered by a user."""
     try:
         async with get_connection() as conn:
             rows = await conn.fetch("""
@@ -281,7 +283,7 @@ async def get_user_dogs(user_id: str) -> List[Dict[str, Any]]:
             """, user_id)
             return [dict(row) for row in rows]
     except Exception as e:
-        print(f"[BUDDY DB] Error fetching user dogs: {e}", file=sys.stderr)
+        print(f"[TRACKER DB] Error fetching user tractors: {e}", file=sys.stderr)
         return []
 
 
@@ -293,9 +295,9 @@ async def save_user_dog(
     has_preexisting_conditions: bool = False,
     preexisting_conditions: List[str] = None
 ) -> Optional[int]:
-    """Save a dog to the database."""
+    """Save a tractor to the database."""
     try:
-        # Look up breed
+        # Look up tractor type
         breed = await get_breed_by_name(breed_name)
         breed_id = breed.get("id") if breed else None
 
@@ -308,10 +310,10 @@ async def save_user_dog(
             """, user_id, dog_name, breed_id, breed_name, age_years,
                 has_preexisting_conditions, preexisting_conditions or [])
 
-            print(f"[BUDDY DB] Saved dog {dog_name} for user {user_id}", file=sys.stderr)
+            print(f"[TRACKER DB] Saved tractor {dog_name} for user {user_id}", file=sys.stderr)
             return result["id"] if result else None
     except Exception as e:
-        print(f"[BUDDY DB] Error saving user dog: {e}", file=sys.stderr)
+        print(f"[TRACKER DB] Error saving user tractor: {e}", file=sys.stderr)
         return None
 
 
@@ -328,7 +330,7 @@ async def get_user_policies(user_id: str) -> List[Dict[str, Any]]:
             """, user_id)
             return [dict(row) for row in rows]
     except Exception as e:
-        print(f"[BUDDY DB] Error fetching user policies: {e}", file=sys.stderr)
+        print(f"[TRACKER DB] Error fetching user policies: {e}", file=sys.stderr)
         return []
 
 
@@ -356,8 +358,8 @@ async def save_quote(
             """, user_id, session_id, json.dumps(dog_details), plan_type,
                 quoted_premium, json.dumps(coverage_details), valid_until)
 
-            print(f"[BUDDY DB] Saved quote for session {session_id}", file=sys.stderr)
+            print(f"[TRACKER DB] Saved quote for session {session_id}", file=sys.stderr)
             return result["id"] if result else None
     except Exception as e:
-        print(f"[BUDDY DB] Error saving quote: {e}", file=sys.stderr)
+        print(f"[TRACKER DB] Error saving quote: {e}", file=sys.stderr)
         return None

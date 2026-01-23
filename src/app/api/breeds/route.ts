@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllBreeds, getBreedByName, searchBreeds } from '@/lib/puppy-db';
+import { getAllBreeds, getBreedByName, searchBreeds } from '@/lib/tractor-db';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;

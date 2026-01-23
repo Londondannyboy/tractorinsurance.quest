@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "Privacy Policy for Puppy Insurance Quest. Learn how we collect, use, and protect your personal information.",
+  description: "Privacy Policy for Tractor Insurance Quest. Learn how we collect, use, and protect your personal information.",
   alternates: {
     canonical: "/privacy-policy",
   },
@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">1. Introduction</h2>
             <p className="text-white/70 leading-relaxed">
-              Puppy Insurance Quest (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website puppyinsurance.quest.
+              Tractor Insurance Quest (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website tractorinsurance.quest.
             </p>
           </section>
 
@@ -34,7 +34,7 @@ export default function PrivacyPolicyPage() {
             <p className="text-white/70 leading-relaxed mb-4">We may collect personal information that you voluntarily provide, including:</p>
             <ul className="list-disc list-inside text-white/70 space-y-2">
               <li>Name and email address (when creating an account)</li>
-              <li>Pet information (breed, age, health conditions) for quote purposes</li>
+              <li>Vehicle information (type, age, condition) for quote purposes</li>
               <li>Communication preferences</li>
             </ul>
 
@@ -108,7 +108,7 @@ export default function PrivacyPolicyPage() {
               <li><strong>Withdraw consent:</strong> Withdraw consent at any time</li>
             </ul>
             <p className="text-white/70 leading-relaxed mt-4">
-              To exercise these rights, contact us at hello@puppyinsurance.quest.
+              To exercise these rights, contact us at hello@tractorinsurance.quest.
             </p>
           </section>
 
@@ -145,7 +145,7 @@ export default function PrivacyPolicyPage() {
             <p className="text-white/70 leading-relaxed">
               For questions about this Privacy Policy or to exercise your data rights, contact us at:
             </p>
-            <p className="text-amber-400 mt-2">hello@puppyinsurance.quest</p>
+            <p className="text-amber-400 mt-2">hello@tractorinsurance.quest</p>
             <p className="text-white/70 mt-4">
               You also have the right to lodge a complaint with the Information Commissioner&apos;s Office (ICO) if you believe your data protection rights have been violated.
             </p>

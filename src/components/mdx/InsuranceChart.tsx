@@ -83,7 +83,7 @@ export function CoverageBreakdownChart({ title = "What's Typically Covered" }: C
   ];
 
   useCopilotReadable({
-    description: "Pet insurance coverage breakdown showing what types of care are typically covered",
+    description: "Tractor insurance coverage breakdown showing what types of cover are typically included",
     value: JSON.stringify(data),
   });
 
@@ -126,20 +126,20 @@ export function CoverageBreakdownChart({ title = "What's Typically Covered" }: C
   );
 }
 
-// Breed Risk Factor Chart
-export function BreedRiskChart({ title = "Insurance Costs by Breed Risk" }: ChartProps) {
+// Tractor Type Risk Factor Chart
+export function BreedRiskChart({ title = "Insurance Costs by Tractor Type Risk" }: ChartProps) {
   const data = [
-    { breed: "Mixed Breed", multiplier: 0.85, category: "Low" },
-    { breed: "Beagle", multiplier: 0.9, category: "Low" },
-    { breed: "Labrador", multiplier: 1.0, category: "Medium" },
-    { breed: "Golden Retriever", multiplier: 1.1, category: "Medium" },
-    { breed: "French Bulldog", multiplier: 1.4, category: "High" },
-    { breed: "Bulldog", multiplier: 1.5, category: "High" },
-    { breed: "Cavalier KC", multiplier: 1.45, category: "High" },
+    { breed: "Ride-on Mower", multiplier: 0.65, category: "Low" },
+    { breed: "Garden Tractor", multiplier: 0.7, category: "Low" },
+    { breed: "Mini Tractor", multiplier: 0.75, category: "Low" },
+    { breed: "Compact Tractor", multiplier: 0.9, category: "Low" },
+    { breed: "Utility Tractor", multiplier: 1.2, category: "Medium" },
+    { breed: "Farm Tractor", multiplier: 1.3, category: "Medium" },
+    { breed: "Vintage Tractor", multiplier: 1.5, category: "High" },
   ];
 
   useCopilotReadable({
-    description: "Breed risk factors affecting insurance premiums",
+    description: "Tractor type risk factors affecting insurance premiums",
     value: JSON.stringify(data),
   });
 
@@ -202,7 +202,7 @@ export function AgeCostChart({ title = "How Age Affects Insurance Cost" }: Chart
   ];
 
   useCopilotReadable({
-    description: "Age-based premium adjustments for pet insurance",
+    description: "Age-based premium adjustments for tractor insurance",
     value: JSON.stringify(data),
   });
 
@@ -254,29 +254,26 @@ export function AgeCostChart({ title = "How Age Affects Insurance Cost" }: Chart
 
 // Interactive Quote Calculator
 export function QuoteCalculator() {
-  const [breed, setBreed] = useState("labrador");
-  const [age, setAge] = useState(2);
+  const [breed, setBreed] = useState("farm-tractor");
+  const [age, setAge] = useState(5);
   const [plan, setPlan] = useState("standard");
   const [quote, setQuote] = useState<number | null>(null);
 
   const breeds: Record<string, number> = {
-    "mixed-breed": 0.85,
-    beagle: 0.9,
-    labrador: 1.0,
-    "golden-retriever": 1.1,
-    "jack-russell": 0.95,
-    pug: 1.35,
-    "french-bulldog": 1.4,
-    cockapoo: 1.05,
-    cavapoo: 1.15,
-    dachshund: 1.1,
+    "ride-on-mower": 0.65,
+    "garden-tractor": 0.7,
+    "mini-tractor": 0.75,
+    "compact-tractor": 0.9,
+    "utility-tractor": 1.2,
+    "farm-tractor": 1.3,
+    "vintage-tractor": 1.5,
   };
 
   const plans: Record<string, number> = {
-    basic: 15,
-    standard: 35,
-    premium: 55,
-    comprehensive: 85,
+    basic: 25,
+    standard: 75,
+    premium: 150,
+    comprehensive: 250,
   };
 
   const calculateQuote = () => {
@@ -298,10 +295,10 @@ export function QuoteCalculator() {
 
   useCopilotAction({
     name: "calculate_quick_quote",
-    description: "Calculate a quick insurance quote based on breed, age, and plan",
+    description: "Calculate a quick insurance quote based on tractor type, age, and plan",
     parameters: [
-      { name: "breed", type: "string", description: "Dog breed" },
-      { name: "age", type: "number", description: "Dog age in years" },
+      { name: "breed", type: "string", description: "Tractor type" },
+      { name: "age", type: "number", description: "Tractor age in years" },
       { name: "plan", type: "string", description: "Insurance plan type" },
     ],
     handler: ({ breed: b, age: a, plan: p }) => {
@@ -327,24 +324,21 @@ export function QuoteCalculator() {
       <h3 className="text-2xl font-bold text-white mb-6">Quick Quote Calculator</h3>
 
       <div className="grid md:grid-cols-3 gap-6 mb-6">
-        {/* Breed Select */}
+        {/* Tractor Type Select */}
         <div>
-          <label className="block text-white/70 text-sm mb-2">Breed</label>
+          <label className="block text-white/70 text-sm mb-2">Tractor Type</label>
           <select
             value={breed}
             onChange={(e) => setBreed(e.target.value)}
             className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none"
           >
-            <option value="mixed-breed">Mixed Breed</option>
-            <option value="beagle">Beagle</option>
-            <option value="labrador">Labrador</option>
-            <option value="golden-retriever">Golden Retriever</option>
-            <option value="jack-russell">Jack Russell</option>
-            <option value="pug">Pug</option>
-            <option value="french-bulldog">French Bulldog</option>
-            <option value="cockapoo">Cockapoo</option>
-            <option value="cavapoo">Cavapoo</option>
-            <option value="dachshund">Dachshund</option>
+            <option value="ride-on-mower">Ride-on Mower</option>
+            <option value="garden-tractor">Garden Tractor</option>
+            <option value="mini-tractor">Mini Tractor</option>
+            <option value="compact-tractor">Compact Tractor</option>
+            <option value="utility-tractor">Utility Tractor</option>
+            <option value="farm-tractor">Farm Tractor</option>
+            <option value="vintage-tractor">Vintage Tractor</option>
           </select>
         </div>
 

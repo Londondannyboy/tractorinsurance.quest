@@ -7,24 +7,23 @@ const footerLinks = {
   insurance: {
     title: "Insurance",
     links: [
-      { href: "/puppy-insurance", label: "Puppy Insurance" },
-      { href: "/best-puppy-insurance", label: "Best Puppy Insurance" },
-      { href: "/cheap-puppy-insurance", label: "Cheap Puppy Insurance" },
-      { href: "/puppy-insurance-cost", label: "Insurance Costs" },
-      { href: "/compare-pet-insurance", label: "Compare Plans" },
-      { href: "/new-puppy-guide", label: "New Puppy Guide" },
+      { href: "/tractor-insurance", label: "Tractor Insurance" },
+      { href: "/best-tractor-insurance", label: "Best Tractor Insurance" },
+      { href: "/cheap-tractor-insurance", label: "Cheap Tractor Insurance" },
+      { href: "/tractor-insurance-cost", label: "Insurance Costs" },
+      { href: "/compare-tractor-insurance", label: "Compare Plans" },
     ],
   },
-  breeds: {
-    title: "Popular Breeds",
+  tractorTypes: {
+    title: "Tractor Types",
     links: [
-      { href: "/jack-russell-insurance", label: "Jack Russell" },
-      { href: "/pug-insurance", label: "Pug" },
-      { href: "/cockapoo-insurance", label: "Cockapoo" },
-      { href: "/cavapoo-insurance", label: "Cavapoo" },
-      { href: "/dachshund-insurance", label: "Dachshund" },
-      { href: "/french-bulldog-insurance", label: "French Bulldog" },
-      { href: "/labrador-insurance", label: "Labrador" },
+      { href: "/utility-tractor-insurance", label: "Utility Tractor" },
+      { href: "/mini-tractor-insurance", label: "Mini Tractor" },
+      { href: "/compact-tractor-insurance", label: "Compact Tractor" },
+      { href: "/garden-tractor-insurance", label: "Garden Tractor" },
+      { href: "/ride-on-mower-insurance", label: "Ride-on Mower" },
+      { href: "/vintage-tractor-insurance", label: "Vintage Tractor" },
+      { href: "/farm-tractor-insurance", label: "Farm Tractor" },
     ],
   },
   company: {
@@ -56,22 +55,22 @@ export function Footer() {
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-4 lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <span className="text-3xl">🐾</span>
-              <span className="font-bold text-xl text-white">Puppy Insurance</span>
+              <span className="text-3xl">🚜</span>
+              <span className="font-bold text-xl text-white">Tractor Insurance</span>
             </Link>
             <p className="text-white/60 text-sm mb-6 leading-relaxed">
-              Your AI-powered guide to finding the perfect pet insurance for your furry friend. Compare plans, get quotes, and protect your puppy today.
+              Your AI-powered guide to finding the perfect tractor insurance. Compare plans, get quotes, and protect your machinery today.
             </p>
             <div className="flex items-center gap-4">
               <a
-                href="mailto:hello@puppyinsurance.quest"
+                href="mailto:hello@tractorinsurance.quest"
                 className="p-2 bg-amber-500/10 rounded-lg text-amber-400 hover:bg-amber-500/20 transition-colors"
                 aria-label="Email us"
               >
                 <Mail className="w-5 h-5" />
               </a>
               <a
-                href="tel:+441onal23456789"
+                href="tel:+441234567890"
                 className="p-2 bg-amber-500/10 rounded-lg text-amber-400 hover:bg-amber-500/20 transition-colors"
                 aria-label="Call us"
               >
@@ -107,7 +106,7 @@ export function Footer() {
       <div className="border-t border-amber-500/20 bg-amber-950/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <p className="text-amber-200/70 text-xs text-center leading-relaxed">
-            <span className="font-semibold text-amber-300">Important:</span> Puppy Insurance Quest is a comparison website only. We do not sell, underwrite, or provide insurance policies. Always consult with an authorised insurance provider before making any financial commitment. Information provided is for guidance only and should not be considered financial advice.
+            <span className="font-semibold text-amber-300">Important:</span> Tractor Insurance Quest is a comparison website only. We do not sell, underwrite, or provide insurance policies. Always consult with an authorised insurance provider before making any financial commitment. Information provided is for guidance only and should not be considered financial advice.
           </p>
         </div>
       </div>
@@ -117,7 +116,7 @@ export function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-white/50 text-sm text-center md:text-left">
-              &copy; {currentYear} Puppy Insurance Quest. All rights reserved.
+              &copy; {currentYear} Tractor Insurance Quest. All rights reserved.
             </p>
             <div className="flex items-center gap-6">
               <Link href="/terms-of-service" className="text-white/50 hover:text-white text-sm transition-colors">

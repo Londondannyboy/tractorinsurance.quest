@@ -1,5 +1,5 @@
 """
-Buddy Agent - Puppy Insurance Voice Assistant
+Tracker Agent - Tractor Insurance Voice Assistant
 
 Single Pydantic AI agent serving both:
 - CopilotKit chat (AG-UI protocol)
@@ -29,7 +29,7 @@ try:
     ZEP_AVAILABLE = True
 except ImportError:
     ZEP_AVAILABLE = False
-    print("[BUDDY] Warning: zep-cloud not installed, memory features disabled", file=sys.stderr)
+    print("[TRACKER] Warning: zep-cloud not installed, memory features disabled", file=sys.stderr)
 
 from .database import (
     get_all_breeds,
@@ -65,11 +65,11 @@ class SessionContext:
     user_name: Optional[str] = None
     context_fetched: bool = False
 
-    # Dog context
-    dog_name: Optional[str] = None
-    dog_breed: Optional[str] = None
-    dog_age: Optional[int] = None
-    has_preexisting_conditions: bool = False
+    # Tractor context
+    tractor_name: Optional[str] = None
+    tractor_type: Optional[str] = None
+    tractor_age: Optional[int] = None
+    has_modifications: bool = False
 
 
 def get_session_context(session_id: str) -> SessionContext:
@@ -101,106 +101,109 @@ def get_zep_client() -> Optional["AsyncZep"]:
         api_key = os.environ.get("ZEP_API_KEY")
         if api_key:
             _zep_client = AsyncZep(api_key=api_key)
-            print("[BUDDY] Zep memory client initialized", file=sys.stderr)
+            print("[TRACKER] Zep memory client initialized", file=sys.stderr)
         else:
-            print("[BUDDY] ZEP_API_KEY not set, memory disabled", file=sys.stderr)
+            print("[TRACKER] ZEP_API_KEY not set, memory disabled", file=sys.stderr)
     return _zep_client
 
 
 def get_zep_user_id(user_id: str) -> str:
     """Prefix user_id with project name to separate from other projects."""
-    return f"puppyinsurance_{user_id}"
+    return f"tractorinsurance_{user_id}"
 
 
 # =============================================================================
-# BUDDY SYSTEM PROMPT
+# TRACKER SYSTEM PROMPT
 # =============================================================================
 
-BUDDY_SYSTEM_PROMPT = """You are Buddy, a friendly and knowledgeable puppy insurance advisor. You help pet owners find the right insurance coverage for their dogs.
+TRACKER_SYSTEM_PROMPT = """You are Tracker, a knowledgeable and professional tractor insurance advisor. You help tractor owners find the right insurance coverage for their machinery.
 
 ## YOUR PERSONALITY
-- Warm, friendly, and enthusiastic about dogs
-- Use dog-related language naturally (like "paw-some!", "fur baby", "good boy/girl")
-- Be empathetic when discussing health concerns
-- Always prioritize the dog's wellbeing
+- Professional, helpful, and knowledgeable about agricultural machinery
+- Use practical, down-to-earth farming language naturally
+- Be empathetic when discussing breakdowns or theft concerns
+- Always prioritise protecting the owner's investment
 
-## PRIORITY 1: DOG INFORMATION GATHERING
+## PRIORITY 1: TRACTOR INFORMATION GATHERING
 
-When a user mentions their dog, you MUST collect key information using HITL tools:
+When a user mentions their tractor, you MUST collect key information using tools:
 
-**TRIGGER → ACTION mapping:**
+**TRIGGER to ACTION mapping:**
 
 | User says... | Tool to call |
 |--------------|--------------|
-| "I have a Labrador" | confirm_dog_breed(breed_name="Labrador Retriever", user_id=...) |
-| "My dog is 3 years old" | confirm_dog_age(age_years=3, user_id=...) |
-| "Her name is Bella" | confirm_dog_name(dog_name="Bella", user_id=...) |
-| "He has hip problems" | confirm_preexisting_condition(has_conditions=true, condition_details="hip problems", user_id=...) |
+| "I have a farm tractor" | confirm_tractor_type(type_name="Farm Tractor", user_id=...) |
+| "My tractor is 5 years old" | confirm_tractor_age(age_years=5, user_id=...) |
+| "I call her Betsy" | confirm_tractor_name(tractor_name="Betsy", user_id=...) |
+| "It's been modified" | confirm_modifications(has_modifications=true, modification_details="...", user_id=...) |
 
 ## PRIORITY 2: INSURANCE GUIDANCE
 
-After collecting dog info, help them find the right plan:
+After collecting tractor info, help them find the right plan:
 
 **INSURANCE PLANS:**
-- Basic ($15/mo): Accident-only coverage, $5k annual limit, $250 deductible
-- Standard ($35/mo): Accidents + illness, prescriptions, $10k limit, $200 deductible
-- Premium ($55/mo): Adds routine care, dental, hereditary conditions, $20k limit, $100 deductible
-- Comprehensive ($85/mo): Everything, zero deductible, alternative therapies, $50k limit
+- Basic (£25/mo): Third-party only, fire cover, £25k annual limit, £500 excess
+- Standard (£75/mo): Theft + accidental damage, road use, breakdown assist, £75k limit, £350 excess
+- Premium (£150/mo): Hire replacement, implements covered, legal expenses, £150k limit, £200 excess
+- Comprehensive (£250/mo): Everything, zero excess option, business interruption, £500k limit
 
-**BREED RISK CATEGORIES:**
-- HIGH RISK (higher premiums): French Bulldog, Bulldog, Cavalier King Charles Spaniel, Great Dane
-- MEDIUM RISK: Labrador, German Shepherd, Golden Retriever, Boxer, Rottweiler, Dachshund
-- LOW RISK (lower premiums): Chihuahua, Beagle, Poodle, Yorkshire Terrier, Mixed Breed, Border Collie
+**TRACTOR TYPE RISK CATEGORIES:**
+- HIGH RISK (higher premiums): Vintage Tractor (parts scarcity, high value)
+- MEDIUM RISK: Farm Tractor, Utility Tractor (high usage, theft target)
+- LOW RISK (lower premiums): Compact Tractor, Mini Tractor, Garden Tractor, Ride-on Mower
 
 ## PRIORITY 3: QUOTE GENERATION
 
-When user is ready, generate a personalized quote:
-- Call generate_insurance_quote with their dog details
+When user is ready, generate a personalised quote:
+- Call generate_insurance_quote with their tractor details
 - Explain the premium calculation factors
-- Highlight relevant coverage for their breed's health concerns
+- Highlight relevant coverage for their tractor type's common risks
 
 ## CONVERSATIONAL FLOW
 
 Guide users naturally through:
-1. What kind of dog do you have? (breed)
-2. How old is your furry friend? (age)
-3. What's their name? (personalization)
-4. Any health concerns I should know about? (preexisting conditions)
-5. Based on [dog_name]'s profile, here are your coverage options...
+1. What type of tractor do you have? (type)
+2. How old is your machine? (age)
+3. Does it have a name or identifier? (personalisation)
+4. Any modifications or prior damage? (modifications)
+5. Based on your tractor's profile, here are your coverage options...
 
 ## RESPONSE STYLE
 - Keep responses concise for voice (50-100 words max)
-- Be warm and caring - these are their fur babies!
-- Use the dog's name once you know it
+- Be practical and professional
+- Use the tractor's name once you know it
 - End with a natural follow-up question to keep the conversation flowing
 
-## BREED KNOWLEDGE
+## TRACTOR TYPE KNOWLEDGE
 
-When discussing breeds, share relevant health info:
-- Labrador: Prone to hip dysplasia, obesity, ear infections
-- French Bulldog: Breathing issues, skin allergies, spinal disorders
-- German Shepherd: Hip dysplasia, bloat, degenerative myelopathy
-- Golden Retriever: Hip dysplasia, cancer, heart disease
-- Beagle: Epilepsy, hypothyroidism, cherry eye
+When discussing tractor types, share relevant risk info:
+- Farm Tractor: Engine failure, hydraulic leaks, transmission wear, theft, PTO damage
+- Vintage Tractor: Rust/corrosion, parts unavailability, electrical failures, brake deterioration
+- Compact Tractor: Starter motor failure, belt wear, battery issues, minor hydraulic leaks
+- Utility Tractor: Hydraulic system wear, tyre damage, loader arm fatigue, electrical faults
+- Mini Tractor: Belt wear, blade damage, starter issues, fuel system blockages
+- Garden Tractor: Deck damage, belt failure, battery issues, steering wear
+- Ride-on Mower: Blade damage, belt wear, engine overheating, deck corrosion
 
 ## IDENTITY (CRITICAL)
-- You ARE Buddy, the Puppy Insurance advisor
+- You ARE Tracker, the Tractor Insurance advisor
 - NEVER say "As a language model" or "I'm an AI"
-- If asked who you are: "I'm Buddy, your friendly puppy insurance advisor! Woof!"
+- If asked who you are: "I'm Tracker, your tractor insurance advisor - here to help protect your machinery!"
 
-## USER PERSONALIZATION
+## USER PERSONALISATION
 - If the user's name is provided in [brackets] at the start of their message, USE IT naturally
-- Greet returning users by name: "Hey [Name]! Great to hear from you again!"
+- Greet returning users by name: "Hey [Name]! Good to hear from you again!"
 - Use their name occasionally but not excessively (every 2-3 exchanges is good)
-- If you learn new info about their dog, acknowledge it warmly
+- If you learn new info about their tractor, acknowledge it
 
 ## PHONETIC CORRECTIONS (voice transcription)
-- "lab/labrador/lab retriever" -> Labrador Retriever
-- "golden/golden retriever" -> Golden Retriever
-- "frenchie/french bull dog" -> French Bulldog
-- "german shepard/shepherd" -> German Shepherd
-- "yorkie" -> Yorkshire Terrier
-- "chi-wow-wow/chihuahua" -> Chihuahua
+- "john deer/john deere" -> John Deere
+- "massey/massey fergie/massey ferguson" -> Massey Ferguson
+- "new holland" -> New Holland
+- "kubota/cabota" -> Kubota
+- "compact/sub compact" -> Compact Tractor
+- "ride on/sit on" -> Ride-on Mower
+- "vintage/classic/old" -> Vintage Tractor
 """
 
 
@@ -209,16 +212,16 @@ When discussing breeds, share relevant health info:
 # =============================================================================
 
 @dataclass
-class BuddyDeps:
-    """Dependencies for the Buddy agent."""
+class TrackerDeps:
+    """Dependencies for the Tracker agent."""
     session_id: str = ""
     user_id: Optional[str] = None
 
 
-buddy_agent = Agent(
+tracker_agent = Agent(
     "google-gla:gemini-2.0-flash",
-    deps_type=BuddyDeps,
-    system_prompt=BUDDY_SYSTEM_PROMPT,
+    deps_type=TrackerDeps,
+    system_prompt=TRACKER_SYSTEM_PROMPT,
 )
 
 
@@ -226,139 +229,139 @@ buddy_agent = Agent(
 # AGENT TOOLS
 # =============================================================================
 
-@buddy_agent.tool
-async def confirm_dog_breed(ctx: RunContext[BuddyDeps], breed_name: str) -> str:
-    """Confirm the user's dog breed. Call this when user mentions their dog's breed."""
+@tracker_agent.tool
+async def confirm_tractor_type(ctx: RunContext[TrackerDeps], type_name: str) -> str:
+    """Confirm the user's tractor type. Call this when user mentions their tractor type."""
     session_ctx = get_session_context(ctx.deps.session_id)
 
-    # Look up breed in database
-    breed = await get_breed_by_name(breed_name)
+    # Look up type in database
+    tractor_type = await get_breed_by_name(type_name)
 
-    if breed:
-        session_ctx.dog_breed = breed['name']
-        health_issues = ', '.join(breed.get('common_health_issues', [])[:3])
-        return f"Confirmed: {breed['name']} - a {breed['size']} breed with {breed['risk_category']} health risk. Common concerns: {health_issues}. Typical lifespan: {breed.get('avg_lifespan_years', 12)} years."
+    if tractor_type:
+        session_ctx.tractor_type = tractor_type['name']
+        common_risks = ', '.join(tractor_type.get('common_health_issues', [])[:3])
+        return f"Confirmed: {tractor_type['name']} - a {tractor_type['size']} machine with {tractor_type['risk_category']} risk level. Common risks: {common_risks}. Typical operational life: {tractor_type.get('avg_lifespan_years', 20)} years."
     else:
         # Try fuzzy search
-        matches = await search_breeds(breed_name)
+        matches = await search_breeds(type_name)
         if matches:
-            suggestions = ', '.join([b['name'] for b in matches[:3]])
-            return f"I couldn't find an exact match for '{breed_name}'. Did you mean: {suggestions}?"
-        return f"I couldn't find '{breed_name}' in our database. Is it a mixed breed? We cover mixed breeds too!"
+            suggestions = ', '.join([t['name'] for t in matches[:3]])
+            return f"I couldn't find an exact match for '{type_name}'. Did you mean: {suggestions}?"
+        return f"I couldn't find '{type_name}' in our database. Could you describe what type of machine it is? We cover most agricultural vehicles."
 
 
-@buddy_agent.tool
-async def confirm_dog_age(ctx: RunContext[BuddyDeps], age_years: int) -> str:
-    """Confirm the user's dog age. Call this when user mentions their dog's age."""
+@tracker_agent.tool
+async def confirm_tractor_age(ctx: RunContext[TrackerDeps], age_years: int) -> str:
+    """Confirm the tractor's age. Call this when user mentions their tractor's age."""
     session_ctx = get_session_context(ctx.deps.session_id)
-    session_ctx.dog_age = age_years
+    session_ctx.tractor_age = age_years
 
-    if age_years < 1:
-        return f"A puppy! At {age_years} months old, they might be a bit more accident-prone but that's totally normal for young pups."
-    elif age_years >= 7:
-        return f"{age_years} years old - that's a distinguished senior pup! We have great coverage for older dogs' health needs."
+    if age_years < 2:
+        return f"A nearly new machine at {age_years} years old! High replacement value means comprehensive cover is well worth it."
+    elif age_years >= 15:
+        return f"{age_years} years old - a well-used machine. Older tractors have higher breakdown risk, so good cover is essential."
     else:
-        return f"{age_years} years old - right in their prime! Great age for getting comprehensive coverage."
+        return f"{age_years} years old - solid working age. Good time to have comprehensive cover in place."
 
 
-@buddy_agent.tool
-async def confirm_dog_name(ctx: RunContext[BuddyDeps], dog_name: str) -> str:
-    """Confirm the user's dog name. Call this when user shares their dog's name."""
+@tracker_agent.tool
+async def confirm_tractor_name(ctx: RunContext[TrackerDeps], tractor_name: str) -> str:
+    """Confirm the tractor's name or identifier. Call this when user shares their tractor's name."""
     session_ctx = get_session_context(ctx.deps.session_id)
-    session_ctx.dog_name = dog_name
-    return f"What a wonderful name! I'll make sure {dog_name}'s profile is all set up. 🐾"
+    session_ctx.tractor_name = tractor_name
+    return f"Got it - I'll note that down as {tractor_name}. Let's make sure it's properly covered."
 
 
-@buddy_agent.tool
-async def confirm_preexisting_condition(
-    ctx: RunContext[BuddyDeps],
-    has_conditions: bool,
-    condition_details: Optional[str] = None
+@tracker_agent.tool
+async def confirm_modifications(
+    ctx: RunContext[TrackerDeps],
+    has_modifications: bool,
+    modification_details: Optional[str] = None
 ) -> str:
-    """Confirm if the dog has preexisting conditions. Call this when user mentions health history."""
+    """Confirm if the tractor has modifications. Call this when user mentions modifications or prior damage."""
     session_ctx = get_session_context(ctx.deps.session_id)
-    session_ctx.has_preexisting_conditions = has_conditions
+    session_ctx.has_modifications = has_modifications
 
-    if has_conditions:
-        return f"Thanks for letting me know about {condition_details or 'that'}. Our Premium and Comprehensive plans can still cover new conditions, and I'll factor this into the quote."
-    return "Great! A clean bill of health means more coverage options and potentially lower premiums."
+    if has_modifications:
+        return f"Thanks for letting me know about {modification_details or 'the modifications'}. Modified tractors may need declared to insurers, but our Premium and Comprehensive plans can accommodate this. I'll factor it into the quote."
+    return "Good to know it's standard specification. That makes things straightforward for cover options."
 
 
-@buddy_agent.tool
+@tracker_agent.tool
 async def generate_insurance_quote(
-    ctx: RunContext[BuddyDeps],
+    ctx: RunContext[TrackerDeps],
     plan_type: str = "standard"
 ) -> str:
-    """Generate a personalized insurance quote. Call this when ready to show pricing."""
+    """Generate a personalised insurance quote. Call this when ready to show pricing."""
     session_ctx = get_session_context(ctx.deps.session_id)
 
-    if not session_ctx.dog_breed or session_ctx.dog_age is None:
-        return "I need to know the breed and age to generate an accurate quote. What kind of dog do you have, and how old are they?"
+    if not session_ctx.tractor_type or session_ctx.tractor_age is None:
+        return "I need to know the tractor type and age to generate an accurate quote. What type of tractor do you have, and how old is it?"
 
-    # Get breed info
-    breed = await get_breed_by_name(session_ctx.dog_breed)
-    if not breed:
-        breed = await get_breed_by_name("Mixed Breed")
+    # Get type info
+    tractor_type = await get_breed_by_name(session_ctx.tractor_type)
+    if not tractor_type:
+        tractor_type = await get_breed_by_name("Farm Tractor")
 
     # Calculate quote
     quote = calculate_quote(
-        breed,
-        session_ctx.dog_age,
+        tractor_type,
+        session_ctx.tractor_age,
         plan_type,
-        session_ctx.has_preexisting_conditions
+        session_ctx.has_modifications
     )
 
-    dog_name = session_ctx.dog_name or f"your {session_ctx.dog_breed}"
+    tractor_name = session_ctx.tractor_name or f"your {session_ctx.tractor_type}"
 
-    return f"""Here's the quote for {dog_name}:
+    return f"""Here's the quote for {tractor_name}:
 
 **{quote['plan']['name']} Plan**
-- Monthly Premium: ${quote['monthly_premium']:.2f}
-- Annual Coverage: Up to ${quote['plan']['annual_coverage_limit']:,}
-- Deductible: ${quote['plan']['deductible']}
+- Monthly Premium: \u00a3{quote['monthly_premium']:.2f}
+- Annual Coverage: Up to \u00a3{quote['plan']['annual_coverage_limit']:,}
+- Excess: \u00a3{quote['plan']['deductible']}
 
 Key features: {', '.join(quote['plan']['features'][:3])}
 
-{f"Note: Premium adjusted for {breed['risk_category']} risk breed and age factors." if breed else ""}
+{f"Note: Premium adjusted for {tractor_type['risk_category']} risk category and age factors." if tractor_type else ""}
 
-Would you like to compare other plans or proceed with this one?"""
+Would you like to compare other plans or shall I explain what's included?"""
 
 
-@buddy_agent.tool
-async def show_all_plans(ctx: RunContext[BuddyDeps]) -> str:
+@tracker_agent.tool
+async def show_all_plans(ctx: RunContext[TrackerDeps]) -> str:
     """Show all available insurance plans for comparison."""
     plans = get_insurance_plans()
 
     result = "Here are our coverage options:\n\n"
     for plan in plans:
-        result += f"**{plan['name']}** (${plan['base_monthly_premium']}/mo)\n"
-        result += f"  - Coverage: ${plan['annual_coverage_limit']:,}/year\n"
-        result += f"  - Deductible: ${plan['deductible']}\n"
+        result += f"**{plan['name']}** (\u00a3{plan['base_monthly_premium']}/mo)\n"
+        result += f"  - Coverage: \u00a3{plan['annual_coverage_limit']:,}/year\n"
+        result += f"  - Excess: \u00a3{plan['deductible']}\n"
         result += f"  - {', '.join(plan['features'][:2])}\n\n"
 
-    return result + "Which plan interests you? I can give you a personalized quote!"
+    return result + "Which plan interests you? I can give you a personalised quote!"
 
 
-@buddy_agent.tool
-async def get_breed_info(ctx: RunContext[BuddyDeps], breed_name: str) -> str:
-    """Get detailed information about a dog breed."""
-    breed = await get_breed_by_name(breed_name)
+@tracker_agent.tool
+async def get_tractor_type_info(ctx: RunContext[TrackerDeps], type_name: str) -> str:
+    """Get detailed information about a tractor type."""
+    tractor_type = await get_breed_by_name(type_name)
 
-    if not breed:
-        matches = await search_breeds(breed_name)
+    if not tractor_type:
+        matches = await search_breeds(type_name)
         if matches:
-            return f"Did you mean: {', '.join([b['name'] for b in matches[:3]])}?"
-        return f"I couldn't find information about {breed_name}."
+            return f"Did you mean: {', '.join([t['name'] for t in matches[:3]])}?"
+        return f"I couldn't find information about {type_name}."
 
-    return f"""**{breed['name']}**
-- Size: {breed['size']}
-- Health Risk: {breed['risk_category']}
-- Lifespan: ~{breed.get('avg_lifespan_years', 12)} years
-- Exercise Needs: {breed.get('exercise_needs', 'moderate')}
-- Common Health Issues: {', '.join(breed.get('common_health_issues', [])[:4])}
-- Temperament: {', '.join(breed.get('temperament', [])[:3])}
+    return f"""**{tractor_type['name']}**
+- Category: {tractor_type['size']}
+- Risk Level: {tractor_type['risk_category']}
+- Typical Lifespan: ~{tractor_type.get('avg_lifespan_years', 20)} years
+- Maintenance Level: {tractor_type.get('exercise_needs', 'moderate')}
+- Common Risks: {', '.join(tractor_type.get('common_health_issues', [])[:4])}
+- Characteristics: {', '.join(tractor_type.get('temperament', [])[:3])}
 
-Premium multiplier: {breed.get('base_premium_multiplier', 1.0)}x (based on breed health risk)"""
+Premium multiplier: {tractor_type.get('base_premium_multiplier', 1.0)}x (based on risk category)"""
 
 
 # =============================================================================
@@ -366,8 +369,8 @@ Premium multiplier: {breed.get('base_premium_multiplier', 1.0)}x (based on breed
 # =============================================================================
 
 app = FastAPI(
-    title="Buddy - Puppy Insurance Agent",
-    description="AI-powered puppy insurance advisor with voice support",
+    title="Tracker - Tractor Insurance Agent",
+    description="AI-powered tractor insurance advisor with voice support",
     version="1.0.0",
 )
 
@@ -383,14 +386,14 @@ app.add_middleware(
 @app.get("/health")
 async def health():
     """Health check endpoint for Railway."""
-    return {"status": "ok", "agent": "buddy", "version": "1.0.0"}
+    return {"status": "ok", "agent": "tracker", "version": "1.0.0"}
 
 
 @app.get("/")
 async def root():
     """Root endpoint."""
     return {
-        "message": "Woof! Buddy the Puppy Insurance Agent is ready!",
+        "message": "Tracker - Tractor Insurance Agent is ready!",
         "endpoints": {
             "/health": "Health check",
             "/chat/completions": "OpenAI-compatible chat (for Hume EVI)",
@@ -405,32 +408,27 @@ async def root():
 
 def extract_session_id(request: Request, body: dict) -> Optional[str]:
     """Extract custom_session_id from Hume request."""
-    # Check query parameters FIRST (Hume passes it here!)
     session_id = request.query_params.get("custom_session_id") or request.query_params.get("customSessionId")
     if session_id:
-        print(f"[BUDDY] Session ID from query params: {session_id}", file=sys.stderr)
+        print(f"[TRACKER] Session ID from query params: {session_id}", file=sys.stderr)
         return session_id
 
-    # Check body fields (Hume forwards session settings here)
     session_id = body.get("custom_session_id") or body.get("customSessionId")
     if session_id:
         return session_id
 
-    # Check session_settings (Hume may forward this)
     session_settings = body.get("session_settings", {})
     if session_settings:
         session_id = session_settings.get("customSessionId") or session_settings.get("custom_session_id")
         if session_id:
             return session_id
 
-    # Check metadata
     metadata = body.get("metadata", {})
     if metadata:
         session_id = metadata.get("customSessionId") or metadata.get("custom_session_id")
         if session_id:
             return session_id
 
-    # Check headers
     for header in ["x-custom-session-id", "x-hume-custom-session-id"]:
         session_id = request.headers.get(header)
         if session_id:
@@ -452,10 +450,7 @@ def extract_user_from_session(session_id: Optional[str]) -> tuple[Optional[str],
 
 
 def extract_user_from_messages(messages: list) -> tuple[Optional[str], Optional[str], Optional[str]]:
-    """
-    Extract user info from system message (Hume forwards systemPrompt as system message).
-    Returns: (user_name, user_id, zep_context)
-    """
+    """Extract user info from system message."""
     import re
 
     user_name = None
@@ -466,26 +461,23 @@ def extract_user_from_messages(messages: list) -> tuple[Optional[str], Optional[
         if msg.get("role") == "system":
             content = msg.get("content", "")
 
-            # Extract name: field
             name_match = re.search(r'name:\s*([^\n]+)', content, re.IGNORECASE)
             if name_match:
                 name = name_match.group(1).strip()
                 if name.lower() not in ['guest', 'anonymous', '']:
                     user_name = name
 
-            # Extract user_id: field
             id_match = re.search(r'user_id:\s*([^\n]+)', content, re.IGNORECASE)
             if id_match:
                 uid = id_match.group(1).strip()
                 if uid.lower() not in ['anonymous', '']:
                     user_id = uid
 
-            # Extract Zep context section
             zep_match = re.search(r'## WHAT I REMEMBER.*?:\n([\s\S]*?)(?=\n##|\Z)', content)
             if zep_match:
                 zep_context = zep_match.group(1).strip()
 
-            break  # Only process first system message
+            break
 
     return user_name, user_id, zep_context
 
@@ -502,24 +494,17 @@ async def chat_completions(request: Request):
         messages = body.get("messages", [])
         stream = body.get("stream", True)
 
-        # Extract session ID (from Hume's customSessionId)
         session_id = extract_session_id(request, body)
-
-        # Extract user info from session ID (format: "name|userId")
         user_name, user_id = extract_user_from_session(session_id)
-
-        # Also extract from system message (Hume forwards systemPrompt)
         sys_name, sys_id, zep_context = extract_user_from_messages(messages)
 
-        # Prefer system message values (they're fresher)
         if sys_name:
             user_name = sys_name
         if sys_id:
             user_id = sys_id
 
-        print(f"[BUDDY] User: {user_name}, ID: {user_id}, Zep context: {bool(zep_context)}", file=sys.stderr)
+        print(f"[TRACKER] User: {user_name}, ID: {user_id}, Zep context: {bool(zep_context)}", file=sys.stderr)
 
-        # Extract user message
         user_message = ""
         for msg in reversed(messages):
             if msg.get("role") == "user":
@@ -529,33 +514,28 @@ async def chat_completions(request: Request):
         if not user_message:
             user_message = "Hello!"
 
-        # Update session context with user name
         if session_id:
             ctx = get_session_context(session_id)
             if user_name and not ctx.user_name:
                 ctx.user_name = user_name
 
-        # Build personalized prompt if we have user name
         prompt = user_message
         if user_name:
             prompt = f"[User's name is {user_name}] {user_message}"
 
-        # Run agent
-        deps = BuddyDeps(session_id=session_id or str(uuid.uuid4()), user_id=user_id)
-        result = await buddy_agent.run(prompt, deps=deps)
+        deps = TrackerDeps(session_id=session_id or str(uuid.uuid4()), user_id=user_id)
+        result = await tracker_agent.run(prompt, deps=deps)
 
-        # Extract the response - use result.output (same pattern as working agents)
         response_text = result.output if hasattr(result, 'output') else str(result.data)
-        print(f"[BUDDY] Response: {response_text[:100]}...", file=sys.stderr)
+        print(f"[TRACKER] Response: {response_text[:100]}...", file=sys.stderr)
 
         if stream:
             async def stream_response() -> AsyncGenerator[str, None]:
-                # Stream as SSE
                 chunk = {
                     "id": f"chatcmpl-{uuid.uuid4()}",
                     "object": "chat.completion.chunk",
                     "created": int(time.time()),
-                    "model": "buddy-1.0",
+                    "model": "tracker-1.0",
                     "choices": [{
                         "index": 0,
                         "delta": {"role": "assistant", "content": response_text},
@@ -564,12 +544,11 @@ async def chat_completions(request: Request):
                 }
                 yield f"data: {json.dumps(chunk)}\n\n"
 
-                # Send done
                 done_chunk = {
                     "id": f"chatcmpl-{uuid.uuid4()}",
                     "object": "chat.completion.chunk",
                     "created": int(time.time()),
-                    "model": "buddy-1.0",
+                    "model": "tracker-1.0",
                     "choices": [{
                         "index": 0,
                         "delta": {},
@@ -592,7 +571,7 @@ async def chat_completions(request: Request):
                 "id": f"chatcmpl-{uuid.uuid4()}",
                 "object": "chat.completion",
                 "created": int(time.time()),
-                "model": "buddy-1.0",
+                "model": "tracker-1.0",
                 "choices": [{
                     "index": 0,
                     "message": {"role": "assistant", "content": response_text},
@@ -602,7 +581,7 @@ async def chat_completions(request: Request):
             }
 
     except Exception as e:
-        print(f"[BUDDY] Error in chat/completions: {e}", file=sys.stderr)
+        print(f"[TRACKER] Error in chat/completions: {e}", file=sys.stderr)
         import traceback
         traceback.print_exc()
         return {"error": str(e)}, 500
@@ -619,7 +598,6 @@ async def copilotkit_endpoint(request: Request):
         body = await request.json()
         messages = body.get("messages", [])
 
-        # Extract last user message
         user_message = ""
         for msg in reversed(messages):
             if msg.get("role") == "user":
@@ -637,10 +615,9 @@ async def copilotkit_endpoint(request: Request):
             user_message = "Hello!"
 
         session_id = str(uuid.uuid4())
-        deps = BuddyDeps(session_id=session_id)
-        result = await buddy_agent.run(user_message, deps=deps)
+        deps = TrackerDeps(session_id=session_id)
+        result = await tracker_agent.run(user_message, deps=deps)
 
-        # Extract the response - use result.output (same pattern as working agents)
         response_text = result.output if hasattr(result, 'output') else str(result.data)
 
         return {
@@ -651,7 +628,7 @@ async def copilotkit_endpoint(request: Request):
         }
 
     except Exception as e:
-        print(f"[BUDDY] Error in copilotkit: {e}", file=sys.stderr)
+        print(f"[TRACKER] Error in copilotkit: {e}", file=sys.stderr)
         import traceback
         traceback.print_exc()
         return {"error": str(e)}, 500

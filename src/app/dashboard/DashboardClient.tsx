@@ -12,7 +12,7 @@ interface User {
   name: string | null;
 }
 
-interface UserDog {
+interface UserTractor {
   id: number;
   name: string;
   breed_name: string;
@@ -31,7 +31,7 @@ interface Policy {
 
 export default function DashboardClient() {
   const [user, setUser] = useState<User | null>(null);
-  const [dogs, setDogs] = useState<UserDog[]>([]);
+  const [tractors, setTractors] = useState<UserTractor[]>([]);
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,8 +41,7 @@ export default function DashboardClient() {
         const { data } = await authClient.getSession();
         if (data?.user) {
           setUser(data.user as User);
-          // In a real app, fetch dogs and policies from API
-          // For now, show empty state
+          // In a real app, fetch tractors and policies from API
         }
       } catch (error) {
         console.error('Error loading user data:', error);
@@ -55,7 +54,7 @@ export default function DashboardClient() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-900 via-orange-900 to-stone-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 flex items-center justify-center">
         <div className="text-white text-xl">Loading...</div>
       </div>
     );
@@ -63,10 +62,10 @@ export default function DashboardClient() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-900 via-orange-900 to-stone-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 flex items-center justify-center pt-28">
         <div className="text-center">
-          <div className="text-6xl mb-4">🐾</div>
-          <h2 className="text-2xl font-bold text-white mb-4">Sign in to manage your pets</h2>
+          <div className="text-6xl mb-4">🚜</div>
+          <h2 className="text-2xl font-bold text-white mb-4">Sign in to manage your tractors</h2>
           <Link
             href="/auth/sign-in"
             className="inline-block px-6 py-3 bg-amber-500 text-stone-900 rounded-full font-semibold hover:bg-amber-400 transition-colors"
@@ -79,7 +78,7 @@ export default function DashboardClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-900 via-orange-900 to-stone-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 p-8 pt-28">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
@@ -88,9 +87,9 @@ export default function DashboardClient() {
           className="mb-8"
         >
           <h1 className="text-4xl font-bold text-white mb-2">
-            Welcome back{user.name ? `, ${user.name.split(' ')[0]}` : ''}! 🐕
+            Welcome back{user.name ? `, ${user.name.split(' ')[0]}` : ''}! 🚜
           </h1>
-          <p className="text-white/70">Manage your pets and insurance policies</p>
+          <p className="text-white/70">Manage your tractors and insurance policies</p>
         </motion.div>
 
         {/* Voice Widget */}
@@ -98,20 +97,20 @@ export default function DashboardClient() {
           <HumeWidget />
         </div>
 
-        {/* My Pets Section */}
+        {/* My Tractors Section */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           className="mb-8"
         >
-          <h2 className="text-2xl font-semibold text-white mb-4">My Pets</h2>
+          <h2 className="text-2xl font-semibold text-white mb-4">My Tractors</h2>
 
-          {dogs.length === 0 ? (
+          {tractors.length === 0 ? (
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/10 p-8 text-center">
-              <div className="text-5xl mb-4">🐶</div>
-              <h3 className="text-xl font-semibold text-white mb-2">No pets registered yet</h3>
-              <p className="text-white/60 mb-6">Add your furry friend to get personalized insurance quotes</p>
+              <div className="text-5xl mb-4">🚜</div>
+              <h3 className="text-xl font-semibold text-white mb-2">No tractors registered yet</h3>
+              <p className="text-white/60 mb-6">Add your tractor to get personalised insurance quotes</p>
               <Link
                 href="/"
                 className="inline-block px-6 py-3 bg-amber-500 text-stone-900 rounded-full font-semibold hover:bg-amber-400 transition-colors"
@@ -121,16 +120,16 @@ export default function DashboardClient() {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-4">
-              {dogs.map((dog) => (
+              {tractors.map((tractor) => (
                 <div
-                  key={dog.id}
+                  key={tractor.id}
                   className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/10 p-6"
                 >
                   <div className="flex items-center gap-4">
-                    <span className="text-4xl">🐕</span>
+                    <span className="text-4xl">🚜</span>
                     <div>
-                      <h3 className="text-xl font-bold text-white">{dog.name}</h3>
-                      <p className="text-white/60">{dog.breed_name} • {dog.age_years} years old</p>
+                      <h3 className="text-xl font-bold text-white">{tractor.name}</h3>
+                      <p className="text-white/60">{tractor.breed_name} &bull; {tractor.age_years} years old</p>
                     </div>
                   </div>
                 </div>
@@ -151,7 +150,7 @@ export default function DashboardClient() {
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/10 p-8 text-center">
               <div className="text-5xl mb-4">📋</div>
               <h3 className="text-xl font-semibold text-white mb-2">No active policies</h3>
-              <p className="text-white/60 mb-6">Get a quote and protect your pet today!</p>
+              <p className="text-white/60 mb-6">Get a quote and protect your tractor today!</p>
               <Link
                 href="/"
                 className="inline-block px-6 py-3 bg-emerald-500 text-white rounded-full font-semibold hover:bg-emerald-400 transition-colors"
@@ -169,10 +168,10 @@ export default function DashboardClient() {
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="text-lg font-bold text-white">{policy.dog_name}</h3>
-                      <p className="text-white/60">{policy.plan_type} Plan • {policy.policy_number}</p>
+                      <p className="text-white/60">{policy.plan_type} Plan &bull; {policy.policy_number}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-emerald-400">${policy.monthly_premium}/mo</p>
+                      <p className="text-2xl font-bold text-emerald-400">&pound;{policy.monthly_premium}/mo</p>
                       <span className="inline-block px-3 py-1 bg-emerald-500/20 text-emerald-300 text-sm rounded-full">
                         {policy.status}
                       </span>
@@ -204,7 +203,7 @@ export default function DashboardClient() {
               className="bg-blue-500/20 border border-blue-500/30 rounded-xl p-4 text-center hover:bg-blue-500/30 transition-colors"
             >
               <span className="text-2xl block mb-2">📞</span>
-              <span className="text-white font-medium">Talk to Buddy</span>
+              <span className="text-white font-medium">Talk to Tracker</span>
             </Link>
             <Link
               href="/account/settings"

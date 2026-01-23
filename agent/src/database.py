@@ -47,6 +47,13 @@ async def get_connection() -> AsyncGenerator[asyncpg.Connection, None]:
 # =============================================================================
 # TRACTOR TYPE QUERIES
 # =============================================================================
+# DB Table Mapping (legacy schema):
+#   tractor_types  -> DB table: dog_breeds
+#   user_tractors  -> DB table: user_dogs
+#   type_id/type_name -> DB columns: breed_id/breed_name
+#   tractor_id     -> DB column: dog_id
+#   tractor_details -> DB column: dog_details
+# =============================================================================
 
 async def get_all_tractor_types() -> List[Dict[str, Any]]:
     """Get all tractor types from database."""
@@ -54,8 +61,7 @@ async def get_all_tractor_types() -> List[Dict[str, Any]]:
         async with get_connection() as conn:
             rows = await conn.fetch("""
                 SELECT id, name, size, risk_category, avg_lifespan_years,
-                       common_health_issues, base_premium_multiplier,
-                       temperament, exercise_needs, grooming_needs
+                       common_health_issues, base_premium_multiplier
                 FROM dog_breeds
                 ORDER BY name
             """)
@@ -73,8 +79,7 @@ async def get_tractor_type_by_name(name: str) -> Optional[Dict[str, Any]]:
             # Try exact match first
             row = await conn.fetchrow("""
                 SELECT id, name, size, risk_category, avg_lifespan_years,
-                       common_health_issues, base_premium_multiplier,
-                       temperament, exercise_needs, grooming_needs
+                       common_health_issues, base_premium_multiplier
                 FROM dog_breeds
                 WHERE LOWER(name) = LOWER($1)
             """, name)
@@ -86,8 +91,7 @@ async def get_tractor_type_by_name(name: str) -> Optional[Dict[str, Any]]:
             # Try fuzzy match
             row = await conn.fetchrow("""
                 SELECT id, name, size, risk_category, avg_lifespan_years,
-                       common_health_issues, base_premium_multiplier,
-                       temperament, exercise_needs, grooming_needs
+                       common_health_issues, base_premium_multiplier
                 FROM dog_breeds
                 WHERE LOWER(name) LIKE LOWER($1)
                 ORDER BY
@@ -275,7 +279,10 @@ async def get_user_tractors(user_id: str) -> List[Dict[str, Any]]:
     try:
         async with get_connection() as conn:
             rows = await conn.fetch("""
-                SELECT d.*, b.name as breed_name_full, b.size, b.risk_category
+                SELECT d.id, d.user_id, d.name, d.breed_id as type_id,
+                       d.breed_name as type_name, d.age_years,
+                       d.has_preexisting_conditions, d.preexisting_conditions,
+                       b.name as type_name_full, b.size, b.risk_category
                 FROM user_dogs d
                 LEFT JOIN dog_breeds b ON d.breed_id = b.id
                 WHERE d.user_id = $1
@@ -295,9 +302,8 @@ async def save_user_tractor(
     has_preexisting_conditions: bool = False,
     preexisting_conditions: List[str] = None
 ) -> Optional[int]:
-    """Save a tractor to the database."""
+    """Save a tractor to the database (DB table: user_dogs, columns: breed_id/breed_name)."""
     try:
-        # Look up tractor type
         tractor_type = await get_tractor_type_by_name(type_name)
         type_id = tractor_type.get("id") if tractor_type else None
 
@@ -322,7 +328,10 @@ async def get_user_policies(user_id: str) -> List[Dict[str, Any]]:
     try:
         async with get_connection() as conn:
             rows = await conn.fetch("""
-                SELECT p.*, d.name as tractor_name, d.breed_name as type_name
+                SELECT p.id, p.policy_number, p.user_id, p.dog_id as tractor_id,
+                       p.plan_type, p.monthly_premium, p.annual_coverage_limit,
+                       p.deductible, p.coverage_details, p.start_date, p.end_date, p.status,
+                       d.name as tractor_name, d.breed_name as type_name
                 FROM insurance_policies p
                 LEFT JOIN user_dogs d ON p.dog_id = d.id
                 WHERE p.user_id = $1
@@ -337,12 +346,12 @@ async def get_user_policies(user_id: str) -> List[Dict[str, Any]]:
 async def save_quote(
     user_id: Optional[str],
     session_id: str,
-    dog_details: Dict[str, Any],
+    tractor_details: Dict[str, Any],
     plan_type: str,
     quoted_premium: float,
     coverage_details: Dict[str, Any]
 ) -> Optional[int]:
-    """Save a quote to the database."""
+    """Save a quote to the database (DB column: dog_details stores tractor_details)."""
     try:
         import json
         from datetime import datetime, timedelta
@@ -355,7 +364,7 @@ async def save_quote(
                                           quoted_premium, coverage_details, valid_until)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
                 RETURNING id
-            """, user_id, session_id, json.dumps(dog_details), plan_type,
+            """, user_id, session_id, json.dumps(tractor_details), plan_type,
                 quoted_premium, json.dumps(coverage_details), valid_until)
 
             print(f"[TRACKER DB] Saved quote for session {session_id}", file=sys.stderr)

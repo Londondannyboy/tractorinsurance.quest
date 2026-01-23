@@ -61,13 +61,15 @@ Single-page conversational AI tractor insurance advisor. CopilotKit Next.js runt
 Project: `delicate-shadow-96964693`
 Connection: `postgresql://neondb_owner:npg_UKZmNVDO74Rw@ep-shy-flower-abtsg4ue-pooler.eu-west-2.aws.neon.tech/neondb`
 
-| Table | Purpose |
-|-------|---------|
-| dog_breeds | Tractor types with risk factors, common issues, premium multipliers |
-| user_dogs | User's registered tractors |
-| insurance_policies | Active policies |
-| policy_quotes | Quote history |
-| page_content | MDX content for sub-pages (slug, title, content, meta_description) |
+| Table (legacy name) | Code name | Purpose |
+|---------------------|-----------|---------|
+| dog_breeds | tractor_types | Tractor types with risk factors, common issues, premium multipliers |
+| user_dogs | user_tractors | User's registered tractors (columns: breed_id→type_id, breed_name→type_name) |
+| insurance_policies | — | Active policies (column: dog_id→tractor_id) |
+| policy_quotes | — | Quote history (column: dog_details→tractor_details) |
+| page_content | — | MDX content for sub-pages (slug, title, content, meta_description) |
+
+> **Note:** DB tables/columns use legacy puppy-insurance names. Code uses SQL aliases to map to tractor terminology.
 
 ---
 

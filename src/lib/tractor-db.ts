@@ -19,6 +19,13 @@ export function getSql() {
 // ============================================
 // TRACTOR INSURANCE TYPE DEFINITIONS
 // ============================================
+// DB Table Mapping (legacy schema):
+//   tractor_types  -> DB table: dog_breeds
+//   user_tractors  -> DB table: user_dogs
+//   type_id/type_name -> DB columns: breed_id/breed_name
+//   tractor_id     -> DB column: dog_id
+//   tractor_details -> DB column: dog_details
+// ============================================
 
 export interface TractorType {
   id: number;
@@ -30,17 +37,14 @@ export interface TractorType {
   base_premium_multiplier: number;
   image_url?: string;
   description?: string;
-  temperament: string[];
-  exercise_needs: 'low' | 'moderate' | 'high';
-  grooming_needs: 'low' | 'moderate' | 'high';
 }
 
 export interface UserTractor {
   id: number;
   user_id: string;
   name: string;
-  type_id?: number;       // DB column: breed_id
-  type_name: string;      // DB column: breed_name
+  type_id?: number;
+  type_name: string;
   date_of_birth?: Date;
   age_years: number;
   weight_kg?: number;
@@ -56,7 +60,7 @@ export interface InsurancePolicy {
   id: number;
   policy_number: string;
   user_id: string;
-  tractor_id: number;    // DB column: dog_id
+  tractor_id: number;
   plan_type: 'basic' | 'standard' | 'premium' | 'comprehensive';
   monthly_premium: number;
   annual_coverage_limit: number;
@@ -83,7 +87,7 @@ export interface PolicyQuote {
   id: number;
   user_id?: string;
   session_id?: string;
-  tractor_details: {         // DB column: dog_details
+  tractor_details: {
     tractorType: string;
     age: number;
     weight?: number;
@@ -316,14 +320,16 @@ export function calculateQuote(
   return { monthlyPremium, annualPremium, plan };
 }
 
-// Save a quote
+// Save a quote (DB column dog_details stores tractor_details)
 export async function saveQuote(
   quote: Omit<PolicyQuote, 'id'>
 ): Promise<number | null> {
   try {
     const result = await getSql()`
       INSERT INTO policy_quotes (user_id, session_id, dog_details, plan_type, quoted_premium, coverage_details, valid_until)
-      VALUES (${quote.user_id || null}, ${quote.session_id || null}, ${JSON.stringify(quote.tractor_details)}, ${quote.plan_type}, ${quote.quoted_premium}, ${JSON.stringify(quote.coverage_details)}, ${quote.valid_until.toISOString()})
+      VALUES (${quote.user_id || null}, ${quote.session_id || null}, ${JSON.stringify(quote.tractor_details)},
+              ${quote.plan_type}, ${quote.quoted_premium}, ${JSON.stringify(quote.coverage_details)},
+              ${quote.valid_until.toISOString()})
       RETURNING id
     `;
     return result[0]?.id || null;
@@ -337,7 +343,12 @@ export async function saveQuote(
 export async function getUserTractors(userId: string): Promise<UserTractor[]> {
   try {
     const result = await getSql()`
-      SELECT * FROM user_dogs WHERE user_id = ${userId} ORDER BY created_at DESC
+      SELECT id, user_id, name, breed_id as type_id, breed_name as type_name,
+             date_of_birth, age_years, weight_kg, gender, is_neutered,
+             microchip_number, has_preexisting_conditions, preexisting_conditions, photo_url
+      FROM user_dogs
+      WHERE user_id = ${userId}
+      ORDER BY created_at DESC
     `;
     return result as UserTractor[];
   } catch (error) {
@@ -346,12 +357,18 @@ export async function getUserTractors(userId: string): Promise<UserTractor[]> {
   }
 }
 
-// Add a tractor for user
+// Add a tractor for user (DB table: user_dogs, columns: breed_id/breed_name)
 export async function addUserTractor(tractor: Omit<UserTractor, 'id'>): Promise<number | null> {
   try {
     const result = await getSql()`
-      INSERT INTO user_dogs (user_id, name, breed_id, breed_name, date_of_birth, age_years, weight_kg, gender, is_neutered, microchip_number, has_preexisting_conditions, preexisting_conditions, photo_url)
-      VALUES (${tractor.user_id}, ${tractor.name}, ${tractor.type_id || null}, ${tractor.type_name}, ${tractor.date_of_birth?.toISOString() || null}, ${tractor.age_years}, ${tractor.weight_kg || null}, ${tractor.gender || null}, ${tractor.is_neutered}, ${tractor.microchip_number || null}, ${tractor.has_preexisting_conditions}, ${tractor.preexisting_conditions || []}, ${tractor.photo_url || null})
+      INSERT INTO user_dogs (user_id, name, breed_id, breed_name, date_of_birth, age_years,
+                             weight_kg, gender, is_neutered, microchip_number,
+                             has_preexisting_conditions, preexisting_conditions, photo_url)
+      VALUES (${tractor.user_id}, ${tractor.name}, ${tractor.type_id || null}, ${tractor.type_name},
+              ${tractor.date_of_birth?.toISOString() || null}, ${tractor.age_years},
+              ${tractor.weight_kg || null}, ${tractor.gender || null}, ${tractor.is_neutered},
+              ${tractor.microchip_number || null}, ${tractor.has_preexisting_conditions},
+              ${tractor.preexisting_conditions || []}, ${tractor.photo_url || null})
       RETURNING id
     `;
     return result[0]?.id || null;
@@ -365,7 +382,10 @@ export async function addUserTractor(tractor: Omit<UserTractor, 'id'>): Promise<
 export async function getUserPolicies(userId: string): Promise<InsurancePolicy[]> {
   try {
     const result = await getSql()`
-      SELECT p.*, d.name as tractor_name, d.breed_name as type_name
+      SELECT p.id, p.policy_number, p.user_id, p.dog_id as tractor_id,
+             p.plan_type, p.monthly_premium, p.annual_coverage_limit,
+             p.deductible, p.coverage_details, p.start_date, p.end_date, p.status,
+             d.name as tractor_name, d.breed_name as type_name
       FROM insurance_policies p
       LEFT JOIN user_dogs d ON p.dog_id = d.id
       WHERE p.user_id = ${userId}
@@ -378,7 +398,7 @@ export async function getUserPolicies(userId: string): Promise<InsurancePolicy[]
   }
 }
 
-// Create a policy from a quote
+// Create a policy from a quote (DB column: dog_id stores tractor_id)
 export async function createPolicy(
   userId: string,
   tractorId: number,
@@ -389,14 +409,18 @@ export async function createPolicy(
     const plan = INSURANCE_PLANS.find(p => p.type === planType);
     if (!plan) return null;
 
-    const policyNumber = `TRC-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+    const policyNumber = `TRC-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     const startDate = new Date();
     const endDate = new Date();
     endDate.setFullYear(endDate.getFullYear() + 1);
 
     await getSql()`
-      INSERT INTO insurance_policies (policy_number, user_id, dog_id, plan_type, monthly_premium, annual_coverage_limit, deductible, coverage_details, start_date, end_date, status)
-      VALUES (${policyNumber}, ${userId}, ${tractorId}, ${planType}, ${plan.base_monthly_premium}, ${plan.annual_coverage_limit}, ${plan.deductible}, ${JSON.stringify(plan.coverage)}, ${startDate.toISOString()}, ${endDate.toISOString()}, 'active')
+      INSERT INTO insurance_policies (policy_number, user_id, dog_id, plan_type, monthly_premium,
+                                      annual_coverage_limit, deductible, coverage_details,
+                                      start_date, end_date, status)
+      VALUES (${policyNumber}, ${userId}, ${tractorId}, ${planType}, ${plan.base_monthly_premium},
+              ${plan.annual_coverage_limit}, ${plan.deductible}, ${JSON.stringify(plan.coverage)},
+              ${startDate.toISOString()}, ${endDate.toISOString()}, 'active')
     `;
 
     // Mark quote as converted

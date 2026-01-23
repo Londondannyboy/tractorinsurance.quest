@@ -32,9 +32,9 @@ except ImportError:
     print("[TRACKER] Warning: zep-cloud not installed, memory features disabled", file=sys.stderr)
 
 from .database import (
-    get_all_breeds,
-    get_breed_by_name,
-    search_breeds,
+    get_all_tractor_types,
+    get_tractor_type_by_name,
+    search_tractor_types,
     calculate_quote,
     get_insurance_plans,
 )
@@ -235,7 +235,7 @@ async def confirm_tractor_type(ctx: RunContext[TrackerDeps], type_name: str) -> 
     session_ctx = get_session_context(ctx.deps.session_id)
 
     # Look up type in database
-    tractor_type = await get_breed_by_name(type_name)
+    tractor_type = await get_tractor_type_by_name(type_name)
 
     if tractor_type:
         session_ctx.tractor_type = tractor_type['name']
@@ -243,7 +243,7 @@ async def confirm_tractor_type(ctx: RunContext[TrackerDeps], type_name: str) -> 
         return f"Confirmed: {tractor_type['name']} - a {tractor_type['size']} machine with {tractor_type['risk_category']} risk level. Common risks: {common_risks}. Typical operational life: {tractor_type.get('avg_lifespan_years', 20)} years."
     else:
         # Try fuzzy search
-        matches = await search_breeds(type_name)
+        matches = await search_tractor_types(type_name)
         if matches:
             suggestions = ', '.join([t['name'] for t in matches[:3]])
             return f"I couldn't find an exact match for '{type_name}'. Did you mean: {suggestions}?"
@@ -299,9 +299,9 @@ async def generate_insurance_quote(
         return "I need to know the tractor type and age to generate an accurate quote. What type of tractor do you have, and how old is it?"
 
     # Get type info
-    tractor_type = await get_breed_by_name(session_ctx.tractor_type)
+    tractor_type = await get_tractor_type_by_name(session_ctx.tractor_type)
     if not tractor_type:
-        tractor_type = await get_breed_by_name("Farm Tractor")
+        tractor_type = await get_tractor_type_by_name("Farm Tractor")
 
     # Calculate quote
     quote = calculate_quote(
@@ -345,10 +345,10 @@ async def show_all_plans(ctx: RunContext[TrackerDeps]) -> str:
 @tracker_agent.tool
 async def get_tractor_type_info(ctx: RunContext[TrackerDeps], type_name: str) -> str:
     """Get detailed information about a tractor type."""
-    tractor_type = await get_breed_by_name(type_name)
+    tractor_type = await get_tractor_type_by_name(type_name)
 
     if not tractor_type:
-        matches = await search_breeds(type_name)
+        matches = await search_tractor_types(type_name)
         if matches:
             return f"Did you mean: {', '.join([t['name'] for t in matches[:3]])}?"
         return f"I couldn't find information about {type_name}."

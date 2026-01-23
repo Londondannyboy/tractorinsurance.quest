@@ -127,15 +127,15 @@ export function CoverageBreakdownChart({ title = "What's Typically Covered" }: C
 }
 
 // Tractor Type Risk Factor Chart
-export function BreedRiskChart({ title = "Insurance Costs by Tractor Type Risk" }: ChartProps) {
+export function TractorRiskChart({ title = "Insurance Costs by Tractor Type Risk" }: ChartProps) {
   const data = [
-    { breed: "Ride-on Mower", multiplier: 0.65, category: "Low" },
-    { breed: "Garden Tractor", multiplier: 0.7, category: "Low" },
-    { breed: "Mini Tractor", multiplier: 0.75, category: "Low" },
-    { breed: "Compact Tractor", multiplier: 0.9, category: "Low" },
-    { breed: "Utility Tractor", multiplier: 1.2, category: "Medium" },
-    { breed: "Farm Tractor", multiplier: 1.3, category: "Medium" },
-    { breed: "Vintage Tractor", multiplier: 1.5, category: "High" },
+    { tractorType: "Ride-on Mower", multiplier: 0.65, category: "Low" },
+    { tractorType: "Garden Tractor", multiplier: 0.7, category: "Low" },
+    { tractorType: "Mini Tractor", multiplier: 0.75, category: "Low" },
+    { tractorType: "Compact Tractor", multiplier: 0.9, category: "Low" },
+    { tractorType: "Utility Tractor", multiplier: 1.2, category: "Medium" },
+    { tractorType: "Farm Tractor", multiplier: 1.3, category: "Medium" },
+    { tractorType: "Vintage Tractor", multiplier: 1.5, category: "High" },
   ];
 
   useCopilotReadable({
@@ -156,7 +156,7 @@ export function BreedRiskChart({ title = "Insurance Costs by Tractor Type Risk" 
           <BarChart data={data} layout="vertical" margin={{ top: 20, right: 30, left: 100, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
             <XAxis type="number" stroke="#9ca3af" domain={[0, 2]} />
-            <YAxis dataKey="breed" type="category" stroke="#9ca3af" width={90} />
+            <YAxis dataKey="tractorType" type="category" stroke="#9ca3af" width={90} />
             <Tooltip
               contentStyle={{
                 backgroundColor: "#1c1917",
@@ -254,12 +254,12 @@ export function AgeCostChart({ title = "How Age Affects Insurance Cost" }: Chart
 
 // Interactive Quote Calculator
 export function QuoteCalculator() {
-  const [breed, setBreed] = useState("farm-tractor");
+  const [tractorType, setTractorType] = useState("farm-tractor");
   const [age, setAge] = useState(5);
   const [plan, setPlan] = useState("standard");
   const [quote, setQuote] = useState<number | null>(null);
 
-  const breeds: Record<string, number> = {
+  const tractorTypes: Record<string, number> = {
     "ride-on-mower": 0.65,
     "garden-tractor": 0.7,
     "mini-tractor": 0.75,
@@ -278,7 +278,7 @@ export function QuoteCalculator() {
 
   const calculateQuote = () => {
     let basePremium = plans[plan];
-    let multiplier = breeds[breed] || 1.0;
+    let multiplier = tractorTypes[tractorType] || 1.0;
 
     // Age adjustments
     if (age < 1) multiplier *= 1.1;
@@ -290,29 +290,29 @@ export function QuoteCalculator() {
 
   useCopilotReadable({
     description: "User's quote calculator selections",
-    value: JSON.stringify({ breed, age, plan, quote }),
+    value: JSON.stringify({ tractorType, age, plan, quote }),
   });
 
   useCopilotAction({
     name: "calculate_quick_quote",
     description: "Calculate a quick insurance quote based on tractor type, age, and plan",
     parameters: [
-      { name: "breed", type: "string", description: "Tractor type" },
+      { name: "tractorType", type: "string", description: "Tractor type" },
       { name: "age", type: "number", description: "Tractor age in years" },
       { name: "plan", type: "string", description: "Insurance plan type" },
     ],
-    handler: ({ breed: b, age: a, plan: p }) => {
-      setBreed(b);
+    handler: ({ tractorType: t, age: a, plan: p }) => {
+      setTractorType(t);
       setAge(a);
       setPlan(p);
       setTimeout(calculateQuote, 100);
-      return `Calculated quote for ${b}, ${a} years old, ${p} plan`;
+      return `Calculated quote for ${t}, ${a} years old, ${p} plan`;
     },
   });
 
   useEffect(() => {
     calculateQuote();
-  }, [breed, age, plan]);
+  }, [tractorType, age, plan]);
 
   return (
     <motion.div
@@ -328,8 +328,8 @@ export function QuoteCalculator() {
         <div>
           <label className="block text-white/70 text-sm mb-2">Tractor Type</label>
           <select
-            value={breed}
-            onChange={(e) => setBreed(e.target.value)}
+            value={tractorType}
+            onChange={(e) => setTractorType(e.target.value)}
             className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none"
           >
             <option value="ride-on-mower">Ride-on Mower</option>

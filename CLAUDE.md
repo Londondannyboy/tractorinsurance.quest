@@ -28,7 +28,7 @@ Single-page conversational AI tractor insurance advisor. CopilotKit Next.js runt
 | Main page | `src/app/page.tsx` |
 | CopilotKit provider | `src/components/providers.tsx` |
 | CopilotKit runtime | `src/app/api/copilotkit/route.ts` |
-| Tractor types API | `src/app/api/breeds/route.ts` |
+| Tractor types API | `src/app/api/tractor-types/route.ts` |
 | Quote API | `src/app/api/quote/route.ts` |
 | Content API (MDX from DB) | `src/app/api/content/route.ts` |
 | Database queries (frontend) | `src/lib/tractor-db.ts` |

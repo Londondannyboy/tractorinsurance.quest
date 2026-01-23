@@ -2,7 +2,7 @@ import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
 import Image from "next/image";
 
-// Custom MDX components for Puppy Insurance Quest
+// Custom MDX components for Tractor Insurance Quest
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     // Override default HTML elements with styled versions

@@ -15,7 +15,7 @@ interface User {
 interface UserTractor {
   id: number;
   name: string;
-  breed_name: string;
+  type_name: string;
   age_years: number;
   has_preexisting_conditions: boolean;
 }
@@ -26,7 +26,7 @@ interface Policy {
   plan_type: string;
   monthly_premium: number;
   status: string;
-  dog_name: string;
+  tractor_name: string;
 }
 
 export default function DashboardClient() {
@@ -129,7 +129,7 @@ export default function DashboardClient() {
                     <span className="text-4xl">🚜</span>
                     <div>
                       <h3 className="text-xl font-bold text-white">{tractor.name}</h3>
-                      <p className="text-white/60">{tractor.breed_name} &bull; {tractor.age_years} years old</p>
+                      <p className="text-white/60">{tractor.type_name} &bull; {tractor.age_years} years old</p>
                     </div>
                   </div>
                 </div>
@@ -167,7 +167,7 @@ export default function DashboardClient() {
                 >
                   <div className="flex justify-between items-center">
                     <div>
-                      <h3 className="text-lg font-bold text-white">{policy.dog_name}</h3>
+                      <h3 className="text-lg font-bold text-white">{policy.tractor_name}</h3>
                       <p className="text-white/60">{policy.plan_type} Plan &bull; {policy.policy_number}</p>
                     </div>
                     <div className="text-right">

@@ -39,8 +39,8 @@ export interface UserTractor {
   id: number;
   user_id: string;
   name: string;
-  breed_id?: number;
-  breed_name: string;
+  type_id?: number;       // DB column: breed_id
+  type_name: string;      // DB column: breed_name
   date_of_birth?: Date;
   age_years: number;
   weight_kg?: number;
@@ -56,7 +56,7 @@ export interface InsurancePolicy {
   id: number;
   policy_number: string;
   user_id: string;
-  dog_id: number;
+  tractor_id: number;    // DB column: dog_id
   plan_type: 'basic' | 'standard' | 'premium' | 'comprehensive';
   monthly_premium: number;
   annual_coverage_limit: number;
@@ -83,11 +83,11 @@ export interface PolicyQuote {
   id: number;
   user_id?: string;
   session_id?: string;
-  dog_details: {
-    breed: string;
+  tractor_details: {         // DB column: dog_details
+    tractorType: string;
     age: number;
     weight?: number;
-    preexisting_conditions?: string[];
+    modifications?: string[];
   };
   plan_type: string;
   quoted_premium: number;
@@ -223,7 +223,7 @@ export const INSURANCE_PLANS: InsurancePlan[] = [
 // ============================================
 
 // Get all tractor types
-export async function getAllBreeds(): Promise<TractorType[]> {
+export async function getAllTractorTypes(): Promise<TractorType[]> {
   try {
     const result = await getSql()`
       SELECT * FROM dog_breeds ORDER BY name
@@ -236,7 +236,7 @@ export async function getAllBreeds(): Promise<TractorType[]> {
 }
 
 // Get tractor type by name (fuzzy match)
-export async function getBreedByName(name: string): Promise<TractorType | null> {
+export async function getTractorTypeByName(name: string): Promise<TractorType | null> {
   try {
     const result = await getSql()`
       SELECT * FROM dog_breeds
@@ -254,7 +254,7 @@ export async function getBreedByName(name: string): Promise<TractorType | null> 
 }
 
 // Search tractor types
-export async function searchBreeds(query: string): Promise<TractorType[]> {
+export async function searchTractorTypes(query: string): Promise<TractorType[]> {
   try {
     const result = await getSql()`
       SELECT * FROM dog_breeds
@@ -270,7 +270,7 @@ export async function searchBreeds(query: string): Promise<TractorType[]> {
 }
 
 // Get tractor type by ID
-export async function getBreedById(id: number): Promise<TractorType | null> {
+export async function getTractorTypeById(id: number): Promise<TractorType | null> {
   try {
     const result = await getSql()`
       SELECT * FROM dog_breeds WHERE id = ${id}
@@ -323,7 +323,7 @@ export async function saveQuote(
   try {
     const result = await getSql()`
       INSERT INTO policy_quotes (user_id, session_id, dog_details, plan_type, quoted_premium, coverage_details, valid_until)
-      VALUES (${quote.user_id || null}, ${quote.session_id || null}, ${JSON.stringify(quote.dog_details)}, ${quote.plan_type}, ${quote.quoted_premium}, ${JSON.stringify(quote.coverage_details)}, ${quote.valid_until.toISOString()})
+      VALUES (${quote.user_id || null}, ${quote.session_id || null}, ${JSON.stringify(quote.tractor_details)}, ${quote.plan_type}, ${quote.quoted_premium}, ${JSON.stringify(quote.coverage_details)}, ${quote.valid_until.toISOString()})
       RETURNING id
     `;
     return result[0]?.id || null;
@@ -334,7 +334,7 @@ export async function saveQuote(
 }
 
 // Get user's tractors
-export async function getUserDogs(userId: string): Promise<UserTractor[]> {
+export async function getUserTractors(userId: string): Promise<UserTractor[]> {
   try {
     const result = await getSql()`
       SELECT * FROM user_dogs WHERE user_id = ${userId} ORDER BY created_at DESC
@@ -347,11 +347,11 @@ export async function getUserDogs(userId: string): Promise<UserTractor[]> {
 }
 
 // Add a tractor for user
-export async function addUserDog(tractor: Omit<UserTractor, 'id'>): Promise<number | null> {
+export async function addUserTractor(tractor: Omit<UserTractor, 'id'>): Promise<number | null> {
   try {
     const result = await getSql()`
       INSERT INTO user_dogs (user_id, name, breed_id, breed_name, date_of_birth, age_years, weight_kg, gender, is_neutered, microchip_number, has_preexisting_conditions, preexisting_conditions, photo_url)
-      VALUES (${tractor.user_id}, ${tractor.name}, ${tractor.breed_id || null}, ${tractor.breed_name}, ${tractor.date_of_birth?.toISOString() || null}, ${tractor.age_years}, ${tractor.weight_kg || null}, ${tractor.gender || null}, ${tractor.is_neutered}, ${tractor.microchip_number || null}, ${tractor.has_preexisting_conditions}, ${tractor.preexisting_conditions || []}, ${tractor.photo_url || null})
+      VALUES (${tractor.user_id}, ${tractor.name}, ${tractor.type_id || null}, ${tractor.type_name}, ${tractor.date_of_birth?.toISOString() || null}, ${tractor.age_years}, ${tractor.weight_kg || null}, ${tractor.gender || null}, ${tractor.is_neutered}, ${tractor.microchip_number || null}, ${tractor.has_preexisting_conditions}, ${tractor.preexisting_conditions || []}, ${tractor.photo_url || null})
       RETURNING id
     `;
     return result[0]?.id || null;
@@ -365,7 +365,7 @@ export async function addUserDog(tractor: Omit<UserTractor, 'id'>): Promise<numb
 export async function getUserPolicies(userId: string): Promise<InsurancePolicy[]> {
   try {
     const result = await getSql()`
-      SELECT p.*, d.name as dog_name, d.breed_name
+      SELECT p.*, d.name as tractor_name, d.breed_name as type_name
       FROM insurance_policies p
       LEFT JOIN user_dogs d ON p.dog_id = d.id
       WHERE p.user_id = ${userId}

@@ -48,7 +48,7 @@ async def get_connection() -> AsyncGenerator[asyncpg.Connection, None]:
 # TRACTOR TYPE QUERIES
 # =============================================================================
 
-async def get_all_breeds() -> List[Dict[str, Any]]:
+async def get_all_tractor_types() -> List[Dict[str, Any]]:
     """Get all tractor types from database."""
     try:
         async with get_connection() as conn:
@@ -66,7 +66,7 @@ async def get_all_breeds() -> List[Dict[str, Any]]:
         return []
 
 
-async def get_breed_by_name(name: str) -> Optional[Dict[str, Any]]:
+async def get_tractor_type_by_name(name: str) -> Optional[Dict[str, Any]]:
     """Get tractor type by name (fuzzy match)."""
     try:
         async with get_connection() as conn:
@@ -106,7 +106,7 @@ async def get_breed_by_name(name: str) -> Optional[Dict[str, Any]]:
         return None
 
 
-async def search_breeds(query: str) -> List[Dict[str, Any]]:
+async def search_tractor_types(query: str) -> List[Dict[str, Any]]:
     """Search tractor types by name."""
     try:
         async with get_connection() as conn:
@@ -208,7 +208,7 @@ def get_plan_by_type(plan_type: str) -> Optional[Dict[str, Any]]:
 
 
 def calculate_quote(
-    breed: Dict[str, Any],
+    tractor_type: Dict[str, Any],
     age_years: int,
     plan_type: str = "standard",
     has_preexisting_conditions: bool = False
@@ -221,7 +221,7 @@ def calculate_quote(
     premium = plan["base_monthly_premium"]
 
     # Apply tractor type risk multiplier
-    type_multiplier = float(breed.get("base_premium_multiplier", 1.0))
+    type_multiplier = float(tractor_type.get("base_premium_multiplier", 1.0))
     premium *= type_multiplier
 
     # Age adjustments for tractors
@@ -270,7 +270,7 @@ async def get_user_profile(user_id: str) -> Optional[Dict[str, Any]]:
         return None
 
 
-async def get_user_dogs(user_id: str) -> List[Dict[str, Any]]:
+async def get_user_tractors(user_id: str) -> List[Dict[str, Any]]:
     """Get all tractors registered by a user."""
     try:
         async with get_connection() as conn:
@@ -287,10 +287,10 @@ async def get_user_dogs(user_id: str) -> List[Dict[str, Any]]:
         return []
 
 
-async def save_user_dog(
+async def save_user_tractor(
     user_id: str,
-    dog_name: str,
-    breed_name: str,
+    tractor_name: str,
+    type_name: str,
     age_years: int,
     has_preexisting_conditions: bool = False,
     preexisting_conditions: List[str] = None
@@ -298,8 +298,8 @@ async def save_user_dog(
     """Save a tractor to the database."""
     try:
         # Look up tractor type
-        breed = await get_breed_by_name(breed_name)
-        breed_id = breed.get("id") if breed else None
+        tractor_type = await get_tractor_type_by_name(type_name)
+        type_id = tractor_type.get("id") if tractor_type else None
 
         async with get_connection() as conn:
             result = await conn.fetchrow("""
@@ -307,10 +307,10 @@ async def save_user_dog(
                                        has_preexisting_conditions, preexisting_conditions)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
                 RETURNING id
-            """, user_id, dog_name, breed_id, breed_name, age_years,
+            """, user_id, tractor_name, type_id, type_name, age_years,
                 has_preexisting_conditions, preexisting_conditions or [])
 
-            print(f"[TRACKER DB] Saved tractor {dog_name} for user {user_id}", file=sys.stderr)
+            print(f"[TRACKER DB] Saved tractor {tractor_name} for user {user_id}", file=sys.stderr)
             return result["id"] if result else None
     except Exception as e:
         print(f"[TRACKER DB] Error saving user tractor: {e}", file=sys.stderr)
@@ -322,7 +322,7 @@ async def get_user_policies(user_id: str) -> List[Dict[str, Any]]:
     try:
         async with get_connection() as conn:
             rows = await conn.fetch("""
-                SELECT p.*, d.name as dog_name, d.breed_name
+                SELECT p.*, d.name as tractor_name, d.breed_name as type_name
                 FROM insurance_policies p
                 LEFT JOIN user_dogs d ON p.dog_id = d.id
                 WHERE p.user_id = $1

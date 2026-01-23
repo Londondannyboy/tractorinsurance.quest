@@ -10,7 +10,7 @@ import Image from 'next/image';
 import { HumeWidget } from '@/components/HumeWidget';
 import {
   PlanComparisonChart,
-  BreedRiskChart,
+  TractorRiskChart,
   AgeCostChart,
   QuoteCalculator,
   FeatureComparisonTable,
@@ -187,7 +187,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchTractorTypes() {
       try {
-        const res = await fetch('/api/breeds');
+        const res = await fetch('/api/tractor-types');
         if (res.ok) {
           const types = await res.json();
           setState(prev => ({ ...prev, tractorTypes: types }));
@@ -209,14 +209,14 @@ export default function Home() {
 
   // Action: Show tractor type info
   useCopilotAction({
-    name: "show_breed_info",
+    name: "show_tractor_info",
     description: "Show detailed information about a specific tractor type when the user mentions a tractor type.",
     parameters: [
-      { name: "breed_name", type: "string" as const, description: "Type of tractor (e.g., 'Farm Tractor', 'Vintage Tractor', 'Compact Tractor')" },
+      { name: "tractor_type_name", type: "string" as const, description: "Type of tractor (e.g., 'Farm Tractor', 'Vintage Tractor', 'Compact Tractor')" },
     ],
-    handler: async ({ breed_name }) => {
+    handler: async ({ tractor_type_name }) => {
       try {
-        const res = await fetch(`/api/breeds?name=${encodeURIComponent(breed_name)}`);
+        const res = await fetch(`/api/tractor-types?name=${encodeURIComponent(tractor_type_name)}`);
         if (res.ok) {
           const tractorType = await res.json();
           setState(prev => ({
@@ -227,7 +227,7 @@ export default function Home() {
           }));
           return `Found ${tractorType.name}! This is a ${tractorType.category} tractor with ${tractorType.risk_category} risk level. Common risks include: ${tractorType.common_risks?.join(', ') || tractorType.common_health_issues?.join(', ')}. Average horsepower: ${tractorType.avg_horsepower || tractorType.avg_lifespan_years}.`;
         }
-        return `I couldn't find a tractor type called "${breed_name}". Could you try a different type?`;
+        return `I couldn't find a tractor type called "${tractor_type_name}". Could you try a different type?`;
       } catch (error) {
         console.error('Error fetching tractor type:', error);
         return 'Error looking up tractor type information. Please try again.';
@@ -237,18 +237,18 @@ export default function Home() {
 
   // Action: Confirm tractor details
   useCopilotAction({
-    name: "confirm_dog_details",
+    name: "confirm_tractor_details",
     description: "Confirm and save the tractor's details when the user provides their tractor's name, type, and age.",
     parameters: [
-      { name: "dog_name", type: "string" as const, description: "The tractor's name or identifier" },
-      { name: "breed_name", type: "string" as const, description: "The tractor type" },
+      { name: "tractor_name", type: "string" as const, description: "The tractor's name or identifier" },
+      { name: "tractor_type_name", type: "string" as const, description: "The tractor type" },
       { name: "age_years", type: "number" as const, description: "The tractor's age in years" },
-      { name: "has_preexisting_conditions", type: "boolean" as const, description: "Whether the tractor has modifications or prior damage" },
+      { name: "has_modifications", type: "boolean" as const, description: "Whether the tractor has modifications or prior damage" },
     ],
-    handler: async ({ dog_name, breed_name, age_years, has_preexisting_conditions }) => {
+    handler: async ({ tractor_name, tractor_type_name, age_years, has_modifications }) => {
       let tractorType = state.selectedType;
-      if (!tractorType || tractorType.name.toLowerCase() !== breed_name.toLowerCase()) {
-        const res = await fetch(`/api/breeds?name=${encodeURIComponent(breed_name)}`);
+      if (!tractorType || tractorType.name.toLowerCase() !== tractor_type_name.toLowerCase()) {
+        const res = await fetch(`/api/tractor-types?name=${encodeURIComponent(tractor_type_name)}`);
         if (res.ok) {
           tractorType = await res.json();
         }
@@ -258,15 +258,15 @@ export default function Home() {
         ...prev,
         selectedType: tractorType,
         tractorDetails: {
-          name: dog_name,
-          type: breed_name,
+          name: tractor_name,
+          type: tractor_type_name,
           age: age_years,
-          hasModifications: has_preexisting_conditions || false,
+          hasModifications: has_modifications || false,
         },
         step: 'tractor_details',
       }));
 
-      return `Great! I've noted that ${dog_name} is a ${age_years} year old ${breed_name}${has_preexisting_conditions ? ' with modifications' : ''}. Would you like to see our insurance plans?`;
+      return `Great! I've noted that ${tractor_name} is a ${age_years} year old ${tractor_type_name}${has_modifications ? ' with modifications' : ''}. Would you like to see our insurance plans?`;
     },
   });
 
@@ -288,10 +288,10 @@ export default function Home() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            breedName: tractorDetails.type,
+            tractorTypeName: tractorDetails.type,
             ageYears: tractorDetails.age,
             planType: plan_type || 'standard',
-            hasPreexistingConditions: tractorDetails.hasModifications || false,
+            hasModifications: tractorDetails.hasModifications || false,
           }),
         });
 
@@ -346,8 +346,8 @@ YOUR PERSONALITY:
 - Always prioritise protecting the owner's investment
 
 CRITICAL RULES:
-1. When user mentions a tractor type, ALWAYS call show_breed_info
-2. When user provides tractor details, call confirm_dog_details
+1. When user mentions a tractor type, ALWAYS call show_tractor_info
+2. When user provides tractor details, call confirm_tractor_details
 3. When user wants prices/coverage, call generate_quote
 4. When user wants to compare options, call show_plans
 
@@ -864,7 +864,7 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
           <div className="bg-stone-900/60 backdrop-blur-sm rounded-2xl border border-stone-700/50 p-6 md:p-8 mb-12">
             <h3 className="text-xl font-bold text-white mb-6 text-center">Premium Multiplier by Tractor Risk Category</h3>
             <div className="h-80">
-              <BreedRiskChart />
+              <TractorRiskChart />
             </div>
           </div>
 

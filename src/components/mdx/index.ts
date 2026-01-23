@@ -2,13 +2,13 @@
 export {
   PlanComparisonChart,
   CoverageBreakdownChart,
-  BreedRiskChart,
+  TractorRiskChart,
   AgeCostChart,
   QuoteCalculator,
   FeatureComparisonTable,
 } from "./InsuranceChart";
 
-export { BreedCard, BreedGrid } from "./BreedCard";
+export { TractorCard, TractorGrid } from "./TractorCard";
 
 export {
   CallToAction,

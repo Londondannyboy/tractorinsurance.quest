@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getBreedByName, calculateQuote, saveQuote, INSURANCE_PLANS } from '@/lib/tractor-db';
+import { getTractorTypeByName, calculateQuote, saveQuote, INSURANCE_PLANS } from '@/lib/tractor-db';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { breedName, ageYears, planType, hasPreexistingConditions, userId, sessionId } = body;
+    const { tractorTypeName, ageYears, planType, hasModifications, userId, sessionId } = body;
 
-    if (!breedName || ageYears === undefined || !planType) {
+    if (!tractorTypeName || ageYears === undefined || !planType) {
       return NextResponse.json(
-        { error: 'Missing required fields: breedName, ageYears, planType' },
+        { error: 'Missing required fields: tractorTypeName, ageYears, planType' },
         { status: 400 }
       );
     }
 
     // Find the tractor type
-    const tractorType = await getBreedByName(breedName);
+    const tractorType = await getTractorTypeByName(tractorTypeName);
     if (!tractorType) {
       return NextResponse.json({ error: 'Tractor type not found' }, { status: 404 });
     }
@@ -24,20 +24,20 @@ export async function POST(request: NextRequest) {
       tractorType,
       ageYears,
       planType,
-      hasPreexistingConditions || false
+      hasModifications || false
     );
 
     // Save quote to database
     const validUntil = new Date();
-    validUntil.setDate(validUntil.getDate() + 30); // Quote valid for 30 days
+    validUntil.setDate(validUntil.getDate() + 30);
 
     const quoteId = await saveQuote({
       user_id: userId,
       session_id: sessionId,
-      dog_details: {
-        breed: breedName,
+      tractor_details: {
+        tractorType: tractorTypeName,
         age: ageYears,
-        preexisting_conditions: hasPreexistingConditions ? ['Yes'] : undefined,
+        modifications: hasModifications ? ['Yes'] : undefined,
       },
       plan_type: planType,
       quoted_premium: monthlyPremium,
@@ -73,7 +73,6 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-  // Return available plans
   return NextResponse.json({
     plans: INSURANCE_PLANS.map(plan => ({
       type: plan.type,

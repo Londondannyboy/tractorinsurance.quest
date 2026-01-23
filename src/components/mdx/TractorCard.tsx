@@ -6,8 +6,8 @@ import Image from "next/image";
 import { useCopilotReadable } from "@copilotkit/react-core";
 import { Shield, Clock } from "lucide-react";
 
-interface BreedCardProps {
-  breed: string;
+interface TractorCardProps {
+  tractorType: string;
   image?: string;
   riskCategory: "low" | "medium" | "high";
   avgLifespan: string;
@@ -22,18 +22,18 @@ const riskColors = {
   high: "text-red-400 bg-red-500/20",
 };
 
-export function BreedCard({
-  breed,
+export function TractorCard({
+  tractorType,
   image,
   riskCategory,
   avgLifespan,
   commonIssues,
   premiumMultiplier,
   href,
-}: BreedCardProps) {
+}: TractorCardProps) {
   useCopilotReadable({
-    description: `Breed card for ${breed}`,
-    value: JSON.stringify({ breed, riskCategory, avgLifespan, commonIssues, premiumMultiplier }),
+    description: `Tractor type card for ${tractorType}`,
+    value: JSON.stringify({ tractorType, riskCategory, avgLifespan, commonIssues, premiumMultiplier }),
   });
 
   return (
@@ -46,12 +46,11 @@ export function BreedCard({
     >
       <Link href={href} className="block">
         <div className="bg-gradient-to-br from-stone-900 to-stone-800 border border-amber-500/20 rounded-2xl overflow-hidden hover:border-amber-500/40 transition-colors">
-          {/* Image */}
           {image && (
             <div className="relative h-48 overflow-hidden">
               <Image
                 src={image}
-                alt={breed}
+                alt={tractorType}
                 fill
                 className="object-cover"
               />
@@ -62,9 +61,8 @@ export function BreedCard({
             </div>
           )}
 
-          {/* Content */}
           <div className="p-5">
-            <h3 className="text-xl font-bold text-white mb-3">{breed}</h3>
+            <h3 className="text-xl font-bold text-white mb-3">{tractorType}</h3>
 
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="flex items-center gap-2 text-white/70 text-sm">
@@ -77,9 +75,8 @@ export function BreedCard({
               </div>
             </div>
 
-            {/* Common Issues */}
             <div className="mb-4">
-              <div className="text-white/50 text-xs mb-2">Common Health Issues:</div>
+              <div className="text-white/50 text-xs mb-2">Common Issues:</div>
               <div className="flex flex-wrap gap-1">
                 {commonIssues.slice(0, 3).map((issue) => (
                   <span
@@ -102,8 +99,8 @@ export function BreedCard({
   );
 }
 
-// Grid wrapper for multiple breed cards
-export function BreedGrid({ children }: { children: React.ReactNode }) {
+// Grid wrapper for multiple tractor cards
+export function TractorGrid({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 my-8">
       {children}

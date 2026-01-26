@@ -21,11 +21,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Tractor Insurance UK | Compare Tractor & Agricultural Vehicle Insurance",
-    template: "%s | Tractor Insurance Quest",
+    default: "Compare Tractor Insurance | Compare Tractor Insurance Quest",
+    template: "%s | Compare Tractor Insurance Quest",
   },
   description:
-    "Compare the best tractor insurance in the UK. Get instant quotes for farm tractors, vintage tractors, compact tractors & more. AI-powered tractor insurance advisor helps you find the perfect coverage.",
+    "Compare Tractor Insurance with Compare Tractor Insurance Quest. Get instant quotes to compare tractor insurance for farm tractors, vintage tractors, compact tractors & more. AI-powered advisor helps you compare tractor insurance and find the perfect coverage.",
   keywords: [
     "tractor insurance",
     "tractor insurance UK",
@@ -38,9 +38,9 @@ export const metadata: Metadata = {
     "tractor insurance cost",
     "compare tractor insurance",
   ],
-  authors: [{ name: "Tractor Insurance Quest" }],
-  creator: "Tractor Insurance Quest",
-  publisher: "Tractor Insurance Quest",
+  authors: [{ name: "Compare Tractor Insurance Quest" }],
+  creator: "Compare Tractor Insurance Quest",
+  publisher: "Compare Tractor Insurance Quest",
   formatDetection: {
     email: false,
     address: false,
@@ -51,18 +51,18 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "Tractor Insurance UK | Compare Tractor & Agricultural Vehicle Insurance",
+    title: "Compare Tractor Insurance | Compare Tractor Insurance Quest",
     description:
-      "Compare the best tractor insurance in the UK. Get instant quotes with our AI-powered tractor insurance advisor.",
+      "Compare Tractor Insurance with Compare Tractor Insurance Quest. Get instant quotes with our AI-powered advisor to compare tractor insurance.",
     url: "https://tractorinsurance.quest",
-    siteName: "Tractor Insurance Quest",
+    siteName: "Compare Tractor Insurance Quest",
     locale: "en_GB",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tractor Insurance UK | Compare Tractor Insurance",
-    description: "Compare the best tractor insurance in the UK. AI-powered quotes for all tractor types.",
+    title: "Compare Tractor Insurance | Compare Tractor Insurance Quest",
+    description: "Compare Tractor Insurance with Compare Tractor Insurance Quest. AI-powered quotes to compare tractor insurance for all tractor types.",
   },
   robots: {
     index: true,
@@ -90,7 +90,7 @@ export default function RootLayout({
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="shortcut icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <meta name="apple-mobile-web-app-title" content="Tractor Insurance Quest" />
+        <meta name="apple-mobile-web-app-title" content="Compare Tractor Insurance Quest" />
         <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body

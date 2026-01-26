@@ -88,7 +88,7 @@ function TractorCard({ name, href, risk, description, image }: {
         <div className="relative h-48 overflow-hidden">
           <Image
             src={image}
-            alt={`${name} tractor insurance`}
+            alt={`Compare Tractor Insurance - ${name}`}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
@@ -386,9 +386,9 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
               className="mb-8"
             >
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight">
-                <span className="text-amber-400">Tractor Insurance UK</span>
+                <span className="text-amber-400">Compare Tractor Insurance</span>
                 <br />
-                <span className="text-white">Compare Agricultural Vehicle Insurance</span>
+                <span className="text-white">Compare Tractor Insurance UK</span>
               </h1>
               <p className="text-lg md:text-xl text-white/70 max-w-3xl mx-auto leading-relaxed">
                 Find the <strong>best tractor insurance</strong> for your machinery. Compare tractor insurance plans from top UK providers,
@@ -481,7 +481,7 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                What is Tractor Insurance and Why Do You Need It?
+                Compare Tractor Insurance: What is It and Why Do You Need It?
               </h2>
               <div className="prose prose-invert max-w-none">
                 <p className="text-white/70 text-lg leading-relaxed mb-6">
@@ -519,7 +519,7 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
             <div className="relative">
               <Image
                 src="https://images.unsplash.com/photo-1530267981375-f0de937f5f13?w=800&q=80"
-                alt="Farm tractor in field - tractor insurance protects your investment"
+                alt="Compare Tractor Insurance - Farm tractor in field"
                 width={600}
                 height={400}
                 className="rounded-2xl shadow-2xl"
@@ -535,7 +535,7 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
         <Section id="video-guides">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Tractor Insurance Explained: Video Guides
+              Compare Tractor Insurance: Video Guides
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
               Learn more about tractor and agricultural vehicle insurance with these helpful video guides.
@@ -614,7 +614,7 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
         <Section id="tractor-insurance-cost">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              How Much Does Tractor Insurance Cost?
+              Compare Tractor Insurance Costs: How Much Does It Cost?
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
               <strong className="text-white">Tractor insurance costs</strong> vary based on type, age, value, usage, and coverage level.
@@ -676,7 +676,7 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
               Compare Tractor Insurance Plans
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
-              Not sure which plan is right for your tractor? <strong className="text-white">Compare tractor insurance</strong> options
+              Not sure which plan is right for your tractor? <strong className="text-white">Compare Tractor Insurance</strong> options
               side-by-side to find the perfect balance of coverage and cost for your needs.
             </p>
           </div>
@@ -742,15 +742,15 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
             <div className="order-2 lg:order-1">
               <Image
                 src="https://images.unsplash.com/photo-1592805144716-feeccccef5ac?w=800&q=80"
-                alt="Best tractor insurance - Modern farm tractor"
+                alt="Compare Tractor Insurance - Modern farm tractor"
                 width={600}
                 height={400}
                 className="rounded-2xl shadow-2xl"
               />
             </div>
             <div className="order-1 lg:order-2">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                Finding the Best Tractor Insurance in 2025
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+                Compare Tractor Insurance: Finding the Best in 2025
               </h2>
               <p className="text-white/70 text-lg leading-relaxed mb-6">
                 The <strong className="text-white">best tractor insurance</strong> isn&apos;t always the cheapest - it&apos;s the one
@@ -787,7 +787,7 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
         <Section id="cheap-tractor-insurance" className="bg-stone-900/30">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Cheap Tractor Insurance That Doesn&apos;t Compromise
+              Compare Tractor Insurance: Cheap Options That Don&apos;t Compromise
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
               Looking for <strong className="text-white">cheap tractor insurance</strong>? You don&apos;t have to sacrifice quality
@@ -853,7 +853,7 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
         <Section id="tractor-type-insurance">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Tractor Insurance by Type
+              Compare Tractor Insurance by Type
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
               Different tractor types have different risks and insurance costs. Explore our type-specific guides
@@ -936,7 +936,7 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
         <Section className="bg-stone-900/30">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              How to Choose the Right Tractor Insurance
+              How to Compare Tractor Insurance and Choose Right
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
               Follow our step-by-step guide to find the perfect policy for your tractor. Making the right choice now
@@ -1017,7 +1017,7 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
         <Section id="types-of-insurance">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Understanding Different Types of Tractor Insurance
+              Compare Tractor Insurance: Understanding Different Policy Types
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
               Before you buy, it&apos;s crucial to understand the different policy types available in the UK market.
@@ -1193,7 +1193,7 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
             <div>
               <Image
                 src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&q=80"
-                alt="Tractor working in field - understanding insurance exclusions"
+                alt="Compare Tractor Insurance - Tractor working in field"
                 width={600}
                 height={400}
                 className="rounded-2xl shadow-2xl mb-8"
@@ -1328,7 +1328,7 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
               <div className="relative">
                 <Image
                   src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&q=80"
-                  alt="Tractor maintenance and repairs"
+                  alt="Compare Tractor Insurance - Maintenance and repairs"
                   width={500}
                   height={350}
                   className="rounded-xl shadow-lg"
@@ -1423,7 +1423,7 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
         <Section id="faq">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Frequently Asked Questions About Tractor Insurance
+              Compare Tractor Insurance: Frequently Asked Questions
             </h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">
               Get answers to the most common questions about insuring your tractor.
@@ -1484,13 +1484,22 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
               __html: JSON.stringify({
                 "@context": "https://schema.org",
                 "@type": "FAQPage",
+                "name": "Compare Tractor Insurance - FAQ",
                 "mainEntity": [
+                  {
+                    "@type": "Question",
+                    "name": "How do I compare tractor insurance?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Compare Tractor Insurance by reviewing coverage levels, premiums, excess amounts, and included features. Use Compare Tractor Insurance Quest to easily compare tractor insurance plans side-by-side."
+                    }
+                  },
                   {
                     "@type": "Question",
                     "name": "Do I need insurance for my tractor?",
                     "acceptedAnswer": {
                       "@type": "Answer",
-                      "text": "If your tractor is used on public roads, you legally need at least third-party insurance. For field-only use, insurance is strongly recommended given the high cost of repairs."
+                      "text": "If your tractor is used on public roads, you legally need at least third-party insurance. Compare tractor insurance options to find the best cover for your needs."
                     }
                   },
                   {
@@ -1498,18 +1507,54 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
                     "name": "How much does tractor insurance cost per month?",
                     "acceptedAnswer": {
                       "@type": "Answer",
-                      "text": "Expect to pay \u00a325-\u00a350/month for basic cover, \u00a350-\u00a3120/month for TPFT, and \u00a3120-\u00a3300+/month for comprehensive cover."
+                      "text": "When you compare tractor insurance, expect to pay £25-£50/month for basic cover, £50-£120/month for TPFT, and £120-£300+/month for comprehensive cover."
                     }
                   },
                   {
                     "@type": "Question",
-                    "name": "Is tractor insurance different from regular vehicle insurance?",
+                    "name": "Why should I compare tractor insurance before buying?",
                     "acceptedAnswer": {
                       "@type": "Answer",
-                      "text": "Yes. Tractor insurance is a specialist product that understands agricultural use, field operations, seasonal usage patterns, and the unique risks tractors face."
+                      "text": "Compare Tractor Insurance to ensure you get the best value. Prices and coverage vary significantly between providers. Compare Tractor Insurance Quest helps you find the right policy."
                     }
                   }
                 ]
+              })
+            }}
+          />
+
+          {/* WebSite Schema */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "name": "Compare Tractor Insurance Quest",
+                "alternateName": "Compare Tractor Insurance",
+                "url": "https://tractorinsurance.quest",
+                "description": "Compare Tractor Insurance with Compare Tractor Insurance Quest. Find the best tractor insurance deals in the UK.",
+                "potentialAction": {
+                  "@type": "SearchAction",
+                  "target": "https://tractorinsurance.quest/?q={search_term_string}",
+                  "query-input": "required name=search_term_string"
+                }
+              })
+            }}
+          />
+
+          {/* Organization Schema */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                "name": "Compare Tractor Insurance Quest",
+                "alternateName": "Compare Tractor Insurance",
+                "url": "https://tractorinsurance.quest",
+                "logo": "https://tractorinsurance.quest/favicon.svg",
+                "description": "Compare Tractor Insurance with Compare Tractor Insurance Quest. The UK's leading tractor insurance comparison site."
               })
             }}
           />
@@ -1519,7 +1564,7 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
         <Section className="bg-gradient-to-b from-stone-900/50 to-amber-900/20">
           <div className="text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-              Protect Your Tractor Today
+              Compare Tractor Insurance and Protect Your Tractor Today
             </h2>
             <p className="text-white/70 text-lg max-w-2xl mx-auto mb-8">
               Don&apos;t wait until it&apos;s too late. Get a free, personalised quote in minutes and give your

@@ -1560,6 +1560,52 @@ ${state.currentQuote ? `CURRENT QUOTE: \u00a3${state.currentQuote.quote.monthlyP
           />
         </Section>
 
+        {/* Related UK Insurance Section */}
+        <Section className="bg-stone-900/30">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Explore More UK Insurance
+            </h2>
+            <p className="text-white/70 text-lg max-w-3xl mx-auto">
+              Compare insurance across different sectors with our specialist UK comparison guides.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <a href="https://yogateacherinsurance.quest" target="_blank" rel="noopener noreferrer" className="block p-4 rounded-xl bg-stone-900/60 hover:bg-stone-800/60 border border-stone-700/50 hover:border-amber-500/30 transition-all">
+              <span className="font-semibold text-white block mb-1">Yoga Teacher Insurance</span>
+              <span className="text-sm text-white/60">Professional liability for instructors</span>
+            </a>
+            <a href="https://puppyinsurance.quest" target="_blank" rel="noopener noreferrer" className="block p-4 rounded-xl bg-stone-900/60 hover:bg-stone-800/60 border border-stone-700/50 hover:border-amber-500/30 transition-all">
+              <span className="font-semibold text-white block mb-1">Puppy Insurance</span>
+              <span className="text-sm text-white/60">Compare pet insurance for puppies</span>
+            </a>
+            <a href="https://mobilityscooterinsurance.quest" target="_blank" rel="noopener noreferrer" className="block p-4 rounded-xl bg-stone-900/60 hover:bg-stone-800/60 border border-stone-700/50 hover:border-amber-500/30 transition-all">
+              <span className="font-semibold text-white block mb-1">Mobility Scooter Insurance</span>
+              <span className="text-sm text-white/60">Protect your mobility device</span>
+            </a>
+            <a href="https://insulinpumpinsurance.quest" target="_blank" rel="noopener noreferrer" className="block p-4 rounded-xl bg-stone-900/60 hover:bg-stone-800/60 border border-stone-700/50 hover:border-amber-500/30 transition-all">
+              <span className="font-semibold text-white block mb-1">Insulin Pump Insurance</span>
+              <span className="text-sm text-white/60">Medical device coverage</span>
+            </a>
+            <a href="https://villagefeteinsurance.quest" target="_blank" rel="noopener noreferrer" className="block p-4 rounded-xl bg-stone-900/60 hover:bg-stone-800/60 border border-stone-700/50 hover:border-amber-500/30 transition-all">
+              <span className="font-semibold text-white block mb-1">Village Fete Insurance</span>
+              <span className="text-sm text-white/60">Event liability coverage</span>
+            </a>
+            <a href="https://homeinsurance.quest" target="_blank" rel="noopener noreferrer" className="block p-4 rounded-xl bg-stone-900/60 hover:bg-stone-800/60 border border-stone-700/50 hover:border-amber-500/30 transition-all">
+              <span className="font-semibold text-white block mb-1">Home Insurance</span>
+              <span className="text-sm text-white/60">Buildings & contents cover</span>
+            </a>
+            <a href="https://travelinsurance.quest" target="_blank" rel="noopener noreferrer" className="block p-4 rounded-xl bg-stone-900/60 hover:bg-stone-800/60 border border-stone-700/50 hover:border-amber-500/30 transition-all">
+              <span className="font-semibold text-white block mb-1">Travel Insurance</span>
+              <span className="text-sm text-white/60">Holiday & trip protection</span>
+            </a>
+            <a href="https://motorinsurance.quest" target="_blank" rel="noopener noreferrer" className="block p-4 rounded-xl bg-stone-900/60 hover:bg-stone-800/60 border border-stone-700/50 hover:border-amber-500/30 transition-all">
+              <span className="font-semibold text-white block mb-1">Motor Insurance</span>
+              <span className="text-sm text-white/60">Car & vehicle coverage</span>
+            </a>
+          </div>
+        </Section>
+
         {/* Final CTA Section */}
         <Section className="bg-gradient-to-b from-stone-900/50 to-amber-900/20">
           <div className="text-center">
